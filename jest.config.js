@@ -18,6 +18,7 @@ module.exports = {
   coveragePathIgnorePatterns: [
     //该路径下的测试，忽略在测试覆盖率上
     'lib',
-    'test/common'
+    'test/common',
+    'test/config.local.js'
   ]
 }
