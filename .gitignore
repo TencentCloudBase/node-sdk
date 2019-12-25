@@ -1,0 +1,12 @@
+*.log
+node_modules
+.idea
+.history
+.DS_Store
+test/config.js
+test/tt.js
+.vscode
+coverage
+package.json
+yarn.lock
+cloudbase-credential.json
