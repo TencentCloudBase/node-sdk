@@ -85,7 +85,8 @@ export interface IContext {
     memory_limit_in_mb: number;
     time_limit_in_ms: number;
     request_id: string;
-    environ: string;
+    environ: any;
+    environment?: any;
     function_version: string;
     function_name: string;
     namespace: string;

@@ -298,7 +298,6 @@ export class Request {
 export default async (args: IRequestInfo): Promise<any> => {
   const req = new Request(args)
   const reqOpts = req.getOpts()
-  console.log('reqOpts:', reqOpts)
   const action = req.getAction()
 
   let reqHooks: IReqHooks
