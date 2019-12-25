@@ -9,7 +9,7 @@ TCB 提供开发应用所需服务和基础设施。CloudBase Server Node.js SDK
 CloudBase Server Node.js SDK 可以通过 npm 安装：
 
 ```bash
-npm install --save @cloudbase/node-sdk@latest
+npm install --save @cloudbase/node-sdk@beta
 ```
 
 要在你的代码内使用该模块：

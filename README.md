@@ -27,7 +27,7 @@ npm install --save @cloudbase/node-sdk@beta
 要在你的项目中使用模块可以
 
 ```js
-var admin = require('@cloudbase/node-sdk')
+const tcb = require('@cloudbase/node-sdk')
 ```
 
 或
