@@ -6,7 +6,7 @@ node-sdk 与 tcb-admin-node 目前在 云函数，文件存储，数据库功能
 - 2. 业务错误码 throw 抛出，携带报错堆栈信息，方便定位问题
 - 3. 更多的 typescript 定义
 
-# 如何从 tcb-admin-node sdk 迁移至 @cloudbase/node-sdk sdk ？
+# 如何从 tcb-admin-node 迁移至 @cloudbase/node-sdk ？
 
 ## sdk 初始化方式变动
 

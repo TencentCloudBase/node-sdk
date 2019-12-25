@@ -1,5 +1,7 @@
 # Tencent Cloud Base(TCB) Server Node.js SDK
 
+> ⚠️ 当你计划在项目中使用 @cloudbase/node-sdk 替代 tcb-admin-node 时，请务必阅读[迁移文档](./docs/packageChange.md)
+
 ## 目录
 
 - [介绍](#介绍)
@@ -33,8 +35,6 @@ var admin = require('@cloudbase/node-sdk')
 ```js
 import tcb from '@cloudbase/node-sdk'
 ```
-
-> ⚠️ 当您计划在项目中使用 node-sdk 替代 tcb-admin-node 时，请务必阅读[迁移文档](./docs/packageChange.md)
 
 ## 文档
 
