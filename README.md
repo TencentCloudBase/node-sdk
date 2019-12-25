@@ -17,10 +17,12 @@ TCB 提供开发应用所需服务和基础设施。CloudBase server node.js SDK
 server node.js SDK 可以通过`@cloudbase/node-sdk`来访问：
 
 ```base
-npm install --save @cloudbase/node-sdk@latest
+npm install --save @cloudbase/node-sdk@beta
 ```
 
-要在你的模块式使用模块可以
+> 目前 node-sdk 发布 beta 版，未来会支持新特性；已通过开发内部自测验证，稳定性尚可(欢迎反馈使用中遇到的问题，以便我们更好的改进)
+
+要在你的项目中使用模块可以
 
 ```js
 var admin = require('@cloudbase/node-sdk')

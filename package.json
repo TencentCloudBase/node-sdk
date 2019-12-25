@@ -14,12 +14,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/TencentCloudBase/tcb-admin-node"
+    "url": "https://github.com/TencentCloudBase/node-sdk"
   },
   "bugs": {
-    "url": "https://github.com/TencentCloudBase/tcb-admin-node/issues"
+    "url": "https://github.com/TencentCloudBase/node-sdk/issues"
   },
-  "homepage": "https://github.com/TencentCloudBase/tcb-admin-node#readme",
+  "homepage": "https://github.com/TencentCloudBase/node-sdk#readme",
   "keywords": [
     "node sdk"
   ],
