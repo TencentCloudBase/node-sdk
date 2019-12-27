@@ -6,6 +6,10 @@ node_modules
 test/config.js
 test/tt.js
 .vscode
-coverage
+coverage/
+# coverage/lcov-report/*
+# coverage/clover.xml
+# coverage/coverage-final.json
+
 yarn.lock
 package-lock.json

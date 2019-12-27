@@ -2,11 +2,11 @@ import { Db } from '@cloudbase/database';
 import { ICloudBaseConfig, ICustomReqOpts, ICustomErrRes, IDeleteFileRes, IGetFileUrlRes, IDownloadFileRes, IUploadFileRes, IContext } from './type';
 import { Log } from './log';
 export declare class CloudBase {
+    static scfContext: IContext;
+    static parseContext(context: IContext): IContext;
     config: ICloudBaseConfig;
     private clsLogger;
-    static scfContext: IContext;
     constructor(config?: ICloudBaseConfig);
-    static parseContext(context: IContext): IContext;
     init(config?: ICloudBaseConfig): void;
     database(dbConfig?: any): Db;
     /**

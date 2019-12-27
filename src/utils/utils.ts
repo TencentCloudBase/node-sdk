@@ -1,25 +1,25 @@
-import {IErrorInfo} from '../type'
+import { IErrorInfo } from '../type'
 
 export class TcbError extends Error {
-  readonly code: string
-  readonly message: string
-  constructor(error: IErrorInfo) {
-    super(error.message)
-    this.code = error.code
-    this.message = error.message
-  }
+    public readonly code: string
+    public readonly message: string
+    public constructor(error: IErrorInfo) {
+        super(error.message)
+        this.code = error.code
+        this.message = error.message
+    }
 }
 
 export const filterValue = function filterValue(o, value) {
-  for (let key in o) {
-    if (o[key] === value) {
-      delete o[key]
+    for (let key in o) {
+        if (o[key] === value) {
+            delete o[key]
+        }
     }
-  }
 }
 
 export const filterUndefined = function(o) {
-  return filterValue(o, undefined)
+    return filterValue(o, undefined)
 }
 
 // export const filterNull = function(o) {
@@ -45,45 +45,43 @@ export const filterUndefined = function(o) {
 //   }
 // }
 
-
 export const E = (errObj: IErrorInfo) => {
-  return new TcbError(errObj);
+    return new TcbError(errObj)
 }
 
-
-export const isArray = (arr) => {
-  return arr instanceof Array
+export const isArray = arr => {
+    return arr instanceof Array
 }
 
-export const camSafeUrlEncode = (str) => {
-  return encodeURIComponent(str)
-    .replace(/!/g, '%21')
-    .replace(/'/g, '%27')
-    .replace(/\(/g, '%28')
-    .replace(/\)/g, '%29')
-    .replace(/\*/g, '%2A')
+export const camSafeUrlEncode = str => {
+    return encodeURIComponent(str)
+        .replace(/!/g, '%21')
+        .replace(/'/g, '%27')
+        .replace(/\(/g, '%28')
+        .replace(/\)/g, '%29')
+        .replace(/\*/g, '%2A')
 }
 
 export const map = (obj, fn) => {
-  var o = isArray(obj) ? [] : {}
-  for (var i in obj) {
-    if (obj.hasOwnProperty(i)) {
-      o[i] = fn(obj[i], i)
+    const o = isArray(obj) ? [] : {}
+    for (let i in obj) {
+        if (obj.hasOwnProperty(i)) {
+            o[i] = fn(obj[i], i)
+        }
     }
-  }
-  return o
+    return o
 }
 
-export const clone = (obj) => {
-  return map(obj, function(v) {
-    return typeof v === 'object' && v !== undefined && v !== null ? clone(v) : v
-  })
+export const clone = obj => {
+    return map(obj, function(v) {
+        return typeof v === 'object' && v !== undefined && v !== null ? clone(v) : v
+    })
 }
 
 export const checkIsInScf = () => {
-  return process.env.TENCENTCLOUD_RUNENV === 'SCF'
+    return process.env.TENCENTCLOUD_RUNENV === 'SCF'
 }
 
-export const delay = (ms) => {
-  return new Promise(resolve => setTimeout(resolve, ms))
+export const delay = ms => {
+    return new Promise(resolve => setTimeout(resolve, ms))
 }

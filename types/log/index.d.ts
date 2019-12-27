@@ -4,8 +4,8 @@
  * @class Log
  */
 export declare class Log {
-    private src;
     isSupportClsReport: boolean;
+    private src;
     constructor();
     /**
      *

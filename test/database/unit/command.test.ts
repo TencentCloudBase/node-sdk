@@ -13,7 +13,7 @@ describe('test/unit/collection.test.ts', () => {
   const _ = command
 
   it('operator', async () => {
-    var a
+    let a
     a = _.gt(4)
     const result = await collection.where({ a }).update({ c: { d: _.mul(3) } })
   })

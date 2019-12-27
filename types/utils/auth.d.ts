@@ -12,8 +12,8 @@ export declare class Auth {
     private opt;
     private qSignAlgorithm;
     constructor(opt: IAuthOpts);
+    getAuth(): string;
     private getObjectKeys;
     private obj2str;
-    getAuth(): string;
 }
 export {};

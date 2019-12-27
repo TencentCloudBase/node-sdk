@@ -11,6 +11,19 @@ export declare class Request {
     private tracingInfo;
     constructor(args: IRequestInfo);
     /**
+     *
+     * 接口action
+     */
+    getAction(): string;
+    /**
+     * 设置超时warning
+     */
+    setSlowRequeryWarning(action: string): NodeJS.Timer;
+    /**
+     * 构造发送请求
+     */
+    getOpts(): IReqOpts;
+    /**
      * 协议
      */
     private getProtocol;
@@ -22,11 +35,6 @@ export declare class Request {
      * 超时时间
      */
     private getTimeout;
-    /**
-     *
-     * 接口action
-     */
-    getAction(): string;
     /**
      * 获取
      */
@@ -52,14 +60,6 @@ export declare class Request {
      *  构造请求项
      */
     private makeReqOpts;
-    /**
-     * 设置超时warning
-     */
-    setSlowRequeryWarning(action: string): NodeJS.Timer;
-    /**
-     * 构造发送请求
-     */
-    getOpts(): IReqOpts;
 }
 declare const _default: (args: IRequestInfo) => Promise<any>;
 export default _default;
