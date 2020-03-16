@@ -72,7 +72,7 @@ export async function callCompatibleWxOpenApi(
     return httpRequest({
         config: cloudbase.config,
         method: 'post',
-        headers: {},
+        headers: { 'content-type': 'multipart/form-data' },
         params,
         unSignedParams,
         isFormData: true,
@@ -104,7 +104,7 @@ export async function callWxPayApi(
     return httpRequest({
         config: cloudbase.config,
         method: 'post',
-        headers: {},
+        headers: { 'content-type': 'multipart/form-data' },
         params,
         unSignedParams,
         isFormData: true,

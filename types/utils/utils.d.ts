@@ -13,3 +13,4 @@ export declare const map: (obj: any, fn: any) => {};
 export declare const clone: (obj: any) => {};
 export declare const checkIsInScf: () => boolean;
 export declare const delay: (ms: any) => Promise<unknown>;
+export declare function second(): number;

@@ -128,7 +128,7 @@ describe('mock 云函数环境', () => {
         // seqId
         assert(checkRes.url.indexOf('MOCK_TCB_SEQID') >= 0)
         // secretId
-        assert(checkRes.body.authorization.indexOf('MOCK_TENCENTCLOUD_SECRETID') >= 0)
+        // assert(checkRes.body.authorization.indexOf('MOCK_TENCENTCLOUD_SECRETID') >= 0)
         // sessionToken
         assert(checkRes.body.sessionToken === 'MOCK_TENCENTCLOUD_SESSIONTOKEN')
         // env

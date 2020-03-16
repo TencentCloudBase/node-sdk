@@ -1,4 +1,3 @@
-import { Auth } from './auth'
 import { generateTracingInfo } from './tracing'
 import * as utils from './utils'
 import { ICloudBaseConfig, IRequestInfo, ICustomParam, IReqOpts, IReqHooks } from '../type/index'
@@ -9,9 +8,10 @@ import { CloudBase } from '../cloudbase'
 import baseRequest from './request'
 import { handleWxOpenApiData } from './requestHook'
 import { getWxCloudApiToken } from './getWxCloudApiToken'
-
+import { sign } from '@cloudbase/signature-nodejs'
+import URL from 'url'
 const { version } = require('../../package.json')
-const { E } = utils
+const { E, second } = utils
 
 export class Request {
     private args: IRequestInfo
@@ -58,11 +58,9 @@ export class Request {
     }
 
     /**
-     * 构造发送请求
+     * 构造params
      */
-    public getOpts(): IReqOpts {
-        this.validateSecretIdAndKey()
-
+    public getParams(): any {
         const args = this.args
 
         const config = this.config
@@ -76,7 +74,9 @@ export class Request {
             // wxCloudApiToken: process.env.WX_API_TOKEN || '',
             wxCloudApiToken: getWxCloudApiToken(),
             // 对应服务端 wxCloudSessionToken
-            tcb_sessionToken: process.env.TCB_SESSIONTOKEN || ''
+            tcb_sessionToken: process.env.TCB_SESSIONTOKEN || '',
+            sessionToken: config.sessionToken,
+            sdk_version: version
         }
 
         // 取当前云函数环境时，替换为云函数下环境变量
@@ -87,18 +87,45 @@ export class Request {
         // 过滤value undefined
         utils.filterUndefined(params)
 
-        const authoration = this.getAuthorization({ ...params })
+        return params
+    }
 
-        params.authorization = authoration
-        config.sessionToken && (params.sessionToken = config.sessionToken)
-        params.sdk_version = version
+    /**
+     *  构造请求项
+     */
+    public makeReqOpts(): IReqOpts {
+        // 校验密钥是否存在
+        this.validateSecretIdAndKey()
 
-        // 对不参与签名项 进行合并
-        if (args.unSignedParams) {
-            params = Object.assign(params, args.unSignedParams)
+        const config = this.config
+        const args = this.args
+        const url = this.getUrl()
+        const method = this.getMethod()
+        const params = this.getParams()
+
+        const opts: IReqOpts = {
+            url,
+            method,
+            // 先取模块的timeout，没有则取sdk的timeout，还没有就使用默认值
+            // timeout: args.timeout || config.timeout || 15000,
+            timeout: this.getTimeout(), // todo 细化到api维度 timeout
+            // 优先取config，其次取模块，最后取默认
+            headers: this.getHeaders(),
+            proxy: config.proxy
         }
 
-        const opts = this.makeReqOpts(params)
+        if (args.method === 'post') {
+            if (args.isFormData) {
+                opts.formData = params
+                opts.encoding = null
+            } else {
+                opts.body = params
+                opts.json = true
+            }
+        } else {
+            opts.qs = params
+        }
+
         return opts
     }
 
@@ -166,59 +193,60 @@ export class Request {
 
     /**
      *
-     * 获取headers
+     * 获取headers 此函数中设置authorization
      */
     private getHeaders(): any {
         const config = this.config
+        const { secretId, secretKey } = config
         const args = this.args
+        const method = this.getMethod()
         const isInSCF = utils.checkIsInScf()
         // Note: 云函数被调用时可能调用端未传递 SOURCE，TCB_SOURCE 可能为空
         const TCB_SOURCE = process.env.TCB_SOURCE || ''
         const SOURCE = isInSCF ? `${TCB_SOURCE},scf` : ',not_scf'
+        const url = this.getUrl()
         // 默认
-        const requiredHeaders = {
-            'user-agent': `tcb-admin-sdk/${version}`,
+        let requiredHeaders = {
+            'User-Agent': `tcb-node-sdk/${version}`,
             'x-tcb-source': SOURCE,
-            'x-client-timestamp': this.timestamp
+            'x-client-timestamp': this.timestamp,
+            'X-SDK-Version': `tcb-node-sdk/${version}`,
+            Host: URL.parse(url).host
         }
 
         if (config.version) {
-            requiredHeaders['x-sdk-version'] = config.version
+            requiredHeaders['X-SDK-Version'] = config.version
         }
 
-        return { ...config.headers, ...args.headers, ...requiredHeaders }
-    }
+        requiredHeaders = { ...config.headers, ...args.headers, ...requiredHeaders }
+        const params = this.getParams()
 
-    /**
-     * 获取authorization
-     */
-    private getAuthorization(params: ICustomParam): string {
-        const headers = this.getHeaders()
-        const method = this.getMethod()
-        const { secretId, secretKey } = this.config
+        const { authorization, timestamp } = sign({
+            secretId: secretId,
+            secretKey: secretKey,
+            method: method,
+            url: url,
+            params: params,
+            headers: requiredHeaders,
+            // withSignedParams: true,
+            timestamp: second() - 1
+        })
 
-        const authObj = {
-            SecretId: secretId,
-            SecretKey: secretKey,
-            Method: method,
-            Pathname: this.urlPath,
-            Query: params,
-            Headers: { ...headers }
-        }
+        requiredHeaders['Authorization'] = authorization
+        requiredHeaders['X-Signature-Expires'] = 600
+        requiredHeaders['X-Timestamp'] = timestamp
 
-        const auth = new Auth(authObj)
-
-        const authorization = auth.getAuth()
-        return authorization
+        return { ...requiredHeaders }
     }
 
     /**
      * 获取url
      * @param action
      */
-    private getUrl(action: string): string {
+    private getUrl(): string {
         const protocol = this.getProtocol()
         const isInSCF = utils.checkIsInScf()
+        const { eventId, seqId } = this.tracingInfo
         const { customEndPoint } = this.args
         const { serviceUrl } = this.config
 
@@ -236,65 +264,26 @@ export class Request {
             url = `http://${this.inScfHost}${this.urlPath}`
         }
 
-        // if (action === 'wx.api' || action === 'wx.openApi') {
-        //   url = `${protocol}://${this.openApiHost}${this.urlPath}`
-        // }
-        return url
-    }
-
-    /**
-     *  构造请求项
-     */
-    private makeReqOpts(params: ICustomParam): IReqOpts {
-        const config = this.config
-        const args = this.args
-        const url = this.getUrl(params.action)
-        const method = this.getMethod()
-        const { eventId, seqId } = this.tracingInfo
-
-        const opts: IReqOpts = {
-            url,
-            method,
-            // 先取模块的timeout，没有则取sdk的timeout，还没有就使用默认值
-            // timeout: args.timeout || config.timeout || 15000,
-            timeout: this.getTimeout(), // todo 细化到api维度 timeout
-            // 优先取config，其次取模块，最后取默认
-            headers: this.getHeaders(),
-            proxy: config.proxy
-        }
-
-        let urlStr = `&eventId=${eventId}&seqId=${seqId}`
+        let urlQueryStr = `&eventId=${eventId}&seqId=${seqId}`
         const scfContext = CloudBase.scfContext
         if (scfContext) {
-            urlStr = `&eventId=${eventId}&seqId=${seqId}&scfRequestId=${scfContext.request_id}`
+            urlQueryStr = `&eventId=${eventId}&seqId=${seqId}&scfRequestId=${scfContext.request_id}`
         }
 
-        if (opts.url.includes('?')) {
-            opts.url = `${opts.url}${urlStr}`
+        if (url.includes('?')) {
+            url = `${url}${urlQueryStr}`
         } else {
-            opts.url = `${opts.url}?${urlStr}`
+            url = `${url}?${urlQueryStr}`
         }
 
-        if (args.method === 'post') {
-            if (args.isFormData) {
-                opts.formData = params
-                opts.encoding = null
-            } else {
-                opts.body = params
-                opts.json = true
-            }
-        } else {
-            opts.qs = params
-        }
-
-        return opts
+        return url
     }
 }
 
 // 业务逻辑都放在这里处理
 export default async (args: IRequestInfo): Promise<any> => {
     const req = new Request(args)
-    const reqOpts = req.getOpts()
+    const reqOpts = req.makeReqOpts()
     const action = req.getAction()
 
     let reqHooks: IReqHooks

@@ -3,7 +3,7 @@
 import tcb from '../../src/index'
 import assert from 'assert'
 import config from '../config.local'
-import {ERROR} from '../../src/const/code'
+import { ERROR } from '../../src/const/code'
 
 beforeEach(async () => {
     jest.resetModules()
@@ -14,20 +14,22 @@ beforeEach(async () => {
 describe('校验config设置  请求入参', () => {
     // const app = tcb.init(config)
 
-    it('校验config.isHttp => protocol', async() => {
+    it('校验config.isHttp => protocol', async () => {
         config.isHttp = true
 
         jest.mock('../../src/utils/request.ts', () => {
-            return jest.fn().mockImplementation((opts) => {
-                return Promise.resolve({data: {response_data: opts}, requestId:'testRequestId'})
+            return jest.fn().mockImplementation(opts => {
+                return Promise.resolve({
+                    data: { response_data: opts },
+                    requestId: 'testRequestId'
+                })
             })
         })
         const tcb = require('../../src/index')
         let app = tcb.init(config)
 
         // mock一次http请求
-        let mockReqRes = await
-        app.callFunction({
+        let mockReqRes = await app.callFunction({
             name: 'unexistFunction',
             data: { a: 1 }
         })
@@ -40,8 +42,7 @@ describe('校验config设置  请求入参', () => {
         app = tcb.init(config)
 
         // mock一次https请求
-        mockReqRes = await
-        app.callFunction({
+        mockReqRes = await app.callFunction({
             name: 'unexistFunction',
             data: { a: 1 }
         })
@@ -51,30 +52,30 @@ describe('校验config设置  请求入参', () => {
         assert(reqOpts.url.indexOf('https') >= 0)
     })
 
-
-    it('校验config.version => x-sdk-version config.serviceUrl => url', async() => {
+    it('校验config.version => x-sdk-version config.serviceUrl => url', async () => {
         config.version = 'test-version'
-        config.serviceUrl = 'testUrl'
+        config.serviceUrl = 'http://testUrl.test.com'
 
         jest.mock('../../src/utils/request.ts', () => {
-            return jest.fn().mockImplementation((opts) => {
-                return Promise.resolve({data: {response_data: opts}, requestId:'testRequestId'})
+            return jest.fn().mockImplementation(opts => {
+                return Promise.resolve({
+                    data: { response_data: opts },
+                    requestId: 'testRequestId'
+                })
             })
         })
         const tcb = require('../../src/index')
         let app = tcb.init(config)
 
         // mock一次http请求
-        let mockReqRes = await
-        app.callFunction({
+        let mockReqRes = await app.callFunction({
             name: 'unexistFunction',
             data: { a: 1 }
         })
 
         let reqOpts = mockReqRes.result
-        assert(reqOpts.headers['x-sdk-version'] === config.version)
-        assert(reqOpts.url.indexOf('testUrl') === 0)
-
+        assert(reqOpts.headers['X-SDK-Version'] === config.version)
+        assert(reqOpts.url.indexOf('http://testUrl.test.com') === 0)
     })
 
     // it('校验config.serviceUrl => url', async() => {

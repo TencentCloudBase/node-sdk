@@ -85,3 +85,8 @@ export const checkIsInScf = () => {
 export const delay = ms => {
     return new Promise(resolve => setTimeout(resolve, ms))
 }
+
+export function second(): number {
+    // istanbul ignore next
+    return Math.floor(new Date().getTime() / 1000)
+}

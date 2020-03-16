@@ -20,9 +20,13 @@ export declare class Request {
      */
     setSlowRequeryWarning(action: string): NodeJS.Timer;
     /**
-     * 构造发送请求
+     * 构造params
      */
-    getOpts(): IReqOpts;
+    getParams(): any;
+    /**
+     *  构造请求项
+     */
+    makeReqOpts(): IReqOpts;
     /**
      * 协议
      */
@@ -44,22 +48,14 @@ export declare class Request {
     private validateSecretIdAndKey;
     /**
      *
-     * 获取headers
+     * 获取headers 此函数中设置authorization
      */
     private getHeaders;
-    /**
-     * 获取authorization
-     */
-    private getAuthorization;
     /**
      * 获取url
      * @param action
      */
     private getUrl;
-    /**
-     *  构造请求项
-     */
-    private makeReqOpts;
 }
 declare const _default: (args: IRequestInfo) => Promise<any>;
 export default _default;
