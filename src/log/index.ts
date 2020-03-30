@@ -112,6 +112,6 @@ export class Log {
     }
 }
 
-export const logger = () => {
+export function logger() {
     return new Log()
 }

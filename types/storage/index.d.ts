@@ -1,10 +1,10 @@
-import { ICustomReqOpts, ICustomErrRes, IDeleteFileRes, IGetFileUrlRes, IDownloadFileRes, IUploadFileRes } from '../type';
+import { ICustomReqOpts, ICustomErrRes, IDeleteFileRes, IGetFileUrlRes, IDownloadFileRes, IUploadFileRes, IErrorInfo } from '../type';
 import { CloudBase } from '../cloudbase';
 export declare function parseXML(str: any): Promise<unknown>;
 export declare function uploadFile(cloudbase: CloudBase, { cloudPath, fileContent }: {
     cloudPath: any;
     fileContent: any;
-}, opts?: ICustomReqOpts): Promise<IUploadFileRes>;
+}, opts?: ICustomReqOpts): Promise<IUploadFileRes | IErrorInfo>;
 /**
  * 删除文件
  * @param {Array.<string>} fileList 文件id数组
@@ -26,3 +26,6 @@ export declare function downloadFile(cloudbase: CloudBase, params: {
 export declare function getUploadMetadata(cloudbase: CloudBase, { cloudPath }: {
     cloudPath: any;
 }, opts?: ICustomReqOpts): Promise<any>;
+export declare function getFileAuthority(cloudbase: CloudBase, { fileList }: {
+    fileList: any;
+}): Promise<any>;

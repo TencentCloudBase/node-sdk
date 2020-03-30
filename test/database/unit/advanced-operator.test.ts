@@ -2,6 +2,7 @@ import * as assert from 'power-assert'
 import tcb from '../../../src/index'
 import * as Config from '../../config.local'
 import * as common from '../../common/index'
+import { checkIsGray } from '../../../src/utils/utils'
 
 const app = tcb.init(Config)
 const db = app.database()
@@ -208,23 +209,25 @@ describe('elemMatch', async () => {
         assert.strictEqual(result.data[0].category, 'number')
     })
 
-    it('Element Match neq', async () => {
-        let result = await db
-            .collection(collName)
-            .where({
-                tags: _.elemMatch(_.neq('Go'))
-            })
-            .get()
+    if (checkIsGray()) {
+        it('Element Match neq', async () => {
+            let result = await db
+                .collection(collName)
+                .where({
+                    tags: _.elemMatch(_.neq('Go'))
+                })
+                .get()
 
-        const findOneTagItem = result.data.some(item => {
-            if (item.tags && item.tags.length === 1 && item.tags[0] === 'Go') {
-                return true
-            }
-            return false
+            const findOneTagItem = result.data.some(item => {
+                if (item.tags && item.tags.length === 1 && item.tags[0] === 'Go') {
+                    return true
+                }
+                return false
+            })
+            // console.log('result:', JSON.stringify(result))
+            assert.strictEqual(findOneTagItem, false) // 匹配不到则正常
         })
-        // console.log('result:', JSON.stringify(result))
-        assert.strictEqual(findOneTagItem, false) // 匹配不到则正常
-    })
+    }
 
     it('Array of Embedded Documents', async () => {
         let result = await db

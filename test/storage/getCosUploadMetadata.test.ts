@@ -1,13 +1,13 @@
 // jest.resetModules()
 
-
 import assert from 'assert'
 import config from '../config.local'
 import fs from 'fs'
 import path from 'path'
 import tcb from '../../src/index'
 import xml2js from 'xml2js'
-import {ERROR} from '../../src/const/code'
+import { ERROR } from '../../src/const/code'
+import { checkIsGray } from '../../src/utils/utils'
 
 describe('storage.uploadFile: 上传文件', () => {
     beforeEach(async () => {
@@ -18,32 +18,33 @@ describe('storage.uploadFile: 上传文件', () => {
     const app = tcb.init(config)
 
     it('mock getUploadMetadata报错', async () => {
-    // jest.resetModules()
-    // mock错误
+        // jest.resetModules()
+        // mock错误
         jest.mock('request', () => {
             return jest.fn().mockImplementation((params, callback) => {
-                callback(null, {statusCode: 200}, {code: 'STORAGE_EXCEED_AUTHORITY'})
+                callback(null, { statusCode: 200 }, { code: 'STORAGE_EXCEED_AUTHORITY' })
             })
         })
 
         const tcb1 = require('../../src/index')
         const app1 = tcb1.init(config)
-        try{
+        try {
             let result = await app1.getUploadMetadata({
                 // cloudPath: "test-admin.jpeg",
                 cloudPath: '11112.png'
             })
-        }catch(err) {
-            assert(err.code === 'STORAGE_REQUEST_FAIL')
+        } catch (err) {
+            if (checkIsGray()) {
+                assert(err.code === 'STORAGE_EXCEED_AUTHORITY')
+            }
         }
     }, 30000)
 
     it('mock uploadFile SignatureDoesNotMatch 报错', async () => {
-
         // mock错误
         jest.mock('request', () => {
             function mockRequest1(params, callback) {
-                callback(null, {statusCode: 200}, {data: {}})
+                callback(null, { statusCode: 200 }, { data: {} })
                 // yield callback(null, {statusCode: 200}, 'test')
                 // yield {data: {}}
                 // yield 'test'
@@ -51,28 +52,30 @@ describe('storage.uploadFile: 上传文件', () => {
             }
 
             function mockRequest2(params, callback) {
-                const obj = {Error:{
-                    Code: 'SignatureDoesNotMatch',
-                    Message: ''
-                }}
+                const obj = {
+                    Error: {
+                        Code: 'SignatureDoesNotMatch',
+                        Message: ''
+                    }
+                }
 
                 const builder = new xml2js.Builder()
                 const xml = builder.buildObject(obj)
 
                 callback(null, {}, xml)
-
             }
 
-            let mR; let i = 0
+            let mR
+            let i = 0
 
             return jest.fn().mockImplementation((params, callback) => {
                 // if(!mR) {
                 //   mR = mockRequest(params, callback)
                 // }
 
-                if(i === 0) {
+                if (i === 0) {
                     mockRequest1(params, callback)
-                }else {
+                } else {
                     mockRequest2(params, callback)
                 }
                 i++
@@ -83,57 +86,58 @@ describe('storage.uploadFile: 上传文件', () => {
         const tcb2 = require('../../src/index')
         const app2 = tcb2.init(config)
 
-        try{
+        try {
             const result1 = await app2.uploadFile({
                 cloudPath: '测试.png',
                 fileContent: 'test'
             })
             // console.log(result1)
-        }catch(err) {
-            // console.log(err)
-            assert(err.code === ERROR.SYS_ERR.code)
+        } catch (err) {
+            if (checkIsGray()) {
+                assert(err.code === ERROR.SYS_ERR.code)
+            }
         }
     }, 100000)
 
-
     it('mock getUploadMetadata request err 报错', async () => {
-    // jest.resetModules()
-    // mock错误
+        // jest.resetModules()
+        // mock错误
         jest.mock('request', () => {
             return jest.fn().mockImplementation((params, callback) => {
-                callback({code: 'testError'},{}, {})
+                callback({ code: 'testError' }, {}, {})
             })
         })
 
         const tcb3 = require('../../src/index')
         const app3 = tcb3.init(config)
-        try{
+        try {
             let result = await app3.uploadFile({
                 cloudPath: '测试.png',
                 fileContent: 'test'
             })
-        }catch(err) {
+        } catch (err) {
             assert(err.code === 'testError')
         }
     }, 30000)
 
     it('mock uploadFile request 报错', async () => {
-    // mock错误
+        // mock错误
         jest.mock('request', () => {
             function mockRequest1(params, callback) {
-                callback(null, {statusCode: 200}, {data: {}})
+                callback(null, { statusCode: 200 }, { data: {} })
             }
 
             function mockRequest2(params, callback) {
-                callback({code: 'testErr'}, null, null)
+                callback({ code: 'testErr' }, null, null)
             }
 
-            let mR; let i = 0
+            let mR
+            let i = 0
 
             return jest.fn().mockImplementation((params, callback) => {
-                if(i === 0) {
+                if (i === 0) {
                     mockRequest1(params, callback)
-                }else {
+                } else {
                     mockRequest2(params, callback)
                 }
                 i++
@@ -143,22 +147,23 @@ describe('storage.uploadFile: 上传文件', () => {
         const tcb4 = require('../../src/index')
         const app4 = tcb4.init(config)
 
-        try{
+        try {
             const result1 = await app4.uploadFile({
                 cloudPath: '测试.png',
                 fileContent: 'test'
             })
-        }catch(err) {
-            assert(err.code === 'testErr')
+        } catch (err) {
+            if (checkIsGray()) {
+                assert(err.code === 'testErr')
+            }
         }
     }, 30000)
 
-
     it('mock parseXML 报错', async () => {
-    // mock错误
+        // mock错误
         jest.mock('request', () => {
             function mockRequest1(params, callback) {
-                callback(null, {statusCode: 200}, {data: {}})
+                callback(null, { statusCode: 200 }, { data: {} })
                 // yield callback(null, {statusCode: 200}, 'test')
                 // yield {data: {}}
                 // yield 'test'
@@ -175,19 +180,19 @@ describe('storage.uploadFile: 上传文件', () => {
                 // const xml = builder.buildObject('ERROR');
 
                 callback(null, {}, 'ERROR')
-
             }
 
-            let mR; let i = 0
+            let mR
+            let i = 0
 
             return jest.fn().mockImplementation((params, callback) => {
                 // if(!mR) {
                 //   mR = mockRequest(params, callback)
                 // }
 
-                if(i === 0) {
+                if (i === 0) {
                     mockRequest1(params, callback)
-                }else {
+                } else {
                     mockRequest2(params, callback)
                 }
                 i++
@@ -198,22 +203,22 @@ describe('storage.uploadFile: 上传文件', () => {
         const tcb5 = require('../../src/index')
         const app5 = tcb5.init(config)
 
-        try{
+        try {
             const result1 = await app5.uploadFile({
                 cloudPath: '测试.png',
                 fileContent: 'test'
             })
-        }catch(err) {
+        } catch (err) {
             assert(err.message)
         }
     }, 30000)
 
     it('mock uploadFile  非SignatureDoesNotMatch 报错', async () => {
-    // jest.resetModules()
-    // mock错误
+        // jest.resetModules()
+        // mock错误
         jest.mock('request', () => {
             function mockRequest1(params, callback) {
-                callback(null, {statusCode: 200}, {data: {}})
+                callback(null, { statusCode: 200 }, { data: {} })
                 // yield callback(null, {statusCode: 200}, 'test')
                 // yield {data: {}}
                 // yield 'test'
@@ -221,28 +226,30 @@ describe('storage.uploadFile: 上传文件', () => {
             }
 
             function mockRequest2(params, callback) {
-                const obj = {Error:{
-                    Code: 'Not_SignatureDoesNotMatch',
-                    Message: ''
-                }}
+                const obj = {
+                    Error: {
+                        Code: 'Not_SignatureDoesNotMatch',
+                        Message: ''
+                    }
+                }
 
                 const builder = new xml2js.Builder()
                 const xml = builder.buildObject(obj)
 
                 callback(null, {}, xml)
-
             }
 
-            let mR; let i = 0
+            let mR
+            let i = 0
 
             return jest.fn().mockImplementation((params, callback) => {
                 // if(!mR) {
                 //   mR = mockRequest(params, callback)
                 // }
 
-                if(i === 0) {
+                if (i === 0) {
                     mockRequest1(params, callback)
-                }else {
+                } else {
                     mockRequest2(params, callback)
                 }
                 i++
@@ -253,15 +260,17 @@ describe('storage.uploadFile: 上传文件', () => {
         const tcb6 = require('../../src/index')
         const app6 = tcb6.init(config)
 
-        try{
+        try {
             const result1 = await app6.uploadFile({
                 cloudPath: '测试.png',
                 fileContent: 'test'
             })
             // console.log(result1)
-        }catch(err) {
+        } catch (err) {
             // console.log(err)
-            assert(err.code === ERROR.STORAGE_REQUEST_FAIL.code)
+            if (checkIsGray()) {
+                assert(err.code === ERROR.STORAGE_REQUEST_FAIL.code)
+            }
         }
     }, 30000)
 
@@ -282,9 +291,7 @@ describe('storage.uploadFile: 上传文件', () => {
 
         const result1 = await app.uploadFile({
             cloudPath: '测试.png',
-            fileContent: fs.createReadStream(
-                path.resolve(__dirname, './my-photo.png')
-            )
+            fileContent: fs.createReadStream(path.resolve(__dirname, './my-photo.png'))
         })
         assert(result1.fileID)
 
@@ -294,8 +301,4 @@ describe('storage.uploadFile: 上传文件', () => {
         assert(result2.fileList)
         assert(result2.fileList[0].fileID)
     }, 30000)
-
-
 })
-
-

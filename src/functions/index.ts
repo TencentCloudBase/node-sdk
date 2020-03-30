@@ -40,19 +40,19 @@ export async function callFunction(cloudbase: CloudBase, { name, data }, opts?: 
             ...(process.env.TCB_ROUTE_KEY ? { 'X-Tcb-Route-Key': process.env.TCB_ROUTE_KEY } : {})
         }
     }).then(res => {
-        if (res.code) {
-            return res
-        } else {
-            let result
-            try {
-                result = JSON.parse(res.data.response_data)
-            } catch (e) {
-                result = res.data.response_data
-            }
-            return {
-                result,
-                requestId: res.requestId
-            }
+        // if (res.code) {
+        //     // return res
+        //     throw E({ ...res })
+        // } else {
+        let result
+        try {
+            result = JSON.parse(res.data.response_data)
+        } catch (e) {
+            result = res.data.response_data
+        }
+        return {
+            result,
+            requestId: res.requestId
         }
     })
 }

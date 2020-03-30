@@ -19,14 +19,14 @@ describe('auth 不注入环境变量', () => {
             uid = 1
             app.auth().createTicket(uid)
         } catch (e) {
-            assert(e.code === ERROR.INVALID_PARAM.code && e.message === 'uid must be a string')
+            assert(e.message === 'uid must be a string')
         }
 
         try {
             uid = '1'
             app.auth().createTicket(uid)
         } catch (e) {
-            assert(e.code === ERROR.INVALID_PARAM.code && e.message === `Invalid uid: "${uid}"`)
+            assert(e.message === `Invalid uid: "${uid}"`)
         }
     })
 
@@ -41,7 +41,8 @@ describe('auth 不注入环境变量', () => {
             openId: '',
             appId: '',
             uid: '',
-            customUserId: ''
+            customUserId: '',
+            isAnonymous: false
         })
         assert.deepStrictEqual(app.auth().getClientIP(), '')
     })
@@ -65,11 +66,13 @@ describe('auth 注入环境变量', () => {
         process.env.WX_APPID = 'WX_APPID'
         process.env.TCB_UUID = 'TCB_UUID'
         process.env.TCB_CUSTOM_USER_ID = 'TCB_CUSTOM_USER_ID'
+        process.env.TCB_ISANONYMOUS_USER = 'true'
         assert.deepStrictEqual(app.auth().getUserInfo(), {
             openId: 'WX_OPENID',
             appId: 'WX_APPID',
             uid: 'TCB_UUID',
-            customUserId: 'TCB_CUSTOM_USER_ID'
+            customUserId: 'TCB_CUSTOM_USER_ID',
+            isAnonymous: true
         })
     })
 

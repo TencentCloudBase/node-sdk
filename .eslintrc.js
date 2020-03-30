@@ -13,7 +13,8 @@ module.exports = {
                 '@typescript-eslint/no-var-requires': 'off',
                 '@typescript-eslint/prefer-optional-chain': 'off',
                 '@typescript-eslint/no-require-imports': 'off',
-                'max-params': 'off'
+                'max-params': 'off',
+                '@typescript-eslint/no-this-alias': 'off'
             }
         }
     ]

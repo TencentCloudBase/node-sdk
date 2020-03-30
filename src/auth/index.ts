@@ -8,6 +8,7 @@ const checkCustomUserIdRegex = /^[a-zA-Z0-9_\-#@~=*(){}[\]:.,<>+]{4,32}$/
 
 function validateUid(uid) {
     if (typeof uid !== 'string') {
+        // console.log('debug:', { ...ERROR.INVALID_PARAM, message: 'uid must be a string' })
         throw E({ ...ERROR.INVALID_PARAM, message: 'uid must be a string' })
     }
     if (!checkCustomUserIdRegex.test(uid)) {
@@ -22,13 +23,30 @@ export function auth(cloudbase: CloudBase) {
             const appId = process.env.WX_APPID || ''
             const uid = process.env.TCB_UUID || ''
             const customUserId = process.env.TCB_CUSTOM_USER_ID || ''
+            const isAnonymous = process.env.TCB_ISANONYMOUS_USER === 'true' ? true : false
 
             return {
                 openId,
                 appId,
                 uid,
-                customUserId
+                customUserId,
+                isAnonymous
             }
+        },
+        async getAuthContext(context) {
+            const { environment, environ } = CloudBase.parseContext(context)
+            const env = environment || environ || {}
+            const { TCB_UUID, LOGINTYPE } = env
+            const res: any = {
+                uid: TCB_UUID,
+                loginType: LOGINTYPE
+            }
+            if (LOGINTYPE === 'QQ-MINI') {
+                const { QQ_OPENID, QQ_APPID } = env
+                res.appId = QQ_APPID
+                res.openId = QQ_OPENID
+            }
+            return res
         },
         getClientIP() {
             return process.env.TCB_SOURCE_IP || ''

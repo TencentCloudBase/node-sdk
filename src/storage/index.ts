@@ -2,7 +2,7 @@ import request from 'request'
 import fs from 'fs'
 import httpRequest from '../utils/httpRequest'
 import { parseString } from 'xml2js'
-import { E } from '../utils/utils'
+import { E, processReturn } from '../utils/utils'
 import { ERROR } from '../const/code'
 import {
     ICustomReqOpts,
@@ -10,7 +10,8 @@ import {
     IDeleteFileRes,
     IGetFileUrlRes,
     IDownloadFileRes,
-    IUploadFileRes
+    IUploadFileRes,
+    IErrorInfo
 } from '../type'
 import { CloudBase } from '../cloudbase'
 
@@ -35,7 +36,7 @@ export async function uploadFile(
     cloudbase: CloudBase,
     { cloudPath, fileContent },
     opts?: ICustomReqOpts
-): Promise<IUploadFileRes> {
+): Promise<IUploadFileRes | IErrorInfo> {
     const {
         data: { url, token, authorization, fileId, cosFileId }
     } = await getUploadMetadata(cloudbase, { cloudPath }, opts)
@@ -65,10 +66,13 @@ export async function uploadFile(
             Message: [message]
         } = body.Error
         if (code === 'SignatureDoesNotMatch') {
-            throw E({ ...ERROR.SYS_ERR, message })
+            return processReturn(cloudbase.config.throwOnCode, { ...ERROR.SYS_ERR, message })
         }
 
-        throw E({ ...ERROR.STORAGE_REQUEST_FAIL, message })
+        return processReturn(cloudbase.config.throwOnCode, {
+            ...ERROR.STORAGE_REQUEST_FAIL,
+            message
+        })
     }
 
     return {
@@ -86,7 +90,7 @@ export async function deleteFile(
     opts?: ICustomReqOpts
 ): Promise<ICustomErrRes | IDeleteFileRes> {
     if (!fileList || !Array.isArray(fileList)) {
-        throw E({
+        return processReturn(cloudbase.config.throwOnCode, {
             ...ERROR.INVALID_PARAM,
             message: 'fileList必须是非空的数组'
         })
@@ -94,7 +98,7 @@ export async function deleteFile(
 
     for (let file of fileList) {
         if (!file || typeof file !== 'string') {
-            throw E({
+            return processReturn(cloudbase.config.throwOnCode, {
                 ...ERROR.INVALID_PARAM,
                 message: 'fileList的元素必须是非空的字符串'
             })
@@ -115,14 +119,14 @@ export async function deleteFile(
             'content-type': 'application/json'
         }
     }).then(res => {
-        if (res.code) {
-            return res
-        } else {
-            return {
-                fileList: res.data.delete_list,
-                requestId: res.requestId
-            }
+        // if (res.code) {
+        //     throw E({ ...res })
+        // } else {
+        return {
+            fileList: res.data.delete_list,
+            requestId: res.requestId
         }
+        // }
     })
 }
 
@@ -136,7 +140,7 @@ export async function getTempFileURL(
     opts?: ICustomReqOpts
 ): Promise<ICustomErrRes | IGetFileUrlRes> {
     if (!fileList || !Array.isArray(fileList)) {
-        throw E({
+        return processReturn(cloudbase.config.throwOnCode, {
             ...ERROR.INVALID_PARAM,
             message: 'fileList必须是非空的数组'
         })
@@ -146,7 +150,7 @@ export async function getTempFileURL(
     for (let file of fileList) {
         if (typeof file === 'object') {
             if (!file.hasOwnProperty('fileID') || !file.hasOwnProperty('maxAge')) {
-                throw E({
+                return processReturn(cloudbase.config.throwOnCode, {
                     ...ERROR.INVALID_PARAM,
                     message: 'fileList的元素如果是对象，必须是包含fileID和maxAge的对象'
                 })
@@ -161,7 +165,7 @@ export async function getTempFileURL(
                 fileid: file
             })
         } else {
-            throw E({
+            return processReturn(cloudbase.config.throwOnCode, {
                 ...ERROR.INVALID_PARAM,
                 message: 'fileList的元素如果不是对象，则必须是字符串'
             })
@@ -184,14 +188,14 @@ export async function getTempFileURL(
         }
     }).then(res => {
         // console.log(res);
-        if (res.code) {
-            return res
-        } else {
-            return {
-                fileList: res.data.download_list,
-                requestId: res.requestId
-            }
+        // if (res.code) {
+        //     throw E({ ...res })
+        // } else {
+        return {
+            fileList: res.data.download_list,
+            requestId: res.requestId
         }
+        // }
     })
 }
 
@@ -218,7 +222,9 @@ export async function downloadFile(
     const res = tmpUrlRes.fileList[0]
 
     if (res.code !== 'SUCCESS') {
-        return res
+        return processReturn(cloudbase.config.throwOnCode, {
+            ...res
+        })
     }
 
     tmpUrl = res.tempFileURL
@@ -274,11 +280,69 @@ export async function getUploadMetadata(
         }
     })
 
-    if (res.code) {
+    // if (res.code) {
+    //     throw E({
+    //         ...ERROR.STORAGE_REQUEST_FAIL,
+    //         message: 'get upload metadata failed: ' + res.code
+    //     })
+    // } else {
+    return res
+    // }
+}
+
+export async function getFileAuthority(cloudbase: CloudBase, { fileList }) {
+    if (!Array.isArray(fileList)) {
         throw E({
-            ...ERROR.STORAGE_REQUEST_FAIL,
-            message: 'get upload metadata failed: ' + res.code
+            ...ERROR.INVALID_PARAM,
+            message: '[node-sdk] getCosFileAuthority fileList must be a array'
         })
+    }
+
+    if (
+        fileList.some(file => {
+            if (!file || !file.path) {
+                return true
+            }
+            if (['READ', 'WRITE', 'READWRITE'].indexOf(file.type) === -1) {
+                return true
+            }
+            return false
+        })
+    ) {
+        throw E({
+            ...ERROR.INVALID_PARAM,
+            message: '[node-sdk] getCosFileAuthority fileList param error'
+        })
+    }
+
+    const userInfo = this.auth().getUserInfo()
+    const { openId, uid } = userInfo
+
+    if (!openId && !uid) {
+        throw E({
+            ...ERROR.INVALID_PARAM,
+            message: '[node-sdk] admin do not need getCosFileAuthority.'
+        })
+    }
+
+    let params = {
+        action: 'storage.getFileAuthority',
+        openId,
+        uid,
+        loginType: process.env.LOGINTYPE,
+        fileList
+    }
+    const res = await httpRequest({
+        config: this.config,
+        params,
+        method: 'post',
+        headers: {
+            'content-type': 'application/json'
+        }
+    })
+
+    if (res.code) {
+        throw E({ ...res, message: '[tcb-admin-node] getCosFileAuthority failed: ' + res.code })
     } else {
         return res
     }

@@ -5,7 +5,9 @@ export declare function auth(cloudbase: CloudBase): {
         appId: string;
         uid: string;
         customUserId: string;
+        isAnonymous: boolean;
     };
+    getAuthContext(context: any): Promise<any>;
     getClientIP(): string;
     createTicket: (uid: any, options?: any) => string;
 };

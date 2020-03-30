@@ -16,9 +16,13 @@ import {
 import { DBRequest } from './utils/dbRequest'
 import { Log, logger } from './log'
 import { ERROR } from './const/code'
-import { E } from './utils/utils'
+import { E, checkIsGray } from './utils/utils'
+import tcb from 'tcb-admin-node'
+
+const GRAY_ENV_KEY = 'TCB_SDK_GRAY_0'
 
 export class CloudBase {
+    public static oldInstance: any
     public static scfContext: IContext
     public static parseContext(context: IContext): IContext {
         if (typeof context !== 'object') {
@@ -79,6 +83,8 @@ export class CloudBase {
     }
 
     public config: ICloudBaseConfig
+    public oldInstance: any // 灰度用旧sdk实例
+
     private clsLogger: Log
 
     public constructor(config?: ICloudBaseConfig) {
@@ -97,7 +103,8 @@ export class CloudBase {
             version,
             headers = {},
             credentials,
-            isHttp
+            isHttp,
+            throwOnCode
         } = config
 
         if ((secretId && !secretKey) || (!secretId && secretKey)) {
@@ -118,14 +125,20 @@ export class CloudBase {
             timeout: timeout || 15000,
             serviceUrl,
             credentials,
-            version
+            version,
+            throwOnCode: throwOnCode !== undefined ? throwOnCode : true
         }
 
         this.config = newConfig
+
+        // 设置旧实例
+        CloudBase.oldInstance = tcb.init(config)
     }
 
     public database(dbConfig: any = {}): Db {
         Db.reqClass = DBRequest
+        // 兼容方法预处理
+
         if (Object.prototype.toString.call(dbConfig).slice(8, -1) !== 'Object') {
             throw E({ ...ERROR.INVALID_PARAM, message: 'dbConfig must be an object' })
         }
@@ -135,7 +148,11 @@ export class CloudBase {
             dbConfig.envName = dbConfig.env
             delete dbConfig.env
         }
-        return new Db({ config: { ...this.config, ...dbConfig } })
+        return new Db({
+            ...this.config,
+            ...dbConfig,
+            _oldDbInstance: CloudBase.oldInstance.database(dbConfig)
+        })
     }
 
     /**
@@ -145,11 +162,11 @@ export class CloudBase {
      * @param opts
      */
     public callFunction({ name, data }, opts?: ICustomReqOpts): Promise<any> {
-        return callFunction(this, { name, data }, opts)
+        return this.preProcess(callFunction)({ name, data }, opts)
     }
 
     public auth(): any {
-        return auth(this)
+        return this.preProcess(auth)()
     }
 
     /**
@@ -159,7 +176,7 @@ export class CloudBase {
      * @param opts
      */
     public callWxOpenApi({ apiName, requestData }, opts?: ICustomReqOpts): Promise<any> {
-        return callWxOpenApi(this, { apiName, requestData }, opts)
+        return this.preProcess(callWxOpenApi)({ apiName, requestData }, opts)
     }
 
     /**
@@ -169,7 +186,7 @@ export class CloudBase {
      * @param opts
      */
     public callWxPayApi({ apiName, requestData }, opts?: ICustomReqOpts): Promise<any> {
-        return callWxPayApi(this, { apiName, requestData }, opts)
+        return this.preProcess(callWxPayApi)({ apiName, requestData }, opts)
     }
 
     /**
@@ -179,7 +196,7 @@ export class CloudBase {
      * @param opts
      */
     public callCompatibleWxOpenApi({ apiName, requestData }, opts?: ICustomReqOpts): Promise<any> {
-        return callCompatibleWxOpenApi(this, { apiName, requestData }, opts)
+        return this.preProcess(callCompatibleWxOpenApi)({ apiName, requestData }, opts)
     }
 
     /**
@@ -189,7 +206,7 @@ export class CloudBase {
      * @param opts
      */
     public uploadFile({ cloudPath, fileContent }, opts?: ICustomReqOpts): Promise<IUploadFileRes> {
-        return uploadFile(this, { cloudPath, fileContent }, opts)
+        return this.preProcess(uploadFile)({ cloudPath, fileContent }, opts)
     }
 
     /**
@@ -202,7 +219,7 @@ export class CloudBase {
         { fileList },
         opts?: ICustomReqOpts
     ): Promise<ICustomErrRes | IDeleteFileRes> {
-        return deleteFile(this, { fileList }, opts)
+        return this.preProcess(deleteFile)({ fileList }, opts)
     }
 
     /**
@@ -215,7 +232,7 @@ export class CloudBase {
         { fileList },
         opts?: ICustomReqOpts
     ): Promise<ICustomErrRes | IGetFileUrlRes> {
-        return getTempFileURL(this, { fileList }, opts)
+        return this.preProcess(getTempFileURL)({ fileList }, opts)
     }
 
     /**
@@ -228,7 +245,7 @@ export class CloudBase {
         params: { fileID: string; tempFilePath?: string },
         opts?: ICustomReqOpts
     ): Promise<ICustomErrRes | IDownloadFileRes> {
-        return downloadFile(this, params, opts)
+        return this.preProcess(downloadFile)(params, opts)
     }
 
     /**
@@ -238,7 +255,7 @@ export class CloudBase {
      * @param opts
      */
     public getUploadMetadata({ cloudPath }, opts?: ICustomReqOpts): Promise<any> {
-        return getUploadMetadata(this, { cloudPath }, opts)
+        return this.preProcess(getUploadMetadata)({ cloudPath }, opts)
     }
 
     /**
@@ -247,8 +264,27 @@ export class CloudBase {
      */
     public logger(): Log {
         if (!this.clsLogger) {
-            this.clsLogger = logger()
+            console.log('times')
+            this.clsLogger = this.preProcess(logger)()
         }
         return this.clsLogger
+    }
+
+    // 兼容处理旧sdk
+    private preProcess(func: Function) {
+        const self = this
+        return function(...args) {
+            // 默认使用旧tcb实例对象
+            const oldInstance = CloudBase.oldInstance
+            const functionName = func.name
+
+            const oldFunc = oldInstance[functionName]
+
+            if (checkIsGray()) {
+                return func.call(self, self, ...args)
+            }
+
+            return oldFunc.call(oldInstance, ...args)
+        }
     }
 }

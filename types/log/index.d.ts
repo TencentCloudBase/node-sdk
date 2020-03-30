@@ -53,4 +53,4 @@ export declare class Log {
      */
     warn(logMsg: any): void;
 }
-export declare const logger: () => Log;
+export declare function logger(): Log;

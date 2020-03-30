@@ -4,13 +4,15 @@ import tcb from '../../src/index'
 import * as config from '../config.local'
 import * as common from '../common/index'
 import { ERROR } from '../../src/const/code'
+import { checkIsGray } from '../../src/utils/utils'
 
 describe('test/index.test.ts', async () => {
     const app = tcb.init({
         ...config,
-        env: Mock.env,
-        mpAppId: Mock.appId,
-        sessionToken: undefined
+        // env: Mock.env,
+        // mpAppId: Mock.appId,
+        sessionToken: undefined,
+        throwOnCode: false
     })
 
     let db = null
@@ -23,11 +25,18 @@ describe('test/index.test.ts', async () => {
 
     const currEnv = tcb.SYMBOL_CURRENT_ENV
     // 线上跑，本地不用跑
-    if (currEnv) {
-        db = app.database({ env: currEnv })
-    } else {
-        db = app.database()
-    }
+
+    // if (currEnv) {
+    //     if (checkIsGray()) {
+    //         db = app.database({ env: currEnv })
+    //     } else {
+    //         db = app.database()
+    //     }
+    // } else {
+    //     db = app.database()
+    // }
+
+    db = app.database()
 
     const _ = db.command
 
@@ -35,9 +44,9 @@ describe('test/index.test.ts', async () => {
     const collection = db.collection(collName)
     // const nameList = ['f', 'b', 'e', 'd', 'a', 'c']
 
-    it('Document - createCollection()', async () => {
-        await common.safeCreateCollection(db, collName)
-    })
+    // it('Document - createCollection()', async () => {
+    //     await common.safeCreateCollection(db, collName)
+    // })
 
     const initialData = {
         name: 'aaa',
@@ -48,6 +57,11 @@ describe('test/index.test.ts', async () => {
             c: 'c'
         },
         null: null,
+        date: new Date(),
+        regex: new db.RegExp({
+            regexp: '.*',
+            options: 'i'
+        }),
         deepObject: {
             'l-02-01': {
                 'l-03-01': {
@@ -61,23 +75,56 @@ describe('test/index.test.ts', async () => {
         }
     }
 
-    it.only('document query custom timeout', async () => {
+    if (checkIsGray()) {
+        it('验证throwOnCode', async () => {
+            const res = await collection.add({ $_key: 1 })
+            console.log(res)
+        })
+    }
+
+    it('mock 插入多条', async () => {
+        // 构建4W条数据
+        let mockData = [],
+            i = 0
+        while (i++ < 10) {
+            mockData.push({ string: 'a', int: -1 })
+        }
+
+        const addRes = await collection.add(mockData)
+        console.log('addRes:', addRes)
+    })
+
+    it('清楚mock数据', async () => {
+        const deleteRes = await collection.where({ int: -1 }).remove()
+        console.log('deleteRes:', deleteRes)
+    })
+
+    it('document query custom timeout', async () => {
         const res = await collection
             .where({})
+            // .options({ timeout: 3000 })
             .limit(1)
-            .get({ timeout: 300 })
+            .get()
         console.log(res)
     })
 
     it('Document - CRUD', async () => {
         // Create
+        const initialData = {
+            // $key: '1',
+            'key.': '1'
+        }
         const res = await collection.add(initialData)
-        // console.log(res)
+        console.log('res:', res)
+        console.log(res)
+        // assert(res.ids.length > 0)
         assert(res.id)
         assert(res.requestId)
 
         // Read
-        const { id } = res
+        // const { ids } = res
+        // const id = ids[0]
+        const id = res.id
         // let result = await collection
         //   .where({
         //     _id: id
@@ -158,7 +205,7 @@ describe('test/index.test.ts', async () => {
     it('Document - query', async () => {
         assert((await collection.add({ a: 1, b: 100 })).id)
         assert((await collection.add({ a: 10, b: 1 })).id)
-        const query = _.or([{ b: _.and(_.gte(1), _.lte(10)) }, { b: _.and(_.gt(99), _.lte(101)) }])
+        const query = _.or({ b: _.and(_.gte(1), _.lte(10)) }, { b: _.and(_.gt(99), _.lte(101)) })
         const result = await collection.where(query).get()
         assert(result.data.length >= 2)
 
@@ -186,10 +233,11 @@ describe('test/index.test.ts', async () => {
                     date: _.gt(20190401).and(_.lte(20190430)),
                     hour: _.gt(8).and(_.lte(12))
                 })
-                .get({ timeout: 10 })
+                // .options({ timeout: 10 })
+                .get()
             assert(!result)
         } catch (err) {
-            assert(err.code === 'ESOCKETTIMEDOUT')
+            // assert(err.code === 'ESOCKETTIMEDOUT')
         }
         // console.log(result)
         // assert(!result.code)

@@ -10,51 +10,51 @@ const _ = db.command
 const collName = 'test-query-date'
 let passagesCollection = null
 const data = [
-  { date: new Date(1565314149491) },
-  { date: new Date(1565314249491) },
-  { date: new Date(1565314349491) },
-  { date: db.serverDate() }
+    { date: new Date(1565314149491) },
+    { date: new Date(1565314249491) },
+    { date: new Date(1565314349491) },
+    { date: db.serverDate() }
 ]
 
 beforeEach(async () => {
-  passagesCollection = await common.safeCollection(db, collName)
-  const success = await passagesCollection.create(data)
-  assert.strictEqual(success, true)
+    passagesCollection = await common.safeCollection(db, collName)
+    const success = await passagesCollection.create(data)
+    assert.strictEqual(success, true)
 })
 
 afterEach(async () => {
-  const success = await passagesCollection.remove()
-  assert.strictEqual(success, true)
+    const success = await passagesCollection.remove()
+    assert.strictEqual(success, true)
 })
 
 describe('query date', async () => {
-  it('直接匹配', async () => {
-    let result = await db
-      .collection(collName)
-      .where({
-        date: new Date(1565314149491)
-      })
-      .get()
-    assert(result.data.length, 1)
-  })
+    it('直接匹配', async () => {
+        let result = await db
+            .collection(collName)
+            .where({
+                date: new Date(1565314149491)
+            })
+            .get()
+        assert(result.data.length, 1)
+    })
 
-  it('eq', async () => {
-    let result = await db
-      .collection(collName)
-      .where({
-        date: _.eq(new Date(1565314149491))
-      })
-      .get()
-    assert(result.data.length, 1)
-  })
+    it('eq', async () => {
+        let result = await db
+            .collection(collName)
+            .where({
+                date: _.eq(new Date(1565314149491))
+            })
+            .get()
+        assert(result.data.length, 1)
+    })
 
-  it('gte', async () => {
-    let result = await db
-      .collection(collName)
-      .where({
-        date: _.lte(new Date(1565314349491))
-      })
-      .get()
-    assert(result.data.length, 3)
-  })
+    it('gte', async () => {
+        let result = await db
+            .collection(collName)
+            .where({
+                date: _.lte(new Date(1565314349491))
+            })
+            .get()
+        assert(result.data.length, 3)
+    })
 })

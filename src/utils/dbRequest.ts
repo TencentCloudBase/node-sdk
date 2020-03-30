@@ -29,7 +29,7 @@ export class DBRequest {
         const params = { ...data, action: api }
 
         return httpRequest({
-            config: this.config.config,
+            config: this.config,
             params,
             method: 'post',
             opts,

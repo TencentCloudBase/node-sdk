@@ -16,6 +16,8 @@ export interface ICloudBaseConfig {
     proxy?: string;
     version?: string;
     credentials?: ICredentialsInfo;
+    _useFeature?: boolean;
+    throwOnCode?: boolean;
 }
 export interface IRequestInfo {
     config: ICloudBaseConfig;
@@ -47,6 +49,7 @@ export interface ICustomReqOpts {
 export interface IErrorInfo {
     code?: string;
     message?: string;
+    requestId?: string;
 }
 export interface ICustomErrRes {
     [propName: string]: any;

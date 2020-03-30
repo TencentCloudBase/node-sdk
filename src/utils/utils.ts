@@ -1,12 +1,17 @@
 import { IErrorInfo } from '../type'
 
+const GRAY_ENV_KEY = 'TCB_SDK_GRAY_0'
+
 export class TcbError extends Error {
     public readonly code: string
     public readonly message: string
+    public readonly requestId: string
+
     public constructor(error: IErrorInfo) {
         super(error.message)
         this.code = error.code
         this.message = error.message
+        this.requestId = error.requestId
     }
 }
 
@@ -89,4 +94,29 @@ export const delay = ms => {
 export function second(): number {
     // istanbul ignore next
     return Math.floor(new Date().getTime() / 1000)
+}
+
+export function processReturn(throwOnCode: boolean, res: any) {
+    if (throwOnCode === false) {
+        // 不抛报错，正常return，兼容旧逻辑
+        return res
+    }
+
+    throw E({ ...res })
+}
+
+export function checkIsGray(): boolean {
+    try {
+        if (process.env.TCB_CONTEXT_CNFG) {
+            // 检查约定环境变量字段是否存在
+            const grayEnvKey = JSON.parse(process.env.TCB_CONTEXT_CNFG)
+            if (grayEnvKey[GRAY_ENV_KEY] === true) {
+                return true
+            }
+        }
+    } catch (e) {
+        console.log('parse context error...')
+    }
+
+    return false
 }

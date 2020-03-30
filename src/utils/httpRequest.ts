@@ -11,7 +11,7 @@ import { getWxCloudApiToken } from './getWxCloudApiToken'
 import { sign } from '@cloudbase/signature-nodejs'
 import URL from 'url'
 const { version } = require('../../package.json')
-const { E, second } = utils
+const { E, second, processReturn } = utils
 
 export class Request {
     private args: IRequestInfo
@@ -284,6 +284,9 @@ export class Request {
 export default async (args: IRequestInfo): Promise<any> => {
     const req = new Request(args)
     const reqOpts = req.makeReqOpts()
+    const config = args.config
+    // console.log('use new instance')
+
     const action = req.getAction()
 
     let reqHooks: IReqHooks
@@ -299,12 +302,15 @@ export default async (args: IRequestInfo): Promise<any> => {
         warnTimer = req.setSlowRequeryWarning(action)
     }
 
-    if (reqHooks) {
-        return baseRequest(reqOpts, reqHooks)
-    }
-
     try {
-        return await baseRequest(reqOpts)
+        const res = await baseRequest(reqOpts, reqHooks)
+        // 检查res是否为return {code, message}回包
+        if (res.code) {
+            // 判断是否设置config._returnCodeByThrow = false
+            return processReturn(config.throwOnCode, res)
+        }
+
+        return res
     } finally {
         if (warnTimer) {
             clearTimeout(warnTimer)

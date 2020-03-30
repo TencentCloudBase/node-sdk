@@ -1,71 +1,84 @@
 import tcb from '../../src/index'
 import config from '../config.local'
 import fs from 'fs'
-import {ERROR} from '../../src/const/code'
+import { ERROR } from '../../src/const/code'
 import assert from 'assert'
-import {ICustomErrRes} from '../../src/type'
+import { ICustomErrRes } from '../../src/type'
+import { checkIsGray } from '../../src/utils/utils'
 
 let fileContent = fs.createReadStream(`${__dirname}/cos.jpeg`)
-
 
 describe('storage.batchGetDownloadUrl: 获取文件下载链接', () => {
     const app = tcb.init(config)
 
     it('校验获取下载链接传参', async () => {
-    // fileList 必须存在且为数组类型
-        try{
+        // fileList 必须存在且为数组类型
+        try {
             await app.getTempFileURL({
                 fileList: null
             })
-        }catch(e) {
+        } catch (e) {
             assert(e.code === ERROR.INVALID_PARAM.code && e.message === 'fileList必须是非空的数组')
         }
 
-        try{
+        try {
             await app.getTempFileURL({
                 fileList: {}
             })
-        }catch(e) {
+        } catch (e) {
             assert(e.code === ERROR.INVALID_PARAM.code && e.message === 'fileList必须是非空的数组')
         }
 
         // fileList中的file必须为Object ({fileid, max_age}) 或者 字符串
-        try{
+        try {
             await app.getTempFileURL({
-                fileList: [{fileID: 'testFileID'}]
+                fileList: [{ fileID: 'testFileID' }]
             })
-        }catch(e) {
-            assert(e.code === ERROR.INVALID_PARAM.code && e.message === 'fileList的元素如果是对象，必须是包含fileID和maxAge的对象')
+        } catch (e) {
+            assert(
+                e.code === ERROR.INVALID_PARAM.code &&
+                    e.message === 'fileList的元素如果是对象，必须是包含fileID和maxAge的对象'
+            )
         }
 
-        try{
+        try {
             await app.getTempFileURL({
-                fileList: [{maxAge: 10}]
+                fileList: [{ maxAge: 10 }]
             })
-        }catch(e) {
-            assert(e.code === ERROR.INVALID_PARAM.code && e.message === 'fileList的元素如果是对象，必须是包含fileID和maxAge的对象')
+        } catch (e) {
+            assert(
+                e.code === ERROR.INVALID_PARAM.code &&
+                    e.message === 'fileList的元素如果是对象，必须是包含fileID和maxAge的对象'
+            )
         }
 
-        try{
+        try {
             await app.getTempFileURL({
                 fileList: [123]
             })
-        }catch(e) {
-            assert(e.code === ERROR.INVALID_PARAM.code && e.message === 'fileList的元素如果不是对象，则必须是字符串')
+        } catch (e) {
+            assert(
+                e.code === ERROR.INVALID_PARAM.code &&
+                    e.message === 'fileList的元素如果不是对象，则必须是字符串'
+            )
         }
     }, 30000)
 
     it('获取超出文件数限制50的下载链接', async () => {
-        let i =0; let fileList = []
-        while(i++ <= 50) {
+        let i = 0
+        let fileList = []
+        while (i++ <= 50) {
             fileList.push('testFileId')
         }
-        const result = await app.getTempFileURL({
-            fileList
-        })
-        assert((<ICustomErrRes>result).code === ERROR.INVALID_PARAM.code)
+        try {
+            const result = await app.getTempFileURL({
+                fileList
+            })
+        } catch (e) {
+            // console.log(e)
+            assert((<ICustomErrRes>e).code === ERROR.INVALID_PARAM.code)
+        }
     }, 30000)
-
 
     it('单环境下上传文件、获取文件链接', async () => {
         const result1 = await app.uploadFile({
@@ -114,15 +127,23 @@ describe('storage.batchGetDownloadUrl: 获取文件下载链接', () => {
     })
 
     it('验证 文件存储接口自定义超时', async () => {
-        try{
-            const result = await app.getTempFileURL({
-                fileList: [`cloud://${config.env}.tcbenv-mPIgjhnq/1535367916760.jpg`]
-            }, {
-                timeout:10
-            })
-            assert(!result)
-        }catch(err) {
-            assert(err.code === 'ESOCKETTIMEDOUT')
+        try {
+            const result = await app.getTempFileURL(
+                {
+                    fileList: [`cloud://${config.env}.tcbenv-mPIgjhnq/1535367916760.jpg`]
+                },
+                {
+                    timeout: 10
+                }
+            )
+            if (checkIsGray()) {
+                assert(!result)
+            }
+        } catch (err) {
+            console.log('e:', err)
+            if (checkIsGray()) {
+                assert(err.code === 'ESOCKETTIMEDOUT')
+            }
         }
     })
 })

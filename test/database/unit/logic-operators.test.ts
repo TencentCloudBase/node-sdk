@@ -7,11 +7,13 @@ const app = tcb.init(Config)
 const db = app.database()
 const _ = db.command
 
-describe('projection', async () => {
+const date = new Date()
+
+describe('逻辑操作符', async () => {
     const collName = 'test-projection'
     let passagesCollection = null
     const data = [
-        { category: 'Web', tags: ['JavaScript', 'C#'] },
+        { category: 'Web', tags: ['JavaScript', 'C#'], date },
         { category: 'Web', tags: ['Go', 'C#'] },
         { category: 'Life', tags: ['Go', 'Python', 'JavaScript'] }
     ]
@@ -27,24 +29,23 @@ describe('projection', async () => {
         assert.strictEqual(success, true)
     })
 
-    it('slice', async () => {
+    it('nor', async () => {
         const result = await db
             .collection(collName)
-            .field({
-                tags: db.command.project.slice(1)
+            .where({
+                category: _.nor(_.eq('Life'), _.eq('Web'))
             })
             .get()
-        console.log(result.data)
+        assert.deepStrictEqual(result.data, [])
     })
 
-    it('projection', async () => {
+    // 新db模块解决or date问题，旧db模块未解决，跳过该测试
+    it.skip('or date', async () => {
         const result = await db
             .collection(collName)
-            .field({
-                category: true
-            })
+            .where({ date: _.or(date, new Date(date.getTime() + 10000)) })
             .get()
-        console.log('result:', result)
-        assert.strictEqual(result.data.length, 3)
+
+        assert(result.data.length > 0)
     })
 })
