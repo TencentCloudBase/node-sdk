@@ -18,10 +18,7 @@ describe('functions.invokeFunction: 执行云函数', () => {
                 data: a
             })
         } catch (e) {
-            assert(
-                e.code === ERROR.INVALID_PARAM.code &&
-          e.message === '对象出现了循环引用'
-            )
+            assert(e.code === ERROR.INVALID_PARAM.code && e.message === '对象出现了循环引用')
         }
 
         try {
@@ -30,9 +27,7 @@ describe('functions.invokeFunction: 执行云函数', () => {
                 data: { a: 1 }
             })
         } catch (e) {
-            assert(
-                e.code === ERROR.INVALID_PARAM.code && e.message === '函数名不能为空'
-            )
+            assert(e.code === ERROR.INVALID_PARAM.code && e.message === '函数名不能为空')
         }
     })
 

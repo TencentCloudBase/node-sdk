@@ -36,7 +36,8 @@ export async function callFunction(cloudbase: CloudBase, { name, data }, opts?: 
         method: 'post',
         opts,
         headers: {
-            'content-type': 'application/json'
+            'content-type': 'application/json',
+            ...(process.env.TCB_ROUTE_KEY ? { 'X-Tcb-Route-Key': process.env.TCB_ROUTE_KEY } : {})
         }
     }).then(res => {
         if (res.code) {
