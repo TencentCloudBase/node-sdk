@@ -3,11 +3,13 @@ import { E } from '../utils/utils'
 import { ERROR } from '../const/code'
 import { CloudBase } from '../cloudbase'
 
+const checkCustomUserIdRegex = /^[a-zA-Z0-9_\-#@~=*(){}[\]:.,<>+]{4,32}$/
+
 function validateUid(uid) {
     if (typeof uid !== 'string') {
         throw E({ ...ERROR.INVALID_PARAM, message: 'uid must be a string' })
     }
-    if (!/^[a-zA-Z0-9]{4,32}$/.test(uid)) {
+    if (!checkCustomUserIdRegex.test(uid)) {
         throw E({ ...ERROR.INVALID_PARAM, message: `Invalid uid: "${uid}"` })
     }
 }
