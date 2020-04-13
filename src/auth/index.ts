@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken'
 import { E } from '../utils/utils'
 import { ERROR } from '../const/code'
 import { CloudBase } from '../cloudbase'
+import { SYMBOL_CURRENT_ENV } from '../const/symbol'
 
 const checkCustomUserIdRegex = /^[a-zA-Z0-9_\-#@~=*(){}[\]:.,<>+]{4,32}$/
 
@@ -35,10 +36,17 @@ export function auth(cloudbase: CloudBase) {
         createTicket: (uid, options: any = {}) => {
             validateUid(uid)
             const timestamp = new Date().getTime()
-            const { credentials, envName } = cloudbase.config
+            const { credentials } = cloudbase.config
+            let { envName } = cloudbase.config
             if (!envName) {
                 throw new Error('no env in config')
             }
+
+            // 使用symbol时替换为环境变量内的env
+            if (envName === SYMBOL_CURRENT_ENV) {
+                envName = process.env.TCB_ENV || process.env.SCF_NAMESPACE
+            }
+
             const { refresh = 3600 * 1000, expire = timestamp + 7 * 24 * 60 * 60 * 1000 } = options
             const token = jwt.sign(
                 {

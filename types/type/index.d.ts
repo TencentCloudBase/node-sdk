@@ -8,7 +8,7 @@ export interface ICloudBaseConfig {
     isHttp?: boolean;
     secretId?: string;
     secretKey?: string;
-    envName?: string;
+    envName?: string | Symbol;
     env?: string;
     sessionToken?: string;
     serviceUrl?: string;
