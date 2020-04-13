@@ -13,7 +13,7 @@ let passagesCollection = null
 const data = [
     { category: 'Web', tags: ['JavaScript', 'C#'], index: 0, tags2: [1, 2, 3] },
     { category: 'Web', tags: ['Go', 'C#'], index: 1, tags2: [1, 2, 3] },
-    { tags: ['Go'] },
+    { category: 'luke', tags: ['Go'] },
     {
         category: 'Life',
         tags: ['Go', 'Python', 'JavaScript'],
@@ -193,7 +193,7 @@ describe('all', async () => {
                 tags: _.all(['Go'])
             })
             .get()
-        assert.strictEqual(result.data.length, 3)
+        assert.strictEqual(result.data.length, 4)
     })
 })
 
@@ -504,7 +504,7 @@ describe('not', async () => {
             })
             .get()
         console.log(result)
-        assert.strictEqual(result.data.length, 3)
+        assert.strictEqual(result.data.length, 4)
     })
 
     // not 目前还不支持正则
