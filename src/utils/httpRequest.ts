@@ -228,7 +228,7 @@ export class Request {
             url: url,
             params: params,
             headers: requiredHeaders,
-            // withSignedParams: true,
+            withSignedParams: true,
             timestamp: second() - 1
         })
 

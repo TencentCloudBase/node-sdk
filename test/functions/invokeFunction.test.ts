@@ -31,7 +31,7 @@ describe('functions.invokeFunction: 执行云函数', () => {
         }
     })
 
-    it.only('执行云函数', async () => {
+    it('执行云函数', async () => {
         const result = await app.callFunction({
             name: 'test-env',
             data: { a: 1 }
@@ -89,5 +89,21 @@ describe('functions.invokeFunction: 执行云函数', () => {
             // assert(err.code === 'STORAGE_REQUEST_FAIL')
             console.log(err)
         }
+    })
+
+    it('function debug', async () => {
+        const app = tcb.init(config)
+        const callRes = await app.callFunction({
+            name: 'invoke',
+            data: {
+                key1: 'test value 1',
+                key2: 'test value 2',
+                userInfo: {
+                    // appId: '',
+                    openId: 'oaoLb4qz0R8STBj6ipGlHkfNCO2Q'
+                }
+            }
+        })
+        console.log('callRes:', callRes)
     })
 })
