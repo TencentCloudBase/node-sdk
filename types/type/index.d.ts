@@ -18,6 +18,7 @@ export interface ICloudBaseConfig {
     credentials?: ICredentialsInfo;
     _useFeature?: boolean;
     throwOnCode?: boolean;
+    forever?: boolean;
 }
 export interface IRequestInfo {
     config: ICloudBaseConfig;
@@ -76,6 +77,7 @@ export interface IReqOpts {
     body?: any;
     formData?: any;
     encoding?: any;
+    forever?: boolean;
     url: string;
     method: string;
     timeout: number;

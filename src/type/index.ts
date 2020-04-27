@@ -18,6 +18,7 @@ export interface ICloudBaseConfig {
     credentials?: ICredentialsInfo
     _useFeature?: boolean // 是否走新特性
     throwOnCode?: boolean // 错误回包(带code) throw
+    forever?: boolean // 是否开启keep alive
 }
 
 export interface IRequestInfo {
@@ -95,6 +96,7 @@ export interface IReqOpts {
     body?: any
     formData?: any
     encoding?: any
+    forever?: boolean
     url: string
     method: string
     timeout: number
