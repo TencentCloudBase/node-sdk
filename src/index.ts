@@ -6,7 +6,6 @@ import tcb from 'tcb-admin-node'
 export = {
     init: (config?: ICloudBaseConfig): CloudBase => {
         // mock注入环境变量
-        // process.env.TCB_CONTEXT_CNFG = JSON.stringify({ TCB_SDK_GRAY_0: true })
         if (config) {
             const { _useFeature } = config
             if (_useFeature === false) {

@@ -264,7 +264,6 @@ export class CloudBase {
      */
     public logger(): Log {
         if (!this.clsLogger) {
-            console.log('times')
             this.clsLogger = this.preProcess(logger)()
         }
         return this.clsLogger
