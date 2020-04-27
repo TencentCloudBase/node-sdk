@@ -3,10 +3,7 @@ import { CloudBase } from '../cloudbase';
 export declare function callWxOpenApi(cloudbase: CloudBase, { apiName, requestData }: {
     apiName: any;
     requestData: any;
-}, opts?: ICustomReqOpts): Promise<{
-    result: any;
-    requestId: any;
-}>;
+}, opts?: ICustomReqOpts): Promise<any>;
 /**
  * 调用wxopenAPi
  * @param {String} apiName  接口名

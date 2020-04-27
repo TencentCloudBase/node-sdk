@@ -32,8 +32,9 @@ export async function callWxOpenApi(
         },
         customEndPoint: 'tcb-open.tencentcloudapi.com'
     }).then(res => {
-        // if (res.code) {
-        //     // return res
+        if (res.code) {
+            return res
+        }
         //     throw E({ ...res })
         // } else {
         let result

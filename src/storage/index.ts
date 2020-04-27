@@ -119,7 +119,9 @@ export async function deleteFile(
             'content-type': 'application/json'
         }
     }).then(res => {
-        // if (res.code) {
+        if (res.code) {
+            return res
+        }
         //     throw E({ ...res })
         // } else {
         return {
@@ -187,7 +189,9 @@ export async function getTempFileURL(
             'content-type': 'application/json'
         }
     }).then(res => {
-        // console.log(res);
+        if (res.code) {
+            return res
+        }
         // if (res.code) {
         //     throw E({ ...res })
         // } else {
@@ -342,7 +346,7 @@ export async function getFileAuthority(cloudbase: CloudBase, { fileList }) {
     })
 
     if (res.code) {
-        throw E({ ...res, message: '[tcb-admin-node] getCosFileAuthority failed: ' + res.code })
+        throw E({ ...res, message: '[node-sdk] getCosFileAuthority failed: ' + res.code })
     } else {
         return res
     }

@@ -9,7 +9,4 @@ import { CloudBase } from '../cloudbase';
 export declare function callFunction(cloudbase: CloudBase, { name, data }: {
     name: any;
     data: any;
-}, opts?: ICustomReqOpts): Promise<{
-    result: any;
-    requestId: any;
-}>;
+}, opts?: ICustomReqOpts): Promise<any>;
