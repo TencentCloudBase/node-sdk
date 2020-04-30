@@ -1,22 +1,10 @@
 import * as assert from 'power-assert'
 import * as Mock from '../unit/mock'
 import tcb from '../../../src/index'
-import * as Config from '../../config.local'
+import * as config from '../../config.local'
 import * as common from '../../common/index'
 
 describe('正则表达式查询', async () => {
-    const config = {
-        secretId: Config.secretId,
-        secretKey: Config.secretKey,
-        // env: Mock.env,
-        // mpAppId: Mock.appId,
-        proxy: Config.proxy,
-        sessionToken: undefined,
-        env: Config.env,
-        appId: Config.appId,
-        serviceUrl: Config.serviceUrl
-    }
-
     console.log(config)
 
     const app = tcb.init(config)

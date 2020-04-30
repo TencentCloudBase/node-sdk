@@ -82,17 +82,20 @@ describe('test/index.test.ts', async () => {
         })
     }
 
-    it('mock 插入多条', async () => {
-        // 构建4W条数据
-        let mockData = [],
-            i = 0
-        while (i++ < 10) {
-            mockData.push({ string: 'a', int: -1 })
-        }
+    if (checkIsGray() || config._useFeature) {
+        it('mock 插入多条', async () => {
+            // 构建4W条数据
+            let mockData = [],
+                i = 0
+            while (i++ < 10) {
+                mockData.push({ string: 'a', int: -1 })
+            }
 
-        const addRes = await collection.add(mockData)
-        console.log('addRes:', addRes)
-    })
+            const addRes = await collection.add(mockData)
+            assert(addRes.ids.length === 10)
+            // console.log('addRes:', addRes)
+        })
+    }
 
     it('清楚mock数据', async () => {
         const deleteRes = await collection.where({ int: -1 }).remove()

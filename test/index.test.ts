@@ -49,8 +49,7 @@ describe('tcb.init: 初始化tcb', () => {
                 data: { a: 1 }
             })
         } catch (err) {
-            // console.log(err)
-            if (checkIsGray() || config._useFeature) {
+            if (checkIsGray()) {
                 assert(err.code === ERROR.INVALID_PARAM.code)
             }
         }
