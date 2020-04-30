@@ -1,10 +1,10 @@
 import * as assert from 'power-assert'
 import tcb from '../../../src/index'
-import * as Config from '../../config.local'
+import * as config from '../../config.local'
 import * as common from '../../common/index'
 import { checkIsGray } from '../../../src/utils/utils'
 
-const app = tcb.init(Config)
+const app = tcb.init(config)
 const db = app.database()
 const _ = db.command
 const $ = _.aggregate
@@ -209,7 +209,7 @@ describe('elemMatch', async () => {
         assert.strictEqual(result.data[0].category, 'number')
     })
 
-    if (checkIsGray()) {
+    if (checkIsGray() || config._useFeature) {
         it('Element Match neq', async () => {
             let result = await db
                 .collection(collName)

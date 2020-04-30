@@ -1,4 +1,5 @@
 import { checkIsGray } from '../../src/utils/utils'
+import * as config from '../config.local'
 
 export async function safeCreateCollection(db, name) {
     return db.createCollection(name)
@@ -24,7 +25,7 @@ export async function safeCollection(db, name) {
             const datas = Array.isArray(data) ? data : [data]
             num = datas.length
 
-            if (checkIsGray()) {
+            if (checkIsGray() || config._useFeature) {
                 let result
                 try {
                     result = await collection.add(datas)

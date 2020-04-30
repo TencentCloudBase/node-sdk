@@ -2,7 +2,7 @@ import tcb from '../src/index'
 import assert from 'assert'
 import { ERROR } from '../src/const/code'
 import { checkIsGray } from '../src/utils/utils'
-// import config from './config.local'
+import * as config from './config.local'
 
 describe('tcb.init: 初始化tcb', () => {
     it('mock 导入本地config报错', async () => {
@@ -50,7 +50,7 @@ describe('tcb.init: 初始化tcb', () => {
             })
         } catch (err) {
             // console.log(err)
-            if (checkIsGray()) {
+            if (checkIsGray() || config._useFeature) {
                 assert(err.code === ERROR.INVALID_PARAM.code)
             }
         }

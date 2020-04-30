@@ -104,7 +104,8 @@ export class CloudBase {
             headers = {},
             credentials,
             isHttp,
-            throwOnCode
+            throwOnCode,
+            _useFeature
         } = config
 
         if ((secretId && !secretKey) || (!secretId && secretKey)) {
@@ -126,7 +127,8 @@ export class CloudBase {
             serviceUrl,
             credentials,
             version,
-            throwOnCode: throwOnCode !== undefined ? throwOnCode : true
+            throwOnCode: throwOnCode !== undefined ? throwOnCode : true,
+            _useFeature
         }
 
         this.config = newConfig
@@ -278,6 +280,13 @@ export class CloudBase {
             const functionName = func.name
 
             const oldFunc = oldInstance[functionName]
+            // 检查用户是否主动设置走新逻辑
+            if (self.config) {
+                const { _useFeature } = self.config
+                if (_useFeature === true) {
+                    return func.call(self, self, ...args)
+                }
+            }
 
             if (checkIsGray()) {
                 return func.call(self, self, ...args)

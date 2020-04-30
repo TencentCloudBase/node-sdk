@@ -5,7 +5,6 @@ import tcb from 'tcb-admin-node'
 
 export = {
     init: (config?: ICloudBaseConfig): CloudBase => {
-        // mock注入环境变量
         if (config) {
             const { _useFeature } = config
             if (_useFeature === false) {

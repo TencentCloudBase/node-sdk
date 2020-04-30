@@ -75,7 +75,7 @@ describe('test/index.test.ts', async () => {
         }
     }
 
-    if (checkIsGray()) {
+    if (checkIsGray() || config._useFeature) {
         it('验证throwOnCode', async () => {
             const res = await collection.add({ $_key: 1 })
             console.log(res)

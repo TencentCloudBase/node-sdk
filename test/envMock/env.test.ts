@@ -73,7 +73,7 @@ describe('mock 云函数环境', () => {
         // 验证环境变量相关逻辑
         let app = tcb.init()
 
-        if (checkIsGray()) {
+        if (checkIsGray() || config._useFeature) {
             // 1. _SCF_TCB_LOG(日志)
             assert(process.env._SCF_TCB_LOG == '1' && app.logger().isSupportClsReport === false)
             app.logger().log({ a: 1 })

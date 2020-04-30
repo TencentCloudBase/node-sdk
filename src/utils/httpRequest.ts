@@ -76,7 +76,7 @@ export class Request {
             // 对应服务端 wxCloudSessionToken
             tcb_sessionToken: process.env.TCB_SESSIONTOKEN || '',
             sessionToken: config.sessionToken,
-            sdk_version: version
+            sdk_version: version // todo 可去掉该参数
         }
 
         // 取当前云函数环境时，替换为云函数下环境变量

@@ -34,7 +34,7 @@ describe('storage.uploadFile: 上传文件', () => {
                 cloudPath: '11112.png'
             })
         } catch (err) {
-            if (checkIsGray()) {
+            if (checkIsGray() || config._useFeature) {
                 assert(err.code === 'STORAGE_EXCEED_AUTHORITY')
             }
         }
@@ -93,7 +93,7 @@ describe('storage.uploadFile: 上传文件', () => {
             })
             // console.log(result1)
         } catch (err) {
-            if (checkIsGray()) {
+            if (checkIsGray() || config._useFeature) {
                 assert(err.code === ERROR.SYS_ERR.code)
             }
         }
@@ -153,7 +153,7 @@ describe('storage.uploadFile: 上传文件', () => {
                 fileContent: 'test'
             })
         } catch (err) {
-            if (checkIsGray()) {
+            if (checkIsGray() || config._useFeature) {
                 assert(err.code === 'testErr')
             }
         }
@@ -268,7 +268,7 @@ describe('storage.uploadFile: 上传文件', () => {
             // console.log(result1)
         } catch (err) {
             // console.log(err)
-            if (checkIsGray()) {
+            if (checkIsGray() || config._useFeature) {
                 assert(err.code === ERROR.STORAGE_REQUEST_FAIL.code)
             }
         }

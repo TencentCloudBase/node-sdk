@@ -1,14 +1,14 @@
 import * as assert from 'power-assert'
 import tcb from '../../../src/index'
-import * as Config from '../../config.local'
+import * as config from '../../config.local'
 import * as bPromise from 'bluebird'
 import { checkIsGray } from '../../../src/utils/utils'
 
-const app = tcb.init(Config)
+const app = tcb.init(config)
 const db = app.database()
 
 beforeAll(async () => {
-    if (checkIsGray()) {
+    if (checkIsGray() || config._useFeature) {
         // 删除 1001条文档
         const collName = 'coll-1'
         const collection = db.collection(collName)

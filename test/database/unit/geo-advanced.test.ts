@@ -89,7 +89,7 @@ describe('GEO高级功能', async () => {
         assert(readRes.data.length > 0)
         const data = readRes.data[0]
 
-        if (checkIsGray()) {
+        if (checkIsGray() || config._useFeature) {
             assert(data.point instanceof Point)
             assert(data.line instanceof LineString)
             assert(data.polygon instanceof Polygon)
@@ -188,7 +188,7 @@ describe('GEO高级功能', async () => {
             })
             .get()
         assert(readRes.data.length > 0)
-        if (checkIsGray()) {
+        if (checkIsGray() || config._useFeature) {
             assert.deepStrictEqual(readRes.data[0].point, geoPoint)
         } else {
             assert(readRes.data[0].point, geoPoint)
@@ -226,7 +226,7 @@ describe('GEO高级功能', async () => {
             .get()
         console.log(readRes)
         assert(readRes.data.length > 0)
-        if (checkIsGray()) {
+        if (checkIsGray() || config._useFeature) {
             assert.deepStrictEqual(readRes.data[0].point, new Point(0, 0))
         } else {
             assert(readRes.data[0].point, new Point(0, 0))

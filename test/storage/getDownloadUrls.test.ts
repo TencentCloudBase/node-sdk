@@ -136,12 +136,12 @@ describe('storage.batchGetDownloadUrl: 获取文件下载链接', () => {
                     timeout: 10
                 }
             )
-            if (checkIsGray()) {
+            if (checkIsGray() || config._useFeature) {
                 assert(!result)
             }
         } catch (err) {
             console.log('e:', err)
-            if (checkIsGray()) {
+            if (checkIsGray() || config._useFeature) {
                 assert(err.code === 'ESOCKETTIMEDOUT')
             }
         }

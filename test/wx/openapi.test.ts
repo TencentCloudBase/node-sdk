@@ -20,7 +20,7 @@ describe('wx.openApi: 微信openapi', () => {
                 requestData: a
             })
         } catch (e) {
-            if (checkIsGray()) {
+            if (checkIsGray() || config._useFeature) {
                 assert(e.code === ERROR.INVALID_PARAM.code)
             }
         }

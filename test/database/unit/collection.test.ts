@@ -152,4 +152,6 @@ describe('test/unit/collection.test.ts', async () => {
         const res2 = await collection.where({}).get()
         assert(res2.data.length > 0)
     })
+
+    
 })

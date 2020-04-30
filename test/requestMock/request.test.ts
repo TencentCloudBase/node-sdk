@@ -50,7 +50,7 @@ describe('mock request 回包处理逻辑', () => {
             // console.log(result)
             // assert(typeof result.result === 'string')
         } catch (err) {
-            if (checkIsGray()) {
+            if (checkIsGray() || config._useFeature) {
                 assert(err.code === 400)
             } else {
                 assert(err.statusCode === 400)

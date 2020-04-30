@@ -15,7 +15,7 @@ beforeEach(async () => {
 describe('校验config设置  请求入参', () => {
     const app = tcb.init(config)
 
-    if (checkIsGray()) {
+    if (checkIsGray() || config._useFeature) {
         it('校验config.isHttp => protocol', async () => {
             config.isHttp = true
 
@@ -101,7 +101,6 @@ describe('校验config设置  请求入参', () => {
             })
 
             let reqOpts = mockReqRes.result
-            console.log('reqOpts:', reqOpts)
             assert(reqOpts.url.indexOf('testUrl') >= 0)
         })
     }
@@ -113,9 +112,6 @@ describe('校验config设置  请求入参', () => {
                 requestData: { name: 'jamespeng' }
             })
         } catch (e) {
-            console.log('e:', e)
-            // console.log(result)
-
             assert(e.code === 'INVALID_PARAM')
         }
     }, 30000)
@@ -148,7 +144,6 @@ describe('校验config设置  请求入参', () => {
                 apiName: '/inner/svrkitclientcall',
                 requestData: { name: 'jamespeng' }
             })
-            // console.log(result)
             assert(typeof result.result === 'string')
         } catch (err) {
             // assert(err.code === 'STORAGE_REQUEST_FAIL')
