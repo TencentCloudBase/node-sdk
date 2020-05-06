@@ -106,17 +106,33 @@ export function processReturn(throwOnCode: boolean, res: any) {
 }
 
 export function checkIsGray(): boolean {
+    const tcbContextConfig = getTcbContextConfig()
+    return tcbContextConfig[GRAY_ENV_KEY] === true
+}
+
+export function getServerInjectUrl(): string {
+    const tcbContextConfig = getTcbContextConfig()
+    return tcbContextConfig['URL'] || ''
+}
+
+export function getTcbContextConfig(): any {
     try {
         if (process.env.TCB_CONTEXT_CNFG) {
             // 检查约定环境变量字段是否存在
-            const grayEnvKey = JSON.parse(process.env.TCB_CONTEXT_CNFG)
-            if (grayEnvKey[GRAY_ENV_KEY] === true) {
-                return true
-            }
+            return JSON.parse(process.env.TCB_CONTEXT_CNFG)
         }
+        return {}
     } catch (e) {
         console.log('parse context error...')
+        return {}
     }
+}
 
-    return false
+export function getWxUrl(config: any): string {
+    const protocal = config.isHttp === true ? 'http' : 'https'
+    let wxUrl = protocal + '://tcb-open.tencentcloudapi.com/admin'
+    if (checkIsInScf()) {
+        wxUrl = 'http://tcb-open.tencentyun.com/admin'
+    }
+    return wxUrl
 }

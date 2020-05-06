@@ -30,8 +30,8 @@ export interface IRequestInfo {
     headers: any
     // 业务逻辑自定义参数
     params: ICustomParam
-    // 业务逻辑自定义endPoint
-    customEndPoint?: string
+    // 自定义api url
+    customApiUrl?: string
     // 不参与签名项
     unSignedParams?: any
     // 是否为formData (wx.openApi formData:true)

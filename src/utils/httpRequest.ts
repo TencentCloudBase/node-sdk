@@ -11,7 +11,7 @@ import { getWxCloudApiToken } from './getWxCloudApiToken'
 import { sign } from '@cloudbase/signature-nodejs'
 import URL from 'url'
 const { version } = require('../../package.json')
-const { E, second, processReturn } = utils
+const { E, second, processReturn, getServerInjectUrl } = utils
 
 export class Request {
     private args: IRequestInfo
@@ -251,22 +251,15 @@ export class Request {
         const protocol = this.getProtocol()
         const isInSCF = utils.checkIsInScf()
         const { eventId, seqId } = this.tracingInfo
-        const { customEndPoint } = this.args
+        const { customApiUrl } = this.args
         const { serviceUrl } = this.config
+        const serverInjectUrl = getServerInjectUrl()
 
-        if (serviceUrl) {
-            return serviceUrl
-        }
+        const defaultUrl = isInSCF
+            ? `http://${this.inScfHost}${this.urlPath}`
+            : `${protocol}://${this.defaultEndPoint}${this.urlPath}`
 
-        if (customEndPoint) {
-            return `${protocol}://${customEndPoint}${this.urlPath}`
-        }
-
-        let url = `${protocol}://${this.defaultEndPoint}${this.urlPath}`
-
-        if (isInSCF) {
-            url = `http://${this.inScfHost}${this.urlPath}`
-        }
+        let url = serviceUrl || serverInjectUrl || customApiUrl || defaultUrl
 
         let urlQueryStr = `&eventId=${eventId}&seqId=${seqId}`
         const scfContext = CloudBase.scfContext
@@ -289,8 +282,6 @@ export default async (args: IRequestInfo): Promise<any> => {
     const req = new Request(args)
     const reqOpts = req.makeReqOpts()
     const config = args.config
-    // console.log('use new instance')
-
     const action = req.getAction()
 
     let reqHooks: IReqHooks

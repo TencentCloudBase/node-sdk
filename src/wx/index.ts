@@ -1,6 +1,6 @@
 import httpRequest from '../utils/httpRequest'
 import { ICustomReqOpts } from '../type'
-import { E } from '../utils/utils'
+import { E, getWxUrl } from '../utils/utils'
 import { ERROR } from '../const/code'
 import { CloudBase } from '../cloudbase'
 
@@ -30,7 +30,7 @@ export async function callWxOpenApi(
         headers: {
             'content-type': 'application/json'
         },
-        customEndPoint: 'tcb-open.tencentcloudapi.com'
+        customApiUrl: getWxUrl(cloudbase.config)
     }).then(res => {
         if (res.code) {
             return res
@@ -64,10 +64,7 @@ export async function callCompatibleWxOpenApi(
 ) {
     const params = {
         action: 'wx.openApi',
-        apiName
-    }
-
-    const unSignedParams = {
+        apiName,
         requestData
     }
 
@@ -76,9 +73,8 @@ export async function callCompatibleWxOpenApi(
         method: 'post',
         headers: { 'content-type': 'multipart/form-data' },
         params,
-        unSignedParams,
         isFormData: true,
-        customEndPoint: 'tcb-open.tencentcloudapi.com',
+        customApiUrl: getWxUrl(cloudbase.config),
         opts
     }).then(res => res)
 }
@@ -96,10 +92,7 @@ export async function callWxPayApi(
 ) {
     const params = {
         action: 'wx.wxPayApi',
-        apiName
-    }
-
-    const unSignedParams = {
+        apiName,
         requestData
     }
 
@@ -108,9 +101,8 @@ export async function callWxPayApi(
         method: 'post',
         headers: { 'content-type': 'multipart/form-data' },
         params,
-        unSignedParams,
         isFormData: true,
-        customEndPoint: 'tcb-open.tencentcloudapi.com',
+        customApiUrl: getWxUrl(cloudbase.config),
         opts
     })
 }

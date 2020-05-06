@@ -25,7 +25,7 @@ export interface IRequestInfo {
     method: string;
     headers: any;
     params: ICustomParam;
-    customEndPoint?: string;
+    customApiUrl?: string;
     unSignedParams?: any;
     isFormData?: boolean;
     opts?: any;
