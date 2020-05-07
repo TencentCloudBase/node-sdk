@@ -12,4 +12,3 @@ coverage/
 # coverage/coverage-final.json
 
 yarn.lock
-package-lock.json

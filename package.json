@@ -35,7 +35,7 @@
         "lodash.merge": "^4.6.1",
         "request": "^2.87.0",
         "request-promise": "^4.2.5",
-        "tcb-admin-node": "^1.22.2",
+        "tcb-admin-node": "1.22.2",
         "xml2js": "^0.4.19"
     },
     "devDependencies": {
