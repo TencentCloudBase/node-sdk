@@ -65,6 +65,23 @@ describe('mock 云函数环境', () => {
     //     assert(res === undefined)
     //   }
     // }, 30000)
+    it('验证 symbol', async () => {
+        let newConfig = {
+            ...config,
+            env: tcb.SYMBOL_CURRENT_ENV
+        }
+
+        const app = tcb.init(newConfig)
+        const testEnv = 'luketest-0nmm1'
+        // const testEnv = ''
+        process.env.TCB_ENV = testEnv
+        const res = await app.callFunction({
+            name: 'testTCBENV',
+            data: { a: 1 }
+        })
+        // console.log(res)
+        assert(res.result === testEnv)
+    })
 
     it('注入mock 云函数环境变量', async () => {
         jest.resetModules()

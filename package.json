@@ -29,13 +29,13 @@
     "typings": "types/index.d.ts",
     "dependencies": {
         "@cloudbase/database": "1.0.0-beta.1",
-        "@cloudbase/signature-nodejs": "^1.0.0-beta.0",
+        "@cloudbase/signature-nodejs": "1.0.0-beta.0",
         "is-regex": "^1.0.4",
         "jsonwebtoken": "^8.5.1",
         "lodash.merge": "^4.6.1",
         "request": "^2.87.0",
         "request-promise": "^4.2.5",
-        "tcb-admin-node": "1.22.2",
+        "tcb-admin-node": "1.23.0",
         "xml2js": "^0.4.19"
     },
     "devDependencies": {
