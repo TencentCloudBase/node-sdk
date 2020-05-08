@@ -22,7 +22,6 @@ import tcb from 'tcb-admin-node'
 const GRAY_ENV_KEY = 'TCB_SDK_GRAY_0'
 
 export class CloudBase {
-    public static oldInstance: any
     public static scfContext: IContext
     public static parseContext(context: IContext): IContext {
         if (typeof context !== 'object') {
@@ -134,7 +133,7 @@ export class CloudBase {
         this.config = newConfig
 
         // 设置旧实例
-        CloudBase.oldInstance = tcb.init(config)
+        this.oldInstance = tcb.init(config)
     }
 
     public database(dbConfig: any = {}): Db {
@@ -153,7 +152,7 @@ export class CloudBase {
         return new Db({
             ...this.config,
             ...dbConfig,
-            _oldDbInstance: CloudBase.oldInstance.database(dbConfig)
+            _oldDbInstance: this.oldInstance.database(dbConfig)
         })
     }
 
@@ -276,7 +275,7 @@ export class CloudBase {
         const self = this
         return function(...args) {
             // 默认使用旧tcb实例对象
-            const oldInstance = CloudBase.oldInstance
+            const oldInstance = self.oldInstance
             const functionName = func.name
 
             const oldFunc = oldInstance[functionName]
