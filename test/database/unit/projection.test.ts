@@ -37,7 +37,7 @@ describe('projection', async () => {
         console.log(result.data)
     })
 
-    it('projection', async () => {
+    it('projection true false', async () => {
         const result = await db
             .collection(collName)
             .field({
@@ -46,5 +46,16 @@ describe('projection', async () => {
             .get()
         console.log('result:', result)
         assert.strictEqual(result.data.length, 3)
+    })
+
+    it('projection 1 0', async () => {
+        const result1 = await db
+            .collection(collName)
+            .field({
+                category: 0
+            })
+            .get()
+        // 检查回包中没有category
+        assert(Object.keys(result1.data[0]).indexOf('category') < 0, true)
     })
 })

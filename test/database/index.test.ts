@@ -102,6 +102,21 @@ describe('test/index.test.ts', async () => {
         console.log('deleteRes:', deleteRes)
     })
 
+    it('验证 无 query count', async () => {
+        const countRes = await collection.count()
+        assert(countRes.total > 0)
+        console.log('countRes:', countRes)
+    })
+
+    it('验证 无 query update', async () => {
+        const updateRes = await collection.update({ a: 1 })
+        if (config._useFeature) {
+            assert(updateRes.code === 'INVALID_PARAM')
+        } else {
+            assert(updateRes.updated >= 0)
+        }
+    })
+
     it('document query custom timeout', async () => {
         const res = await collection
             .where({})

@@ -83,21 +83,21 @@ describe('mock 云函数环境', () => {
         assert(res.result === testEnv)
     })
 
-    it('注入mock 云函数环境变量', async () => {
+    it.skip('注入mock 云函数环境变量', async () => {
         jest.resetModules()
         setEnvValue()
 
         // 验证环境变量相关逻辑
-        let app = tcb.init()
+        let app = tcb.init(config)
 
         if (checkIsGray() || config._useFeature) {
             // 1. _SCF_TCB_LOG(日志)
-            assert(process.env._SCF_TCB_LOG == '1' && app.logger().isSupportClsReport === false)
+            assert(process.env._SCF_TCB_LOG == '1' && app.logger().isSupportClsReport == false)
             app.logger().log({ a: 1 })
 
             // mock support
             ;(<any>console).__baseLog__ = console.log
-            app = tcb.init()
+            app = tcb.init(config)
             assert(process.env._SCF_TCB_LOG == '1' && app.logger().isSupportClsReport === true)
             app.logger().log({ a: 1 })
             app.logger().info({ a: 1 })
