@@ -19,6 +19,8 @@ describe('Date类型', async () => {
     const db = app.database()
 
     const collName = 'coll-1'
+    const _ = db.command
+
     const collection = db.collection(collName)
     // const nameList = ["f", "b", "e", "d", "a", "c"];
 
@@ -34,6 +36,7 @@ describe('Date类型', async () => {
         date,
         serverDate1: new db.serverDate(),
         serverDate2: db.serverDate({ offset }),
+        innerServerDate: [db.serverDate({ offset })],
         emptyArray: [],
         emptyObject: {},
         // timestamp: {
@@ -105,7 +108,8 @@ describe('Date类型', async () => {
             })
             .update({
                 date: newDate,
-                serverDate2: newServerDate
+                serverDate2: newServerDate,
+                innerServerDate: _.push(db.serverDate({ offset }))
             })
         console.log(result)
         assert.strictEqual(result.updated, 1)
@@ -114,7 +118,8 @@ describe('Date类型', async () => {
                 _id: id
             })
             .get()
-        console.log(result)
+        console.log('debug:')
+        console.log(JSON.stringify(result))
         assert.strictEqual(result.data[0].date.getTime(), newDate.getTime())
         assert(
             result.data[0].serverDate2.getTime() - result.data[0].serverDate1.getTime() >
@@ -123,6 +128,7 @@ describe('Date类型', async () => {
 
         // Delete
         const deleteRes = await collection.doc(id).remove()
+        // const deleteRes = await collection.where({ name: 'test' }).remove()
         assert.strictEqual(deleteRes.deleted, 1)
     })
 })
