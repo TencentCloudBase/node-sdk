@@ -2,7 +2,6 @@ import * as assert from 'power-assert'
 import tcb from '../../../src/index'
 import * as config from '../../config.local'
 import * as common from '../../common/index'
-import { checkIsGray } from '../../../src/utils/utils'
 
 const app = tcb.init(config)
 const db = app.database()
@@ -41,14 +40,12 @@ describe('逻辑操作符', async () => {
     })
 
     // 新db模块解决or date问题，旧db模块未解决，跳过该测试
-    if (checkIsGray() || config._useFeature) {
-        it('or date', async () => {
-            const result = await db
-                .collection(collName)
-                .where({ date: _.or(date, new Date(date.getTime() + 10000)) })
-                .get()
+    it('or date', async () => {
+        const result = await db
+            .collection(collName)
+            .where({ date: _.or(date, new Date(date.getTime() + 10000)) })
+            .get()
 
-            assert(result.data.length > 0)
-        })
-    }
+        assert(result.data.length > 0)
+    })
 })

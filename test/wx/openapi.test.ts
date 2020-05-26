@@ -2,7 +2,6 @@ import tcb from '../../src/index'
 import assert from 'assert'
 import config from '../config.local'
 import { ERROR } from '../../src/const/code'
-import { checkIsGray } from '../../src/utils/utils'
 
 // TODO 删除前先创建
 describe('wx.openApi: 微信openapi', () => {
@@ -20,9 +19,7 @@ describe('wx.openApi: 微信openapi', () => {
                 requestData: a
             })
         } catch (e) {
-            if (checkIsGray() || config._useFeature) {
-                assert(e.code === ERROR.INVALID_PARAM.code)
-            }
+            assert(e.code === ERROR.INVALID_PARAM.code)
         }
     })
 

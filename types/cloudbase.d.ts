@@ -5,7 +5,6 @@ export declare class CloudBase {
     static scfContext: IContext;
     static parseContext(context: IContext): IContext;
     config: ICloudBaseConfig;
-    oldInstance: any;
     private clsLogger;
     constructor(config?: ICloudBaseConfig);
     init(config?: ICloudBaseConfig): void;
@@ -103,5 +102,4 @@ export declare class CloudBase {
      *
      */
     logger(): Log;
-    private preProcess;
 }

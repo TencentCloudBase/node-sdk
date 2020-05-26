@@ -16,7 +16,6 @@ export declare const checkIsInScf: () => boolean;
 export declare const delay: (ms: any) => Promise<unknown>;
 export declare function second(): number;
 export declare function processReturn(throwOnCode: boolean, res: any): any;
-export declare function checkIsGray(): boolean;
 export declare function getServerInjectUrl(): string;
 export declare function getTcbContextConfig(): any;
 export declare function getWxUrl(config: any): string;

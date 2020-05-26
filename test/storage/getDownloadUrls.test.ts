@@ -4,7 +4,6 @@ import fs from 'fs'
 import { ERROR } from '../../src/const/code'
 import assert from 'assert'
 import { ICustomErrRes } from '../../src/type'
-import { checkIsGray } from '../../src/utils/utils'
 
 let fileContent = fs.createReadStream(`${__dirname}/cos.jpeg`)
 
@@ -136,14 +135,9 @@ describe('storage.batchGetDownloadUrl: 获取文件下载链接', () => {
                     timeout: 10
                 }
             )
-            if (checkIsGray() || config._useFeature) {
-                assert(!result)
-            }
+            assert(!result)
         } catch (err) {
-            console.log('e:', err)
-            if (checkIsGray() || config._useFeature) {
-                assert(err.code === 'ESOCKETTIMEDOUT')
-            }
+            assert(err.code === 'ESOCKETTIMEDOUT')
         }
     })
 })

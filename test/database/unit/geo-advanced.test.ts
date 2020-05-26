@@ -4,7 +4,6 @@ import tcb from '../../../src/index'
 import * as config from '../../config.local'
 import * as common from '../../common/index'
 import oldTcb from '../../../node_modules/tcb-admin-node'
-import { checkIsGray } from '../../../src/utils/utils'
 
 describe('GEO高级功能', async () => {
     const app = tcb.init(config)
@@ -89,33 +88,18 @@ describe('GEO高级功能', async () => {
         assert(readRes.data.length > 0)
         const data = readRes.data[0]
 
-        if (checkIsGray() || config._useFeature) {
-            assert(data.point instanceof Point)
-            assert(data.line instanceof LineString)
-            assert(data.polygon instanceof Polygon)
-            assert(data.multiPoint instanceof MultiPoint)
-            assert(data.multiLineString instanceof MultiLineString)
-            assert(data.multiPolygon instanceof MultiPolygon)
-            assert.deepStrictEqual(data.point, initialData.point)
-            assert.deepStrictEqual(data.line, line)
-            assert.deepStrictEqual(data.polygon, polygon)
-            assert.deepStrictEqual(data.multiPoint, multiPoint)
-            assert.deepStrictEqual(data.multiLineString, multiLineString)
-            assert.deepStrictEqual(data.multiPolygon, multiPolygon)
-        } else {
-            assert(data.point instanceof OldPoint)
-            assert(data.line instanceof OldLineString)
-            assert(data.polygon instanceof OldPolygon)
-            assert(data.multiPoint instanceof OldMultiPoint)
-            assert(data.multiLineString instanceof OldMultiLineString)
-            assert(data.multiPolygon instanceof OldMultiPolygon)
-            assert(data.point, initialData.point)
-            assert(data.line, line)
-            assert(data.polygon, polygon)
-            assert(data.multiPoint, multiPoint)
-            assert(data.multiLineString, multiLineString)
-            assert(data.multiPolygon, multiPolygon)
-        }
+        assert(data.point instanceof Point)
+        assert(data.line instanceof LineString)
+        assert(data.polygon instanceof Polygon)
+        assert(data.multiPoint instanceof MultiPoint)
+        assert(data.multiLineString instanceof MultiLineString)
+        assert(data.multiPolygon instanceof MultiPolygon)
+        assert.deepStrictEqual(data.point, initialData.point)
+        assert.deepStrictEqual(data.line, line)
+        assert.deepStrictEqual(data.polygon, polygon)
+        assert.deepStrictEqual(data.multiPoint, multiPoint)
+        assert.deepStrictEqual(data.multiLineString, multiLineString)
+        assert.deepStrictEqual(data.multiPolygon, multiPolygon)
 
         // Update
         let result = await collection.doc(id).set(initialData)
@@ -188,11 +172,7 @@ describe('GEO高级功能', async () => {
             })
             .get()
         assert(readRes.data.length > 0)
-        if (checkIsGray() || config._useFeature) {
-            assert.deepStrictEqual(readRes.data[0].point, geoPoint)
-        } else {
-            assert(readRes.data[0].point, geoPoint)
-        }
+        assert.deepStrictEqual(readRes.data[0].point, geoPoint)
 
         // Delete
         // const deleteRes = await collection
@@ -226,11 +206,7 @@ describe('GEO高级功能', async () => {
             .get()
         console.log(readRes)
         assert(readRes.data.length > 0)
-        if (checkIsGray() || config._useFeature) {
-            assert.deepStrictEqual(readRes.data[0].point, new Point(0, 0))
-        } else {
-            assert(readRes.data[0].point, new Point(0, 0))
-        }
+        assert.deepStrictEqual(readRes.data[0].point, new Point(0, 0))
 
         // Delete
         const deleteRes = await collection

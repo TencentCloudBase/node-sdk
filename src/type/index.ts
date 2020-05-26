@@ -16,7 +16,6 @@ export interface ICloudBaseConfig {
     proxy?: string
     version?: string
     credentials?: ICredentialsInfo
-    _useFeature?: boolean // 是否走新特性
     throwOnCode?: boolean // 错误回包(带code) throw
     forever?: boolean // 是否开启keep alive
 }
