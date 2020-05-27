@@ -3,6 +3,7 @@ import { callFunction } from './functions'
 import { auth } from './auth'
 import { callWxOpenApi, callCompatibleWxOpenApi, callWxPayApi } from './wx'
 import { uploadFile, deleteFile, getTempFileURL, downloadFile, getUploadMetadata } from './storage'
+
 import {
     ICloudBaseConfig,
     ICustomReqOpts,
@@ -88,6 +89,7 @@ export class CloudBase {
 
     public init(config: ICloudBaseConfig = {}): void {
         let {
+            debug,
             secretId,
             secretKey,
             sessionToken,
@@ -99,7 +101,11 @@ export class CloudBase {
             headers = {},
             credentials,
             isHttp,
-            throwOnCode
+            throwOnCode,
+
+            forever,
+            timingsMeasurerOptions,
+            retries
         } = config
 
         if ((secretId && !secretKey) || (!secretId && secretKey)) {
@@ -110,6 +116,7 @@ export class CloudBase {
         }
 
         const newConfig: ICloudBaseConfig = {
+            debug: !!debug,
             secretId: secretId,
             secretKey: secretKey,
             sessionToken: sessionToken,
@@ -121,7 +128,11 @@ export class CloudBase {
             serviceUrl,
             credentials,
             version,
-            throwOnCode: throwOnCode !== undefined ? throwOnCode : true
+            throwOnCode: throwOnCode !== undefined ? throwOnCode : true,
+
+            forever,
+            timingsMeasurerOptions,
+            retries
         }
 
         this.config = newConfig

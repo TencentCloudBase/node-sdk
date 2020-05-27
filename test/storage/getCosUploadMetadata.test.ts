@@ -21,7 +21,7 @@ describe('storage.uploadFile: 上传文件', () => {
         // mock错误
         jest.mock('request', () => {
             return jest.fn().mockImplementation((params, callback) => {
-                callback(null, { statusCode: 200 }, { code: 'STORAGE_EXCEED_AUTHORITY' })
+                callback(null, { statusCode: 200, body: { code: 'STORAGE_EXCEED_AUTHORITY' } })
             })
         })
 
@@ -41,7 +41,8 @@ describe('storage.uploadFile: 上传文件', () => {
         // mock错误
         jest.mock('request', () => {
             function mockRequest1(params, callback) {
-                callback(null, { statusCode: 200 }, { data: {} })
+                const body = { data: {} }
+                callback(null, { statusCode: 200, body }, body)
                 // yield callback(null, {statusCode: 200}, 'test')
                 // yield {data: {}}
                 // yield 'test'
@@ -59,7 +60,7 @@ describe('storage.uploadFile: 上传文件', () => {
                 const builder = new xml2js.Builder()
                 const xml = builder.buildObject(obj)
 
-                callback(null, {}, xml)
+                callback(null, {body: xml}, xml)
             }
 
             let mR
@@ -119,7 +120,7 @@ describe('storage.uploadFile: 上传文件', () => {
         // mock错误
         jest.mock('request', () => {
             function mockRequest1(params, callback) {
-                callback(null, { statusCode: 200 }, { data: {} })
+                callback(null, { statusCode: 200, body: { data: {} } })
             }
 
             function mockRequest2(params, callback) {
@@ -156,7 +157,7 @@ describe('storage.uploadFile: 上传文件', () => {
         // mock错误
         jest.mock('request', () => {
             function mockRequest1(params, callback) {
-                callback(null, { statusCode: 200 }, { data: {} })
+                callback(null, { statusCode: 200, body: { data: {} } })
                 // yield callback(null, {statusCode: 200}, 'test')
                 // yield {data: {}}
                 // yield 'test'
@@ -172,7 +173,7 @@ describe('storage.uploadFile: 上传文件', () => {
                 // const builder = new xml2js.Builder();
                 // const xml = builder.buildObject('ERROR');
 
-                callback(null, {}, 'ERROR')
+                callback(null, {body: 'ERROR'}, 'ERROR')
             }
 
             let mR
@@ -211,7 +212,7 @@ describe('storage.uploadFile: 上传文件', () => {
         // mock错误
         jest.mock('request', () => {
             function mockRequest1(params, callback) {
-                callback(null, { statusCode: 200 }, { data: {} })
+                callback(null, { statusCode: 200, body: { data: {} } }, { data: {} })
                 // yield callback(null, {statusCode: 200}, 'test')
                 // yield {data: {}}
                 // yield 'test'
@@ -229,7 +230,7 @@ describe('storage.uploadFile: 上传文件', () => {
                 const builder = new xml2js.Builder()
                 const xml = builder.buildObject(obj)
 
-                callback(null, {}, xml)
+                callback(null, {body: xml}, xml)
             }
 
             let mR

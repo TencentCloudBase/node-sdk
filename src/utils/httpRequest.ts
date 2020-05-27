@@ -1,3 +1,4 @@
+import http from 'http'
 import { generateTracingInfo } from './tracing'
 import * as utils from './utils'
 import { ICloudBaseConfig, IRequestInfo, ICustomParam, IReqOpts, IReqHooks } from '../type/index'
@@ -5,12 +6,13 @@ import { ERROR } from '../const/code'
 import { SYMBOL_CURRENT_ENV } from '../const/symbol'
 import { CloudBase } from '../cloudbase'
 
-import baseRequest from './request'
+import { extraRequest } from './request'
 import { handleWxOpenApiData } from './requestHook'
 import { getWxCloudApiToken } from './getWxCloudApiToken'
 import { sign } from '@cloudbase/signature-nodejs'
 import URL from 'url'
-const { version } = require('../../package.json')
+import { version } from '../../package.json'
+
 const { E, second, processReturn, getServerInjectUrl } = utils
 
 export class Request {
@@ -27,13 +29,84 @@ export class Request {
         seqId: string
     } = generateTracingInfo()
 
+    private slowWarnTimer: NodeJS.Timer = null
+
+    // 请求参数
+    private params: {[key: string]: any} = {}
+
+    private hooks: IReqHooks = {}
+
     public constructor(args: IRequestInfo) {
         this.args = args
         this.config = args.config
+        this.params = this.makeParams()
     }
 
     /**
-     *
+     * 最终发送请求
+     */
+    public request(): Promise<any> {
+        const action = this.getAction()
+        const key = {
+            functions: 'function_name',
+            database: 'collectionName',
+            wx: 'apiName',
+          }[action.split('.')[0]]
+
+        const argopts: any = this.args.opts || {}
+        const config = this.args.config
+        const opts = this.makeReqOpts()
+
+        // 注意：必须初始化为 null
+        let retryOptions: any = null
+        if (argopts.retryOptions) {
+            retryOptions = argopts.retryOptions
+        }
+        else if (config.retries && typeof config.retries === 'number') {
+            retryOptions = {retries: config.retries}
+        }
+
+        return extraRequest(opts, {
+            debug: config.debug,
+            op: `${action}:${this.args.params[key]}@${this.params.envName}`,
+            seqId: this.getSeqId(),
+            retryOptions: retryOptions,
+            timingsMeasurerOptions: config.timingsMeasurerOptions || {}
+          }).then((response: any) => {
+            this.slowWarnTimer && clearTimeout(this.slowWarnTimer)
+            const { body } = response
+            if (response.statusCode === 200) {
+                let res
+                try {
+                    res = typeof body === 'string' ? JSON.parse(body) : body
+                    if (this.hooks && this.hooks.handleData) {
+                        res = this.hooks.handleData(res, null, response, body)
+                    }
+                } catch (e) {
+                    res = body
+                }
+                return res
+            } else {
+                const e = E({
+                    code: response.statusCode,
+                    message: ` ${response.statusCode} ${
+                        http.STATUS_CODES[response.statusCode]
+                    } | [${opts.url}]`
+                })
+                throw e
+            }
+        })
+    }
+
+    public setHooks(hooks: IReqHooks) {
+        Object.assign(this.hooks, hooks)
+    }
+
+    public getSeqId(): string {
+        return this.tracingInfo.seqId
+    }
+
+    /**
      * 接口action
      */
     public getAction(): string {
@@ -45,29 +118,27 @@ export class Request {
     /**
      * 设置超时warning
      */
-    public setSlowRequeryWarning(action: string): NodeJS.Timer {
+    public setSlowWarning(timeout: number) {
+        const action = this.getAction()
         const { seqId } = this.tracingInfo
-
-        const warnStr = `Your current request ${action ||
-            ''} is longer than 3s, it may be due to the network or your query performance | [${seqId}]`
-        // 暂针对数据库请求
-        const warnTimer = setTimeout(() => {
-            console.warn(warnStr)
-        }, 3000)
-        return warnTimer
+        this.slowWarnTimer = setTimeout(() => {
+            const msg = `Your current request ${action ||
+                ''} is longer than 3s, it may be due to the network or your query performance | [${seqId}]`
+            console.warn(msg)
+        }, timeout)
     }
 
     /**
      * 构造params
      */
-    public getParams(): any {
+    public makeParams(): any {
         const args = this.args
 
         const config = this.config
 
         const { eventId } = this.tracingInfo
 
-        let params: ICustomParam = {
+        const params: ICustomParam = {
             ...args.params,
             envName: config.envName,
             eventId,
@@ -101,7 +172,7 @@ export class Request {
         const args = this.args
         const url = this.getUrl()
         const method = this.getMethod()
-        const params = this.getParams()
+        const params = this.params
 
         const opts: IReqOpts = {
             url,
@@ -155,10 +226,6 @@ export class Request {
         // timeout优先级 自定义接口timeout > config配置timeout > 默认timeout
         return opts.timeout || this.config.timeout || this.defaultTimeout
     }
-
-    /**
-     * 获取
-     */
 
     /**
      * 校验密钥和token是否存在
@@ -223,14 +290,13 @@ export class Request {
         }
 
         requiredHeaders = { ...config.headers, ...args.headers, ...requiredHeaders }
-        const params = this.getParams()
 
         const { authorization, timestamp } = sign({
             secretId: secretId,
             secretKey: secretKey,
             method: method,
             url: url,
-            params: params,
+            params: this.params,
             headers: requiredHeaders,
             withSignedParams: true,
             timestamp: second() - 1
@@ -280,35 +346,26 @@ export class Request {
 // 业务逻辑都放在这里处理
 export default async (args: IRequestInfo): Promise<any> => {
     const req = new Request(args)
-    const reqOpts = req.makeReqOpts()
     const config = args.config
-    const action = req.getAction()
-
-    let reqHooks: IReqHooks
-    let warnTimer = null
+    const { action } = args.params
 
     if (action === 'wx.openApi' || action === 'wx.wxPayApi') {
-        reqHooks = {
-            handleData: handleWxOpenApiData
-        }
+        req.setHooks({handleData: handleWxOpenApiData})
     }
 
-    if (action.indexOf('database') >= 0) {
-        warnTimer = req.setSlowRequeryWarning(action)
+    if (action.startsWith('database')) {
+        req.setSlowWarning(3000)
     }
 
     try {
-        const res = await baseRequest(reqOpts, reqHooks)
+        const res = await req.request()
         // 检查res是否为return {code, message}回包
-        if (res.code) {
+        if (res && res.code) {
             // 判断是否设置config._returnCodeByThrow = false
             return processReturn(config.throwOnCode, res)
         }
-
         return res
     } finally {
-        if (warnTimer) {
-            clearTimeout(warnTimer)
-        }
+        // 
     }
 }

@@ -54,7 +54,8 @@ describe('wx.openApi: 微信openapi', () => {
         jest.resetModules()
         jest.mock('request', () => {
             return jest.fn().mockImplementation((params, callback) => {
-                callback(null, { statusCode: 200 }, { data: { responseData: 'test' } })
+                const body = { data: { responseData: 'test' } }
+                callback(null, { statusCode: 200, body }, body)
             })
         })
 
