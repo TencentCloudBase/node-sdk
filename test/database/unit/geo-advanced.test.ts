@@ -3,22 +3,11 @@ import * as Mock from './mock'
 import tcb from '../../../src/index'
 import * as config from '../../config.local'
 import * as common from '../../common/index'
-import oldTcb from '../../../node_modules/tcb-admin-node'
 
 describe('GEO高级功能', async () => {
     const app = tcb.init(config)
-    const oldApp = oldTcb.init(config)
     const db = app.database()
-    const oldDb = oldApp.database()
     const { Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon } = db.Geo
-    const {
-        Point: OldPoint,
-        LineString: OldLineString,
-        Polygon: OldPolygon,
-        MultiPoint: OldMultiPoint,
-        MultiLineString: OldMultiLineString,
-        MultiPolygon: OldMultiPolygon
-    } = oldDb.Geo
 
     const collName = 'coll-1'
     const collection = db.collection(collName)
