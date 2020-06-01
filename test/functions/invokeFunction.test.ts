@@ -62,14 +62,13 @@ describe('functions.invokeFunction: 执行云函数', () => {
                 {
                     name: 'test',
                     data: { a: 1 }
+                },
+                {
+                    timeout: 10
                 }
-                // {
-                //     timeout: 10
-                // }
             )
             assert(!result)
         } catch (err) {
-            // console.log(err)
             assert(err.code === 'ESOCKETTIMEDOUT')
         }
     }, 30000)
@@ -78,7 +77,8 @@ describe('functions.invokeFunction: 执行云函数', () => {
         jest.resetModules()
         jest.mock('request', () => {
             return jest.fn().mockImplementation((params, callback) => {
-                callback(null, { statusCode: 200 }, { data: { response_data: 'test' } })
+                const body = { data: { response_data: 'test' } }
+                callback(null, { statusCode: 200, body})
             })
         })
 

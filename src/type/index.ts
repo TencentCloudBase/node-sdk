@@ -1,9 +1,15 @@
+
+export interface IKeyValue {
+    [key: string]: any
+}
+
 export interface ICredentialsInfo {
     private_key_id: string
     private_key: string
 }
 
-export interface ICloudBaseConfig {
+export interface ICloudBaseConfig extends IKeyValue {
+    debug?: boolean
     timeout?: number
     isHttp?: boolean
     secretId?: string
@@ -55,8 +61,25 @@ export interface ICustomParam extends ICommonParam {
     [propName: string]: any
 }
 
+export interface IRetryOptions {
+    retries?: number
+    factor?: number
+    minTimeout?: number
+    maxTimeout?: number
+    randomize?: boolean
+
+    timeouts?: number[]
+
+    timeoutOps?: {
+        timeout: number
+        cb: Function
+    }
+}
+
 export interface ICustomReqOpts {
-    timeout: number
+    timeout?: number
+    // 重试选项，优先级高于全局配置
+    retryOptions?: IRetryOptions
 }
 
 export interface IErrorInfo {
@@ -97,13 +120,13 @@ export interface IReqOpts {
     encoding?: any
     forever?: boolean
     url: string
-    method: string
-    timeout: number
-    headers: any
+    method?: string
+    timeout?: number
+    headers?: any
 }
 
 export interface IReqHooks {
-    handleData: (res: any, err: any, response: any, body: any) => any
+    handleData?: (res: any, err: any, response: any, body: any) => any
 }
 
 export interface IContext {
