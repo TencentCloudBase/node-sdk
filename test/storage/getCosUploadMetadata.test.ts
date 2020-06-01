@@ -7,7 +7,6 @@ import path from 'path'
 import tcb from '../../src/index'
 import xml2js from 'xml2js'
 import { ERROR } from '../../src/const/code'
-import { checkIsGray } from '../../src/utils/utils'
 
 describe('storage.uploadFile: 上传文件', () => {
     beforeEach(async () => {
@@ -34,9 +33,7 @@ describe('storage.uploadFile: 上传文件', () => {
                 cloudPath: '11112.png'
             })
         } catch (err) {
-            if (checkIsGray() || config._useFeature) {
-                assert(err.code === 'STORAGE_EXCEED_AUTHORITY')
-            }
+            assert(err.code === 'STORAGE_EXCEED_AUTHORITY')
         }
     }, 30000)
 
@@ -93,9 +90,7 @@ describe('storage.uploadFile: 上传文件', () => {
             })
             // console.log(result1)
         } catch (err) {
-            if (checkIsGray() || config._useFeature) {
-                assert(err.code === ERROR.SYS_ERR.code)
-            }
+            assert(err.code === ERROR.SYS_ERR.code)
         }
     }, 100000)
 
@@ -153,9 +148,7 @@ describe('storage.uploadFile: 上传文件', () => {
                 fileContent: 'test'
             })
         } catch (err) {
-            if (checkIsGray() || config._useFeature) {
-                assert(err.code === 'testErr')
-            }
+            assert(err.code === 'testErr')
         }
     }, 30000)
 
@@ -265,12 +258,8 @@ describe('storage.uploadFile: 上传文件', () => {
                 cloudPath: '测试.png',
                 fileContent: 'test'
             })
-            // console.log(result1)
         } catch (err) {
-            // console.log(err)
-            if (checkIsGray() || config._useFeature) {
-                assert(err.code === ERROR.STORAGE_REQUEST_FAIL.code)
-            }
+            assert(err.code === ERROR.STORAGE_REQUEST_FAIL.code)
         }
     }, 30000)
 

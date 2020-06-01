@@ -36,7 +36,7 @@ export async function uploadFile(
     cloudbase: CloudBase,
     { cloudPath, fileContent },
     opts?: ICustomReqOpts
-): Promise<IUploadFileRes | IErrorInfo> {
+): Promise<IUploadFileRes> {
     const {
         data: { url, token, authorization, fileId, cosFileId }
     } = await getUploadMetadata(cloudbase, { cloudPath }, opts)

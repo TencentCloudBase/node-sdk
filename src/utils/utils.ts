@@ -1,7 +1,5 @@
 import { IErrorInfo } from '../type'
 
-const GRAY_ENV_KEY = 'TCB_SDK_GRAY_0'
-
 export class TcbError extends Error {
     public readonly code: string
     public readonly message: string
@@ -105,10 +103,10 @@ export function processReturn(throwOnCode: boolean, res: any) {
     throw E({ ...res })
 }
 
-export function checkIsGray(): boolean {
-    const tcbContextConfig = getTcbContextConfig()
-    return tcbContextConfig[GRAY_ENV_KEY] === true
-}
+// export function checkIsGray(): boolean {
+//     const tcbContextConfig = getTcbContextConfig()
+//     return tcbContextConfig[GRAY_ENV_KEY] === true
+// }
 
 export function getServerInjectUrl(): string {
     const tcbContextConfig = getTcbContextConfig()

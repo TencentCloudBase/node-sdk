@@ -1,8 +1,5 @@
-import tcb from '../../src/index'
 import assert from 'assert'
 import config from '../config.local'
-import { ERROR } from '../../src/const/code'
-import { checkIsGray } from '../../src/utils/utils'
 
 describe('mock request 回包处理逻辑', () => {
     it('mock callFunction 回包为string', async () => {
@@ -50,11 +47,8 @@ describe('mock request 回包处理逻辑', () => {
             // console.log(result)
             // assert(typeof result.result === 'string')
         } catch (err) {
-            if (checkIsGray() || config._useFeature) {
-                assert(err.code === 400)
-            } else {
-                assert(err.statusCode === 400)
-            }
+            assert(err.code === 400)
+
             // console.log(err)
         }
     })

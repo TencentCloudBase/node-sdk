@@ -16,7 +16,6 @@ export interface ICloudBaseConfig {
     proxy?: string;
     version?: string;
     credentials?: ICredentialsInfo;
-    _useFeature?: boolean;
     throwOnCode?: boolean;
     forever?: boolean;
 }

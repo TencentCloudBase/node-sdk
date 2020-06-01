@@ -4,7 +4,6 @@ import tcb from '../../src/index'
 import * as config from '../config.local'
 import * as common from '../common/index'
 import { ERROR } from '../../src/const/code'
-import { checkIsGray } from '../../src/utils/utils'
 
 describe('test/index.test.ts', async () => {
     const app = tcb.init({
@@ -58,10 +57,10 @@ describe('test/index.test.ts', async () => {
         },
         null: null,
         date: new Date(),
-        regex: new db.RegExp({
-            regexp: '.*',
-            options: 'i'
-        }),
+        // regex: new db.RegExp({
+        //     regexp: '.*',
+        //     options: 'i'
+        // }),
         deepObject: {
             'l-02-01': {
                 'l-03-01': {
@@ -75,27 +74,23 @@ describe('test/index.test.ts', async () => {
         }
     }
 
-    if (checkIsGray() || config._useFeature) {
-        it('验证throwOnCode', async () => {
-            const res = await collection.add({ $_key: 1 })
-            console.log(res)
-        })
-    }
+    it('验证throwOnCode', async () => {
+        const res = await collection.add({ $_key: 1 })
+        console.log(res)
+    })
 
-    if (checkIsGray() || config._useFeature) {
-        it('mock 插入多条', async () => {
-            // 构建4W条数据
-            let mockData = [],
-                i = 0
-            while (i++ < 10) {
-                mockData.push({ string: 'a', int: -1 })
-            }
+    it('mock 插入多条', async () => {
+        // 构建4W条数据
+        let mockData = [],
+            i = 0
+        while (i++ < 10) {
+            mockData.push({ string: 'a', int: -1 })
+        }
 
-            const addRes = await collection.add(mockData)
-            assert(addRes.ids.length === 10)
-            // console.log('addRes:', addRes)
-        })
-    }
+        const addRes = await collection.add(mockData)
+        assert(addRes.ids.length === 10)
+        // console.log('addRes:', addRes)
+    })
 
     it('清楚mock数据', async () => {
         const deleteRes = await collection.where({ int: -1 }).remove()
@@ -110,11 +105,7 @@ describe('test/index.test.ts', async () => {
 
     it('验证 无 query update', async () => {
         const updateRes = await collection.update({ a: 1 })
-        if (config._useFeature) {
-            assert(updateRes.code === 'INVALID_PARAM')
-        } else {
-            assert(updateRes.updated >= 0)
-        }
+        assert(updateRes.code === 'INVALID_PARAM')
     })
 
     it('document query custom timeout', async () => {
@@ -251,180 +242,66 @@ describe('test/index.test.ts', async () => {
                     date: _.gt(20190401).and(_.lte(20190430)),
                     hour: _.gt(8).and(_.lte(12))
                 })
-                // .options({ timeout: 10 })
+                .options({ timeout: 10 })
                 .get()
-            assert(!result)
         } catch (err) {
-            // assert(err.code === 'ESOCKETTIMEDOUT')
+            assert(err.code === 'ESOCKETTIMEDOUT')
         }
-        // console.log(result)
-        // assert(!result.code)
     })
 
-    it('Document - doc().update()', async () => {
-        // console.log(
-        //   await collection
-        //     .where({
-        //       a: '2'
-        //     })
-        //     .remove()
-        // )
-        // return
-        // console.log(await db.createCollection('ccc'))
-        // return
-        // var a = { a: { b: _.and(_.gt(1), _.lt(32)) } }
-        // var a = { b: _.lte(2) }
-        // var a = { b: _.and(_.gt(2), _.lte(25)) }
-        // var a = _.or([
-        //   { b: _.and(_.gt(1), _.lte(25)) },
-        //   { b: _.and(_.gt(20), _.lte(25)) }
-        // ])
-        // console.log(await collection.where(a).get())
-        // console.log(
-        //   await collection.add({
-        //     _id: '12234',
-        //     a: { b: { d: 1 } }
-        //   })
-        // )
-        // return
-        // console.log(
-        //   await collection
-        //     .where({
-        //       a: { b: { d: 1 } }
-        //     })
-        //     .skip(0)
-        //     .get()
-        // )
-        // return
-        // console.log(
-        //   await collection
-        //     .where({
-        //       a: '10'
-        //     })
-        //     .update({
-        //       c: db.serverDate({ offset: 100 })
-        //     })
-        // )
-        // return
-        // const clean = () => {
-        //   it('Document - doc().remove() - clean all documents', async () => {
-        //     const res = await collection.get()
-        //     // console.log(res);
-        //     const promiseList = res.data.map(document => {
-        //       return collection.doc(document._id).remove()
-        //     })
-        //     await Promise.all(promiseList)
-        //     const res1 = await collection.get()
-        //     // console.log(res1);
-        //     assert(Array.isArray(res1.data))
-        //     assert(res1.data.length === 0)
-        //   })
-        // }
-        // it('DB - use default db', async () => {
-        //   // assert(db.config.dbname === defaultDbName);
-        // })
-        // it('Collection - the collection name', () => {
-        //   assert(collection.name === collName)
-        // })
-        // it('Collection - query count', async () => {
-        //   const res = await collection
-        //     .where({
-        //       like_key: '1111'
-        //     })
-        //     .count()
-        //   console.log(res)
-        // })
-        // clean()
-        // it('Collection - should be empty', async () => {
-        //   const res = await collection.get()
-        //   // console.log(JSON.stringify(res));
-        //   assert(Array.isArray(res.data))
-        //   assert(res.data.length === 0)
-        // })
-        // it('Document - doc().set()', async () => {
-        //   const res = await collection.doc().set({
-        //     name: 'mz',
-        //     url:
-        //       'https://b86.photo.store.qq.com/psb?/V11mueXx0BWCDF/GKMTZTUHLU6yqgDwcVZxkv1jtYpGj1C5qnocertN90U!/a/dFYAAAAAAAAA'
-        //   })
-        //   assert(!!res.upsertedId)
-        // })
-        // it('Collection - add()', async () => {
-        //   const point = new db.Geo.Point(21, -23)
-        //   const data = await collection.add({
-        //     name: 'hm',
-        //     time: new Date(),
-        //     point: point
-        //   })
-        //   assert(!!data.id)
-        // })
-        // it('Document - doc().update()', async () => {
-        //   const res = await collection.where({ name: _.eq('mz') }).get()
-        //   const docId = res.data[0].id
-        //   const result = await collection.doc(docId).update({
-        //     name: 'hm-mz'
-        //   })
-        //   assert(result.updated === 1)
-        // })
-        // it('Collection - where()', async () => {
-        //   const res = await collection.where({ name: _.eq('hm-mz') }).get()
-        //   assert(Array.isArray(res.data))
-        //   assert(res.data.length === 1)
-        // })
-        // it('Collection - add many documents', async () => {
-        //   const promiseList = nameList.map(name => {
-        //     return collection.add({
-        //       name: name
-        //     })
-        //   })
-        //   await Promise.all(promiseList)
-        //   const res = await collection.get()
-        //   // console.log(res);
-        //   assert(Array.isArray(res.data))
-        //   assert(res.data.length >= nameList.length)
-        // })
-        // it('Collection - orderBy()', async () => {
-        //   const res = await collection.orderBy('name', 'asc').get()
-        //   const namesList = res.data.map(document => {
-        //     return document.name
-        //   })
-        //   const orderedList = namesList.sort()
-        //   let ordered = true
-        //   orderedList.forEach((item, index) => {
-        //     if (item !== orderedList[index]) {
-        //       ordered = false
-        //     }
-        //   })
-        //   assert(ordered === true)
-        // })
-        // it('Collection - limit()', async () => {
-        //   const res = await collection.limit(1).get()
-        //   assert(Array.isArray(res.data))
-        //   // assert(res.data.length === 1);
-        // })
-        // it('Collection - skip()', async () => {
-        //   const res = await collection.get()
-        //   const total = res.data.length
-        //   const res1 = await collection.skip(4).get()
-        //   assert(Array.isArray(res1.data))
-        //   assert(res1.data.length + 4 === total)
-        // })
-        // it('Collection - update()', async () => {
-        //   const res = await collection.where({ name: _.eq('a') }).update({
-        //     age: _.inc(10)
-        //   })
-        //   assert(res.updated === 1)
-        // })
-        // it('Collection - field', async () => {
-        //   const res = await collection.field({ age: 1 }).get()
-        //   let hasNameField = false
-        //   res.data.forEach(document => {
-        //     if (document.name) {
-        //       hasNameField = true
-        //     }
-        //   })
-        //   assert(hasNameField === false)
-        // })
-        // clean()
+    it('Document - doc().update()', async () => {})
+
+    // option更新单个 or 多个
+    it('Document - doc().option().update()', async () => {
+        const addRes = await collection.add([{ testNum: 1 }, { testNum: 1 }, { testNum: 1 }])
+        assert(addRes.ids.length === 3)
+        const updateSingleRes = await collection
+            .where({ testNum: 1 })
+            .options({ multiple: false })
+            .update({ testNum: _.inc(1) })
+        console.log('updateSingleRes:', updateSingleRes)
+        assert(updateSingleRes.updated === 1)
+
+        const updateMultiRes = await collection
+            .where({ testNum: _.gt(0) })
+            .options({ multiple: true })
+            .update({ testNum: _.inc(1) })
+        console.log('updateMultiRes:', updateMultiRes)
+        // assert(updateSingleRes.updated === 3)
+
+        // 不传multiple字段
+        const updateMultiRes1 = await collection
+            .where({ testNum: _.gt(0) })
+            .options({})
+            .update({ testNum: _.inc(1) })
+        console.log('updateMultiRes1:', updateMultiRes1)
+        // assert(updateSingleRes.updated === 3)
+
+        // 不设options
+        const updateMultiRes2 = await collection
+            .where({ testNum: _.gt(0) })
+            .options({})
+            .update({ testNum: _.inc(1) })
+        console.log('updateMultiRes2:', updateMultiRes2)
+        // assert(updateSingleRes.updated === 3)
+    })
+
+    // options 删除单个 or 多个
+    it('Document - doc().option().delete()', async () => {
+        const deleteSingleRes = await collection
+            .where({ testNum: _.gt(0) })
+            .options({ multiple: false })
+            .remove()
+
+        console.log('deleteSingleRes:', deleteSingleRes)
+        assert(deleteSingleRes.deleted === 1)
+
+        const deleteMultiRes = await collection
+            .where({ testNum: _.gt(0) })
+            // .options({ multiple: true })
+            .options({})
+            .remove()
+        console.log('deleteMultiRes:', deleteMultiRes)
+        assert(deleteMultiRes.deleted === 2)
     })
 })

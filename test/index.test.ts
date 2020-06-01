@@ -1,7 +1,6 @@
 import tcb from '../src/index'
 import assert from 'assert'
 import { ERROR } from '../src/const/code'
-import { checkIsGray } from '../src/utils/utils'
 import * as config from './config.local'
 
 describe('tcb.init: 初始化tcb', () => {
@@ -49,9 +48,7 @@ describe('tcb.init: 初始化tcb', () => {
                 data: { a: 1 }
             })
         } catch (err) {
-            if (checkIsGray()) {
-                assert(err.code === ERROR.INVALID_PARAM.code)
-            }
+            assert(err.code === ERROR.INVALID_PARAM.code)
         }
 
         // const result = await app.callFunction({
