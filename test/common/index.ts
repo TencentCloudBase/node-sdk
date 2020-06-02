@@ -28,14 +28,10 @@ export async function safeCollection(db, name) {
             try {
                 result = await collection.add(datas)
             } catch (e) {
-                console.log('debug:', e)
                 // throw e
             }
 
-            console.log('result:', result)
-
             // const getRes = await collection.doc(result.id).get()
-            // console.log('getRes:', getRes)
 
             if (result.ids.length !== num) {
                 throw Error('出现插入数据失败情况了！！')

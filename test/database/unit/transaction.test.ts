@@ -56,14 +56,12 @@ describe('transaction', async () => {
             // 事务内插入 含date geo类型文档
             const insertDoc = { _id: 'lluke', date: date, geo: new db.Geo.Point(90, 23) }
             const insertRes = await transaction.collection(collectionName).add(insertDoc)
-            console.log('insertRes:', insertRes)
             assert(insertRes.inserted === 1)
 
             const doc = await transaction
                 .collection(collectionName)
                 .doc('lluke')
                 .get()
-            console.log('doc:', doc)
             assert(doc.data, insertDoc)
 
             // 事务外插入含date geo serverDate 类型文档
@@ -168,6 +166,12 @@ describe('transaction', async () => {
             .collection(collectionName)
             .doc('1')
             .get()
+
+        const addDoc = await transaction
+            .collection(collectionName)
+            .add({ _id: '5', category: 'hope' })
+
+        assert.deepStrictEqual(addDoc.id, '5')
         assert.deepStrictEqual(doc.data, data[0])
         const res = await transaction.rollback()
         assert(res.requestId)
