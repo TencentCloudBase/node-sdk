@@ -1,6 +1,14 @@
-## 应用初始化
+# 初始化
 
-参数
+## init
+
+#### 1. 接口描述
+
+接口功能：SDK 实例初始化
+
+接口声明：`init(object: Object): Promise<Object>`
+
+#### 2. 输入参数
 
 | 字段        | 类型   | 必填 | 说明                                                                                                                                 |
 | ----------- | ------ | ---- | ------------------------------------------------------------------------------------------------------------------------------------ |
@@ -12,10 +20,19 @@
 | credentials | object | 否   | Cloudbase 私钥，包含 `private_key` 和 `private_key_id` 两个字符串，可以通过[云开发控制台](https://console.cloud.tencent.com/tcb)获取 |
 | version     | string | 否   | 版本号，依赖项目的版本号                                                                                                             |
 
+#### 3. 返回结果
+
+| 字段 | 类型   | 必填 | 说明         |
+| ---- | ------ | ---- | ------------ |
+| -    | Object | 是   | tcb 实例对象 |
+
+#### 4. 示例代码
+
 ```javascript
 // 初始化示例
 const tcb = require('@cloudbase/node-sdk')
 // 初始化资源
+
 // 云函数下不需要secretId和secretKey。
 // env如果不指定将使用默认环境
 const app = tcb.init({
@@ -33,11 +50,11 @@ const app = tcb.init({
 })
 
 //获取执行当前云函数的环境
-tcb.SYMBOL_CURRENT_ENV
+const currentEnv = tcb.SYMBOL_CURRENT_ENV
 
 //云函数下指定环境为当前的执行环境
 const app = tcb.init({
-  env: tcb.SYMBOL_CURRENT_ENV
+  env: currentEnv
 })
 
 //修改请求超时时间
@@ -47,7 +64,7 @@ const app = tcb.init({
 
 //使用多个环境
 //初始化环境'xx'和'zz'
-const app = tcb.init({
+const app1 = tcb.init({
   env: 'xx'
 })
 

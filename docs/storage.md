@@ -1,205 +1,222 @@
-## 存储
+# 存储
 
-<!-- TOC -->
+## uploadFile
 
-- [上传文件](#上传文件)
-- [获取文件下载链接](#获取文件下载链接)
-- [删除文件](#删除文件)
-- [下载文件](#下载文件)
+#### 1. 接口描述
 
-<!-- /TOC -->
+接口功能：上传文件到文件管理服务
 
-### 上传文件
+接口声明：`uploadFile(object: Object): Promise<Object>`
 
-uploadFile(object)
+#### 2. 输入参数
 
-| 字段 | 类型 | 必填 | 说明
-| --- | --- | --- | ---
-| object | Object | 是 | 上传文件请求参数
-| opts | Object | 否 | 自定义配置，目前只支持超时时间设置，{timeout: number}
+| 字段        | 类型          | 必填 | 说明                                                                                                                                                                                                                                               |
+| ----------- | ------------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| cloudPath   | String        | 是   | 文件的绝对路径，包含文件名。例如 foo/bar.jpg、foo/bar/baz.jpg 等，不能包含除[0-9 , a-z , A-Z]、/、!、-、\_、.、、\*和中文以外的字符，使用 / 字符来实现类似传统文件系统的层级结构。[查看详情](https://cloud.tencent.com/document/product/436/13324) |
+| fileContent | fs.ReadStream | 是   | buffer 或要上传的文件[可读流](https://nodejs.org/api/stream.html#stream_class_stream_readable)                                                                                                                                                     |
 
-请求参数 object
+#### 3. 返回结果
 
-| 字段 | 类型 | 必填 | 说明
-| --- | --- | --- | --- |
-| cloudPath | string | 是 | 文件的绝对路径，包含文件名。例如foo/bar.jpg、foo/bar/baz.jpg等，不能包含除[0-9 , a-z , A-Z]、/、!、-、_、.、、*和中文以外的字符，使用 / 字符来实现类似传统文件系统的层级结构。[查看详情](https://cloud.tencent.com/document/product/436/13324)
-| fileContent | fs.ReadStream | 是 | buffer或要上传的文件[可读流](https://nodejs.org/api/stream.html#stream_class_stream_readable)
+| 字段      | 类型   | 必填 | 说明                                    |
+| --------- | ------ | ---- | --------------------------------------- |
+| fileID    | string | 否   | 文件唯一 ID，用来访问文件，建议存储起来 |
+| requestId | string | 是   | 请求序列号，用于错误排查                |
+| code      | string | 否   | 状态码，操作成功则不返回                |
+| message   | string | 否   | 错误描述，操作成功则不返回              |
 
-响应参数
-
-| 字段 | 类型 | 必填 | 说明
-| --- | --- | --- | --- |
-| code | string | 否 | 状态码，操作成功则不返回
-| message | string | 否 | 错误描述
-| fileID | fileID | 是 | 文件唯一ID，用来访问文件，建议存储起来
-| requestId | string | 否 | 请求序列号，用于错误排查
-
-示例代码
+#### 4. 示例代码
 
 ```javascript
-const tcb = require("@cloudbase/node-sdk");
-const app = tcb.init()
-const fs = require("fs");
+// 初始化
+const tcb = require('@cloudbase/node-sdk')
+const fs = require('fs')
 
-let result = await app.uploadFile({
-    cloudPath: "test-admin.jpeg",
+const app = tcb.init({
+  env: 'xxx'
+})
+
+exports.main = async (event, context) => {
+  const result = await app.uploadFile({
+    cloudPath: 'test-admin.jpeg',
     fileContent: fs.createReadStream(`${__dirname}/cos.jpeg`)
-});
+  })
 
-// 设置自定义超时时间
-let result = await app.uploadFile({
-    cloudPath: "test-admin.jpeg",
-    fileContent: fs.createReadStream(`${__dirname}/cos.jpeg`)
-}, {
-  timeout: 5000
-});
-
+  console.log(result.fileID) // 输出文件ID
+}
 ```
 
+## getTempFileURL
 
+#### 1. 接口描述
 
-### 获取文件下载链接
+接口功能：获取文件 CDN 下载链接
 
-getTempFileURL(object)
+接口声明：`getTempFileURL(object: IGetTempFileURLOpts, opts: Object): Promise<Object>`
 
-| 字段 | 类型 | 必填 | 说明
-| --- | --- | --- | ---
-| object | Object | 是 | 获取下载链接请求参数
-| opts | Object | 否 | 自定义配置，目前只支持超时时间设置，{timeout: number}
+#### 2. 输入参数
 
-请求参数 object
+| 字段   | 类型                | 必填 | 说明                                                  |
+| ------ | ------------------- | ---- | ----------------------------------------------------- |
+| object | IGetTempFileURLOpts | 是   | 获取下载链接请求参数                                  |
+| opts   | Object              | 否   | 自定义配置，目前只支持超时时间设置，{timeout: number} |
 
-| 字段 | 类型 | 必填 | 说明
-| --- | --- | --- | --- |
-| fileList | &lt;Array&gt;.string | 是 | 要下载的文件ID组成的数组
+##### IGetTempFileURLOpts
 
-fileList
+| 字段     | 类型                             | 必填 | 说明                       |
+| -------- | -------------------------------- | ---- | -------------------------- |
+| fileList | &lt;Array&gt;.string Or fileItem | 是   | 要下载的文件 ID 组成的数组 |
 
-| 字段 | 类型 | 必填 | 说明
-| --- | --- | --- | --- |
-| fileID | string | 是 | 文件ID
-| maxAge | Integer | 是 | 文件链接有效期
+##### fileItem
 
-响应参数
+| 字段   | 类型   | 必填 | 说明           |
+| ------ | ------ | ---- | -------------- |
+| fileID | string | 是   | 文件 ID        |
+| maxAge | number | 是   | 文件链接有效期 |
 
-| 字段 | 类型 | 必填 | 说明
-| --- | --- | --- | --- |
-| code | string | 否 | 状态码，操作成功则为SUCCESS
-| message | string | 否 | 错误描述
-| fileList | &lt;Array&gt;.object | 否 | 存储下载链接的数组
-| requestId | string | 否 | 请求序列号，用于错误排查
+#### 3. 返回结果
 
-fileList
+| 字段      | 类型                      | 必填 | 说明                         |
+| --------- | ------------------------- | ---- | ---------------------------- |
+| fileList  | &lt;Array&gt;.fileUrlItem | 否   | 存储下载链接的数组           |
+| requestId | string                    | 是   | 请求序列号，用于错误排查     |
+| code      | string                    | 否   | 状态码，操作成功则为 SUCCESS |
+| message   | string                    | 否   | 错误描述                     |
 
-| 字段 | 类型 | 必填 | 说明
-| --- | --- | --- | --- |
-| code | string | 否 | 删除结果，成功为SUCCESS
-| fileID | string | 是 | 文件ID
-| tempFileURL | string | 是 | 文件访问链接
+##### fileUrlItem
 
-示例代码
+| 字段        | 类型   | 必填 | 说明                     |
+| ----------- | ------ | ---- | ------------------------ |
+| code        | string | 否   | 删除结果，成功为 SUCCESS |
+| fileID      | string | 是   | 文件 ID                  |
+| tempFileURL | string | 是   | 文件访问链接             |
+
+#### 4. 示例代码
 
 ```javascript
-let result = await app.getTempFileURL({
+// 初始化
+const tcb = require('@cloudbase/node-sdk')
+
+const app = tcb.init({
+  env: 'xxx'
+})
+
+exports.main = async (event, context) => {
+  const result = await app.getTempFileURL({
     fileList: ['cloud://test-28farb/a.png']
-});
+  })
 
-// 设置自定义超时时间
-let result = await app.getTempFileURL({
-    fileList: ['cloud://test-28farb/a.png']
-}, {
-  timeout: 5000
-});
+  result.fileList.forEach(item => {
+    console.log(item.tempFileURL) // 打印文件访问链接
+  })
+}
 ```
 
-### 删除文件
+## deleteFile
 
-deletfile(object)
+#### 1. 接口描述
 
-| 字段 | 类型 | 必填 | 说明
-| --- | --- | --- | ---
-| object | Object | 是 | 删除文件请求参数
-| opts | Object | 否 | 自定义配置，目前只支持超时时间设置，{timeout: number}
+接口功能：删除文件
 
-请求参数 object
+接口声明：`deleteFile(object: IDeleteFileOpts, opts: Object): Promise<Object>`
 
-| 字段 | 类型 | 必填 | 说明
-| --- | --- | --- | --- |
-| fileList | &lt;Array&gt;.string | 是 | 要删除的文件ID组成的数组
+#### 2. 输入参数
 
-响应参数
+| 字段   | 类型            | 必填 | 说明                                                  |
+| ------ | --------------- | ---- | ----------------------------------------------------- |
+| object | IDeleteFileOpts | 是   | 删除文件请求参数                                      |
+| opts   | Object          | 否   | 自定义配置，目前只支持超时时间设置，{timeout: number} |
 
-| 字段 | 类型 | 必填 | 说明
-| --- | --- | --- | --- |
-| code | string | 否 | 状态码，操作成功则不返回
-| message | string | 否 | 错误描述
-| fileList | &lt;Array&gt;.object | 否 | 删除结果组成的数组
-| requestId | string | 否 | 请求序列号，用于错误排查
+##### IDeleteFileOpts
 
-fileList
+| 字段     | 类型                 | 必填 | 说明                       |
+| -------- | -------------------- | ---- | -------------------------- |
+| fileList | &lt;Array&gt;.string | 是   | 要删除的文件 ID 组成的数组 |
 
-| 字段 | 类型 | 必填 | 说明
-| --- | --- | --- | --- |
-| code | string | 否 | 删除结果，成功为SUCCESS
-| fileID | string | 是 | 文件ID
+#### 3. 返回结果
 
-示例代码
+| 字段      | 类型                         | 必填 | 说明                     |
+| --------- | ---------------------------- | ---- | ------------------------ |
+| code      | string                       | 否   | 状态码，操作成功则不返回 |
+| message   | string                       | 否   | 错误描述                 |
+| fileList  | &lt;Array&gt;.deleteFileItem | 否   | 删除结果组成的数组       |
+| requestId | string                       | 是   | 请求序列号，用于错误排查 |
+
+##### deleteFileItem
+
+| 字段   | 类型   | 必填 | 说明                     |
+| ------ | ------ | ---- | ------------------------ |
+| code   | string | 否   | 删除结果，成功为 SUCCESS |
+| fileID | string | 是   | 文件 ID                  |
+
+#### 4. 示例代码
 
 ```javascript
-let result = await app.deleteFile({
-    fileList: [
-        "HHOeahVQ0fRTDsums4GVgMCsF6CE3wb7kmIkZbX+yilTJE4NPSQQW5EYks"
-    ]
-});
+// 初始化
+const tcb = require('@cloudbase/node-sdk')
+const app = tcb.init({
+  env: 'xxx'
+})
 
-// 设置自定义超时
-let result = await app.deleteFile({
-    fileList: [
-        "HHOeahVQ0fRTDsums4GVgMCsF6CE3wb7kmIkZbX+yilTJE4NPSQQW5EYks"
-    ]
-}, {
-  timeout: 5000
-});
+exports.main = async (event, context) => {
+  const result = await app.deleteFile({
+    fileList: ['HHOeahVQ0fRTDsums4GVgMCsF6CE3wb7kmIkZbX+yilTJE4NPSQQW5EYks']
+  })
+
+  result.fileList.forEach(item => {
+    if (item.code === 'SUCCESS') {
+      // 文件删除成功
+    }
+  })
+}
 ```
 
-### 下载文件
+## downloadFile
 
-downloadFile(object)
+#### 1. 接口描述
 
-| 字段 | 类型 | 必填 | 说明
-| --- | --- | --- | ---
-| object | Object | 是 | 下载文件请求参数
-| opts | Object | 否 | 自定义配置，目前只支持超时时间设置，{timeout: number}
+接口功能：下载文件到本地
 
-请求参数 object
+接口声明：`downloadFile(object: IDownloadFileOpts, opts: Object): Promise<Object>`
 
-| 字段 | 类型 | 必填 | 说明
-| --- | --- | --- | --- |
-| fileID | string | 是 | 要下载的文件的id
-| tempFilePath | string | 否 | 下载的文件要存储的位置
+#### 2. 输入参数
 
-响应参数
+| 字段   | 类型              | 必填 | 说明                                                  |
+| ------ | ----------------- | ---- | ----------------------------------------------------- |
+| object | IDownloadFileOpts | 是   | 下载文件请求参数                                      |
+| opts   | Object            | 否   | 自定义配置，目前只支持超时时间设置，{timeout: number} |
 
-| 字段 | 类型 | 必填 | 说明
-| --- | --- | --- | --- |
-| code | string | 否 | 状态码，操作成功则不返回
-| message | string | 否 | 错误描述
-| fileContent | Buffer | 否 | 下载的文件的内容。如果传入tempFilePath则不返回该字段
-| requestId | string | 否 | 请求序列号，用于错误排查
+##### IDownloadFileOpts
 
-示例代码
+| 字段         | 类型   | 必填 | 说明                   |
+| ------------ | ------ | ---- | ---------------------- |
+| fileID       | string | 是   | 要下载的文件的 id      |
+| tempFilePath | string | 否   | 下载的文件要存储的位置 |
+
+#### 3. 返回结果
+
+| 字段        | 类型   | 必填 | 说明                                                   |
+| ----------- | ------ | ---- | ------------------------------------------------------ |
+| code        | string | 否   | 状态码，操作成功则不返回                               |
+| message     | string | 否   | 错误描述                                               |
+| fileContent | buffer | 否   | 下载的文件的内容。如果传入 tempFilePath 则不返回该字段 |
+| requestId   | string | 是   | 请求序列号，用于错误排查                               |
+
+#### 4. 示例代码
 
 ```javascript
-let result = await app.downloadFile({
-    fileID: "cloud://aa-99j9f/my-photo.png",
-    // tempFilePath: '/tmp/test/storage/my-photo.png'
-});
+// 初始化
+const tcb = require('@cloudbase/node-sdk')
+const app = tcb.init({
+  env: 'xxx'
+})
 
-// 自定义超时
-let result = await app.downloadFile({
-    fileID: "cloud://aa-99j9f/my-photo.png",
+exports.main = async (event, context) => {
+  const result = await app.downloadFile({
+    fileID: 'cloud://aa-99j9f/my-photo.png'
     // tempFilePath: '/tmp/test/storage/my-photo.png'
-}, {
-  timeout: 5000
-});
+  })
+
+  // 未传入tempFilePath 可打印fileContent, 传入则进入对应目录查看文件
+  console.log(result.fileContent)
+}
 ```

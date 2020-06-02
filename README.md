@@ -1,10 +1,6 @@
 # Tencent Cloud Base(TCB) Server Node.js SDK
 
-[![NPM Version](https://img.shields.io/npm/v/@cloudbase/node-sdk/beta)](https://www.npmjs.com/package/@cloudbase/node-sdk)
-![node (scoped)](https://img.shields.io/node/v/@cloudbase/node-sdk)
-[![Coverage Status](https://coveralls.io/repos/github/TencentCloudBase/node-sdk/badge.svg?branch=master)](https://coveralls.io/github/TencentCloudBase/node-sdk?branch=master)
-
-> ⚠️ 当你计划在项目中使用 @cloudbase/node-sdk 替代 tcb-admin-node 时，请务必阅读[迁移文档](./docs/packageChange.md)
+> ⚠️ 当你计划在项目中使用 @cloudbase/node-sdk 替代 tcb-admin-node 时，请务必阅读[迁移文档](./docs/packageUpgrade.md)
 
 ## 目录
 
@@ -44,7 +40,7 @@ import tcb from '@cloudbase/node-sdk'
 
 -   [初始化](docs/initialization.md)
 -   [存储](docs/storage.md)
--   [数据库](docs/database.md)
+-   [数据库](docs/database/database.md)
 -   [云函数](docs/functions.md)
 -   [鉴权](./docs/auth.md)
 -   [环境](./docs/env.md)
