@@ -4,7 +4,7 @@ import { ERROR } from '../src/const/code'
 import * as config from './config.local'
 
 describe('tcb.init: 初始化tcb', () => {
-    it('mock 导入本地config报错', async () => {
+    it.skip('mock 导入本地config报错', async () => {
         jest.resetModules()
         jest.mock('./config', () => {
             throw Error('mock config require err')
