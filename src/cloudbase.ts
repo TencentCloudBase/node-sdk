@@ -83,6 +83,8 @@ export class CloudBase {
 
     private clsLogger: Log
 
+    private extensionMap: any
+
     public constructor(config?: ICloudBaseConfig) {
         this.init(config)
     }
@@ -136,6 +138,20 @@ export class CloudBase {
         }
 
         this.config = newConfig
+        this.extensionMap = {}
+    }
+
+    public registerExtension(ext: any) {
+        this.extensionMap[ext.name] = ext
+    }
+
+    public async invokeExtension(name, opts) {
+        const ext = this.extensionMap[name]
+        if (!ext) {
+            throw Error(`扩展${name} 必须先注册`)
+        }
+
+        return ext.invoke(opts, this)
     }
 
     public database(dbConfig: any = {}): Db {

@@ -6,8 +6,11 @@ export declare class CloudBase {
     static parseContext(context: IContext): IContext;
     config: ICloudBaseConfig;
     private clsLogger;
+    private extensionMap;
     constructor(config?: ICloudBaseConfig);
     init(config?: ICloudBaseConfig): void;
+    registerExtension(ext: any): void;
+    invokeExtension(name: any, opts: any): Promise<any>;
     database(dbConfig?: any): Db;
     /**
      * 调用云函数
