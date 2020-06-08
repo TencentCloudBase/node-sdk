@@ -1,4 +1,5 @@
 import { IErrorInfo } from '../type'
+import { CloudBase } from '../cloudbase'
 
 export class TcbError extends Error {
     public readonly code: string
@@ -82,7 +83,8 @@ export const clone = obj => {
 }
 
 export const checkIsInScf = () => {
-    return process.env.TENCENTCLOUD_RUNENV === 'SCF'
+    const { TENCENTCLOUD_RUNENV } = CloudBase.getCloudbaseContext()
+    return TENCENTCLOUD_RUNENV === 'SCF'
 }
 
 export const delay = ms => {
@@ -115,9 +117,11 @@ export function getServerInjectUrl(): string {
 
 export function getTcbContextConfig(): any {
     try {
-        if (process.env.TCB_CONTEXT_CNFG) {
+        const { TCB_CONTEXT_CNFG } = CloudBase.getCloudbaseContext()
+
+        if (TCB_CONTEXT_CNFG) {
             // 检查约定环境变量字段是否存在
-            return JSON.parse(process.env.TCB_CONTEXT_CNFG)
+            return JSON.parse(TCB_CONTEXT_CNFG)
         }
         return {}
     } catch (e) {

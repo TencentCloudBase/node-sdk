@@ -1,1 +1,1 @@
-export declare function getWxCloudApiToken(): string;
+export declare function getWxCloudApiToken(): any;

@@ -295,6 +295,7 @@ export async function getUploadMetadata(
 }
 
 export async function getFileAuthority(cloudbase: CloudBase, { fileList }) {
+    const { LOGINTYPE } = CloudBase.getCloudbaseContext()
     if (!Array.isArray(fileList)) {
         throw E({
             ...ERROR.INVALID_PARAM,
@@ -333,7 +334,7 @@ export async function getFileAuthority(cloudbase: CloudBase, { fileList }) {
         action: 'storage.getFileAuthority',
         openId,
         uid,
-        loginType: process.env.LOGINTYPE,
+        loginType: LOGINTYPE,
         fileList
     }
     const res = await httpRequest({

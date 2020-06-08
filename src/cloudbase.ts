@@ -78,6 +78,85 @@ export class CloudBase {
         CloudBase.scfContext = parseResult
         return parseResult
     }
+    /**
+     * 获取当前函数内的所有环境变量(作为获取变量的统一方法，取值来源process.env 和 context)
+     */
+    public static getCloudbaseContext(context?: IContext) {
+        // 解析process.env
+        const {
+            TENCENTCLOUD_RUNENV,
+            SCF_NAMESPACE,
+            TCB_CONTEXT_CNFG,
+            TCB_CONTEXT_KEYS,
+            TCB_ENV,
+            TCB_ISANONYMOUS_USER,
+            TCB_ROUTE_KEY,
+            TCB_SEQID,
+            TCB_SESSIONTOKEN,
+            TCB_SOURCE,
+            TENCENTCLOUD_SECRETID,
+            TENCENTCLOUD_SECRETKEY,
+            TENCENTCLOUD_SESSIONTOKEN,
+            TRIGGER_SRC,
+            WX_API_TOKEN,
+            WX_TRIGGER_API_TOKEN_V0,
+            WX_APPID,
+            WX_CLIENTIP,
+            WX_CLIENTIPV6,
+            WX_CONTEXT_KEYS,
+            WX_OPENID,
+            TCB_UUID,
+            TCB_CUSTOM_USER_ID,
+            TCB_SOURCE_IP,
+            _SCF_TCB_LOG,
+            LOGINTYPE
+        } = process.env
+
+        let contextEnv = {}
+        if (context) {
+            const { environment, environ } = CloudBase.parseContext(context)
+            contextEnv = environment || environ || {}
+        }
+
+        let rawContext = {
+            TENCENTCLOUD_RUNENV,
+            SCF_NAMESPACE,
+            TCB_CONTEXT_CNFG,
+            TCB_CONTEXT_KEYS,
+            TCB_ENV,
+            TCB_ISANONYMOUS_USER,
+            TCB_ROUTE_KEY,
+            TCB_SEQID,
+            TCB_SESSIONTOKEN,
+            TCB_SOURCE,
+            TENCENTCLOUD_SECRETID,
+            TENCENTCLOUD_SECRETKEY,
+            TENCENTCLOUD_SESSIONTOKEN,
+            TRIGGER_SRC,
+            WX_API_TOKEN,
+            WX_TRIGGER_API_TOKEN_V0,
+            WX_APPID,
+            WX_CLIENTIP,
+            WX_CLIENTIPV6,
+            WX_CONTEXT_KEYS,
+            WX_OPENID,
+            TCB_UUID,
+            TCB_CUSTOM_USER_ID,
+            TCB_SOURCE_IP,
+            _SCF_TCB_LOG,
+            LOGINTYPE,
+            ...contextEnv
+        }
+
+        let finalContext: any = {}
+        for (let key in rawContext) {
+            if (rawContext[key] !== undefined) {
+                finalContext[key] = rawContext[key]
+            }
+        }
+
+        return finalContext
+    }
 
     public config: ICloudBaseConfig
 

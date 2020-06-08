@@ -6,6 +6,7 @@
     "scripts": {
         "eslint": "eslint \"./**/*.ts\"",
         "eslint-fix": "eslint --fix \"./**/*.ts\"",
+        "build": "rm -rf lib/* && npm run tsc",
         "tsc": "tsc -p tsconfig.json",
         "tsc:w": "tsc -p tsconfig.json -w",
         "tstest": "mocha --timeout 5000 --require espower-typescript/guess test/**/*.test.ts",
@@ -67,7 +68,7 @@
     },
     "husky": {
         "hooks": {
-            "pre-commit": "npm run tsc && git add . && lint-staged"
+            "pre-commit": "npm run build && git add . && lint-staged"
         }
     },
     "lint-staged": {

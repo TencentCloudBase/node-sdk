@@ -1,14 +1,18 @@
 export interface IRetryOptions {
     retries?: number;
-    timeouts?: [number];
+    factor?: number;
+    minTimeout?: number;
+    maxTimeout?: number;
+    randomize?: boolean;
     forever?: boolean;
     unref?: boolean;
     maxRetryTime?: number;
+    timeoutOps?: any;
+    timeouts?: [number];
     shouldRetry?: (e: any, result: any, operation: any) => {
         retryAble: boolean;
         message: string;
     };
-    timeoutOps: any;
 }
 /**
  * withRetry 重试封装函数

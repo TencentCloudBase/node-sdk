@@ -1,5 +1,4 @@
-/// <reference types="node" />
-import { IRequestInfo, IReqOpts } from '../type/index';
+import { IRequestInfo, IReqOpts, IReqHooks } from '../type/index';
 export declare class Request {
     private args;
     private config;
@@ -9,20 +8,28 @@ export declare class Request {
     private defaultTimeout;
     private timestamp;
     private tracingInfo;
+    private slowWarnTimer;
+    private params;
+    private hooks;
     constructor(args: IRequestInfo);
     /**
-     *
+     * 最终发送请求
+     */
+    request(): Promise<any>;
+    setHooks(hooks: IReqHooks): void;
+    getSeqId(): string;
+    /**
      * 接口action
      */
     getAction(): string;
     /**
      * 设置超时warning
      */
-    setSlowRequeryWarning(action: string): NodeJS.Timer;
+    setSlowWarning(timeout: number): void;
     /**
      * 构造params
      */
-    getParams(): any;
+    makeParams(): any;
     /**
      *  构造请求项
      */
@@ -39,9 +46,6 @@ export declare class Request {
      * 超时时间
      */
     private getTimeout;
-    /**
-     * 获取
-     */
     /**
      * 校验密钥和token是否存在
      */

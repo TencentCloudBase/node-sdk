@@ -19,18 +19,20 @@ function validateUid(uid) {
 export function auth(cloudbase: CloudBase) {
     return {
         getUserInfo() {
-            const openId = process.env.WX_OPENID || ''
-            const appId = process.env.WX_APPID || ''
-            const uid = process.env.TCB_UUID || ''
-            const customUserId = process.env.TCB_CUSTOM_USER_ID || ''
-            const isAnonymous = process.env.TCB_ISANONYMOUS_USER === 'true' ? true : false
+            const {
+                WX_OPENID,
+                WX_APPID,
+                TCB_UUID,
+                TCB_CUSTOM_USER_ID,
+                TCB_ISANONYMOUS_USER
+            } = CloudBase.getCloudbaseContext()
 
             return {
-                openId,
-                appId,
-                uid,
-                customUserId,
-                isAnonymous
+                openId: WX_OPENID || '',
+                appId: WX_APPID || '',
+                uid: TCB_UUID || '',
+                customUserId: TCB_CUSTOM_USER_ID || '',
+                isAnonymous: TCB_ISANONYMOUS_USER === 'true' ? true : false
             }
         },
         async getAuthContext(context) {
@@ -49,11 +51,13 @@ export function auth(cloudbase: CloudBase) {
             return res
         },
         getClientIP() {
-            return process.env.TCB_SOURCE_IP || ''
+            const { TCB_SOURCE_IP } = CloudBase.getCloudbaseContext()
+            return TCB_SOURCE_IP || ''
         },
         createTicket: (uid, options: any = {}) => {
             validateUid(uid)
             const timestamp = new Date().getTime()
+            const { TCB_ENV, SCF_NAMESPACE } = CloudBase.getCloudbaseContext()
             const { credentials } = cloudbase.config
             let { envName } = cloudbase.config
             if (!envName) {
@@ -62,7 +66,7 @@ export function auth(cloudbase: CloudBase) {
 
             // 使用symbol时替换为环境变量内的env
             if (envName === SYMBOL_CURRENT_ENV) {
-                envName = process.env.TCB_ENV || process.env.SCF_NAMESPACE
+                envName = TCB_ENV || SCF_NAMESPACE
             }
 
             const { refresh = 3600 * 1000, expire = timestamp + 7 * 24 * 60 * 60 * 1000 } = options
