@@ -1,7 +1,16 @@
 import * as config from '../config.local'
+import { create } from 'domain'
 
 export async function safeCreateCollection(db, name) {
     return db.createCollection(name)
+}
+
+export async function timer(time: number) {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            resolve()
+        }, time)
+    })
 }
 
 export async function safeCollection(db, name) {
@@ -10,7 +19,15 @@ export async function safeCollection(db, name) {
 
     // 检查collection是否存在
     try {
-        await collection.where({}).get()
+        const res = await collection.where({}).get()
+        // collection存在 且有数据 则删除当前collection中所有doc
+        if (res.data.length) {
+            await collection
+                .where({
+                    _id: /.*/
+                })
+                .remove()
+        }
     } catch (e) {
         if (e.code === 'DATABASE_COLLECTION_NOT_EXIST') {
             // 不存在
@@ -40,12 +57,25 @@ export async function safeCollection(db, name) {
             return true
         },
         async remove() {
-            const result = await collection
-                .where({
-                    _id: /.*/
-                })
-                .remove()
-            return result.deleted > 0
+            // 加重试机制
+            let flag = false
+            let retryTimes = 0
+            let result = null
+            while (flag !== true && retryTimes++ < 4) {
+                result = await collection
+                    .where({
+                        _id: /.*/
+                    })
+                    .remove()
+
+                flag = result.deleted >= 0
+
+                if (!flag) {
+                    await timer(1200) // 等1.2s
+                }
+            }
+
+            return flag
         }
     }
 }

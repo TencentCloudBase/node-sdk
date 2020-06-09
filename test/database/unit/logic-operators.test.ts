@@ -10,7 +10,7 @@ const _ = db.command
 const date = new Date()
 
 describe('逻辑操作符', async () => {
-    const collName = 'test-projection'
+    const collName = 'db-test-logic-operators'
     let passagesCollection = null
     const data = [
         { category: 'Web', tags: ['JavaScript', 'C#'], date },
