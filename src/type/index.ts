@@ -1,4 +1,3 @@
-
 export interface IKeyValue {
     [key: string]: any
 }
@@ -6,6 +5,7 @@ export interface IKeyValue {
 export interface ICredentialsInfo {
     private_key_id: string
     private_key: string
+    env_id?: string
 }
 
 export interface ICloudBaseConfig extends IKeyValue {

@@ -59,14 +59,32 @@ export function auth(cloudbase: CloudBase) {
             const timestamp = new Date().getTime()
             const { TCB_ENV, SCF_NAMESPACE } = CloudBase.getCloudbaseContext()
             const { credentials } = cloudbase.config
+            const { env_id } = credentials
             let { envName } = cloudbase.config
             if (!envName) {
-                throw new Error('no env in config')
+                throw E({ ...ERROR.INVALID_PARAM, message: 'no env in config' })
+            }
+
+            // 检查credentials 是否包含env
+            if (!env_id) {
+                throw E({
+                    ...ERROR.INVALID_PARAM,
+                    message:
+                        '当前私钥未包含env_id 信息， 请前往腾讯云云开发控制台，获取自定义登录最新私钥'
+                })
             }
 
             // 使用symbol时替换为环境变量内的env
             if (envName === SYMBOL_CURRENT_ENV) {
                 envName = TCB_ENV || SCF_NAMESPACE
+            }
+
+            // 检查 credentials env 和 init 指定env 是否一致
+            if (env_id && env_id !== envName) {
+                throw E({
+                    ...ERROR.INVALID_PARAM,
+                    message: '当前私钥所属环境与 init 指定环境不一致！'
+                })
             }
 
             const { refresh = 3600 * 1000, expire = timestamp + 7 * 24 * 60 * 60 * 1000 } = options
