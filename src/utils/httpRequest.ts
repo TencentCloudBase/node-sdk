@@ -40,6 +40,9 @@ export class Request {
     public constructor(args: IRequestInfo) {
         this.args = args
         this.config = args.config
+
+        // 密钥检查及设置
+        this.initSecret()
         this.params = this.makeParams()
     }
 
@@ -55,8 +58,21 @@ export class Request {
         }[action.split('.')[0]]
 
         const argopts: any = this.args.opts || {}
-        const config = this.args.config
+        const config = this.config
         const opts = this.makeReqOpts()
+
+        // 发请求时未找到有效环境字段
+        if (!this.params.envName) {
+            // 检查config中是否有设置
+            if (config.envName) {
+                return processReturn(config.throwOnCode, {
+                    ...ERROR.INVALID_PARAM,
+                    message: '未取到init 指定 env！'
+                })
+            } else {
+                console.warn(`当前未指定env，将默认使用第一个创建的环境！`)
+            }
+        }
 
         // 注意：必须初始化为 null
         let retryOptions: any = null
@@ -159,11 +175,6 @@ export class Request {
         // 过滤value undefined
         utils.filterUndefined(params)
 
-        // 发请求时未找到有效环境字段，则warning提示
-        if (!params.envName) {
-            console.warn(`当前未指定env，将默认使用第一个创建的环境！`)
-        }
-
         return params
     }
 
@@ -171,9 +182,6 @@ export class Request {
      *  构造请求项
      */
     public makeReqOpts(): IReqOpts {
-        // 校验密钥是否存在
-        this.validateSecretIdAndKey()
-
         const config = this.config
         const args = this.args
         const url = this.getUrl()
@@ -236,7 +244,7 @@ export class Request {
     /**
      * 校验密钥和token是否存在
      */
-    private validateSecretIdAndKey(): void {
+    private initSecret(): void {
         const {
             TENCENTCLOUD_SECRETID,
             TENCENTCLOUD_SECRETKEY,

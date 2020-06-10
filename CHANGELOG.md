@@ -1,3 +1,9 @@
+# v2.1.0
+
+-   [add] 新增获取云函数下全部环境变量方法 getCloudbaseContext
+-   [add] 请求时对 env 参数校验，若 init 时未指定 env，则 warning 提示使用默认环境， 若指定 env 但请求时发现为空，则抛错处理
+-   [add] createTicket 时 校验私钥中环境与 init 指定环境是否一致，不一致则报错
+
 # v2.0.2
 
 -   [add] 新增扩展注册，调用方法

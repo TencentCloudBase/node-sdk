@@ -1,6 +1,6 @@
 import * as assert from 'power-assert'
 import { Util } from '@cloudbase/database/src/util'
-import tcb from '../../../src/index'
+import tcb from '../../../lib/index'
 import * as Config from '../../config.local'
 import * as common from '../../common/index'
 

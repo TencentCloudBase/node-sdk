@@ -82,71 +82,72 @@ export class CloudBase {
      * 获取当前函数内的所有环境变量(作为获取变量的统一方法，取值来源process.env 和 context)
      */
     public static getCloudbaseContext(context?: IContext) {
+        // WX_CONTEXT_ENV  WX_APPID WX_OPENID WX_UNIONID WX_API_TOKEN
+        // TCB_CONTEXT_ENV TCB_ENV TCB_SEQID TRIGGER_SRC LOGINTYPE QQ_OPENID QQ_APPID TCB_UUID TCB_ISANONYMOUS_USER TCB_SESSIONTOKEN TCB_CUSTOM_USER_ID TCB_SOURCE_IP TCB_SOURCE TCB_ROUTE_KEY TCB_HTTP_CONTEXT TCB_CONTEXT_CNFG
+
         // 解析process.env
         const {
             TENCENTCLOUD_RUNENV,
             SCF_NAMESPACE,
-            TCB_CONTEXT_CNFG,
             TCB_CONTEXT_KEYS,
-            TCB_ENV,
-            TCB_ISANONYMOUS_USER,
-            TCB_ROUTE_KEY,
-            TCB_SEQID,
-            TCB_SESSIONTOKEN,
-            TCB_SOURCE,
             TENCENTCLOUD_SECRETID,
             TENCENTCLOUD_SECRETKEY,
             TENCENTCLOUD_SESSIONTOKEN,
             TRIGGER_SRC,
-            WX_API_TOKEN,
+            WX_CONTEXT_KEYS,
             WX_TRIGGER_API_TOKEN_V0,
-            WX_APPID,
             WX_CLIENTIP,
             WX_CLIENTIPV6,
-            WX_CONTEXT_KEYS,
-            WX_OPENID,
-            TCB_UUID,
-            TCB_CUSTOM_USER_ID,
-            TCB_SOURCE_IP,
             _SCF_TCB_LOG,
             LOGINTYPE
         } = process.env
 
-        let contextEnv = {}
+        let contextEnv: any = {}
         if (context) {
             const { environment, environ } = CloudBase.parseContext(context)
             contextEnv = environment || environ || {}
         }
 
+        // 从TCB_CONTEXT_KEYS 和 WX_CONTEXT_KEYS中解析环境变量 取值优先级为 context > process.env
+        const tcb_context_keys = contextEnv.TCB_CONTEXT_KEYS || TCB_CONTEXT_KEYS
+        const wx_context_keys = contextEnv.WX_CONTEXT_KEYS || WX_CONTEXT_KEYS
+
         let rawContext = {
             TENCENTCLOUD_RUNENV,
             SCF_NAMESPACE,
-            TCB_CONTEXT_CNFG,
             TCB_CONTEXT_KEYS,
-            TCB_ENV,
-            TCB_ISANONYMOUS_USER,
-            TCB_ROUTE_KEY,
-            TCB_SEQID,
-            TCB_SESSIONTOKEN,
-            TCB_SOURCE,
             TENCENTCLOUD_SECRETID,
             TENCENTCLOUD_SECRETKEY,
             TENCENTCLOUD_SESSIONTOKEN,
             TRIGGER_SRC,
-            WX_API_TOKEN,
             WX_TRIGGER_API_TOKEN_V0,
-            WX_APPID,
             WX_CLIENTIP,
             WX_CLIENTIPV6,
             WX_CONTEXT_KEYS,
-            WX_OPENID,
-            TCB_UUID,
-            TCB_CUSTOM_USER_ID,
-            TCB_SOURCE_IP,
             _SCF_TCB_LOG,
-            LOGINTYPE,
-            ...contextEnv
+            LOGINTYPE
         }
+
+        // 遍历keys
+        if (tcb_context_keys) {
+            try {
+                const tcbKeysList = tcb_context_keys.split(',')
+                for (let item of tcbKeysList) {
+                    rawContext[item] = contextEnv[item] || process.env[item]
+                }
+            } catch (e) {}
+        }
+
+        if (wx_context_keys) {
+            try {
+                const wxKeysList = wx_context_keys.split(',')
+                for (let item of wxKeysList) {
+                    rawContext[item] = contextEnv[item] || process.env[item]
+                }
+            } catch (e) {}
+        }
+
+        rawContext = { ...rawContext, ...contextEnv }
 
         let finalContext: any = {}
         for (let key in rawContext) {

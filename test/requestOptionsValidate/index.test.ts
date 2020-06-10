@@ -1,6 +1,6 @@
 // 校验各种设置config ，入参是否正确
 
-import tcb from '../../src/index'
+import tcb from '../../lib/index'
 import assert from 'assert'
 import config from '../config.local'
 
@@ -16,7 +16,7 @@ describe('校验config设置  请求入参', () => {
     it('校验config.isHttp => protocol', async () => {
         config.isHttp = true
 
-        jest.mock('../../src/utils/request.ts', () => {
+        jest.mock('../../lib/utils/request', () => {
             return {
                 extraRequest: jest.fn().mockImplementation(opts => {
                     return Promise.resolve({
@@ -30,7 +30,7 @@ describe('校验config设置  请求入参', () => {
             }
         })
 
-        const tcb = require('../../src/index')
+        const tcb = require('../../lib/index')
         let app = tcb.init(config)
 
         // mock一次http请求
@@ -61,7 +61,7 @@ describe('校验config设置  请求入参', () => {
         config.version = 'test-version'
         config.serviceUrl = 'http://testUrl.test.com'
 
-        jest.mock('../../src/utils/request.ts', () => {
+        jest.mock('../../lib/utils/request', () => {
             return {
                 extraRequest: jest.fn().mockImplementation(opts => {
                     return Promise.resolve({
@@ -74,7 +74,7 @@ describe('校验config设置  请求入参', () => {
                 })
             }
         })
-        const tcb = require('../../src/index')
+        const tcb = require('../../lib/index')
         let app = tcb.init(config)
 
         // mock一次http请求
@@ -90,7 +90,7 @@ describe('校验config设置  请求入参', () => {
 
     it('校验config.serviceUrl => url', async () => {
         config.serviceUrl = 'http://testUrl.com'
-        jest.mock('../../src/utils/request.ts', () => {
+        jest.mock('../../lib/utils/request', () => {
             return {
                 extraRequest: jest.fn().mockImplementation(opts => {
                     return Promise.resolve({
@@ -103,7 +103,7 @@ describe('校验config设置  请求入参', () => {
                 })
             }
         })
-        const tcb = require('../../src/index')
+        const tcb = require('../../lib/index')
         let app = tcb.init(config)
 
         // mock一次http请求
@@ -144,7 +144,7 @@ describe('校验config设置  请求入参', () => {
         jest.resetModules()
         jest.mock('request', () => {
             return {
-                extraRequest: jest.fn().mockImplementation((params) => {
+                extraRequest: jest.fn().mockImplementation(params => {
                     return Promise.resolve({
                         statusCode: 200,
                         body: {
@@ -156,7 +156,7 @@ describe('校验config设置  请求入参', () => {
             }
         })
 
-        const tcb1 = require('../../src/index')
+        const tcb1 = require('../../lib/index')
         const app1 = tcb1.init(config)
         try {
             let result = await app1.callWxOpenApi({

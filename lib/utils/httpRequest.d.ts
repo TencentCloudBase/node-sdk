@@ -49,7 +49,7 @@ export declare class Request {
     /**
      * 校验密钥和token是否存在
      */
-    private validateSecretIdAndKey;
+    private initSecret;
     /**
      *
      * 获取headers 此函数中设置authorization

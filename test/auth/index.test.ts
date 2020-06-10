@@ -1,7 +1,6 @@
-import tcb from '../../src/index'
+import tcb from '../../lib/index'
 import assert from 'assert'
 import config from '../config.local'
-import { ERROR } from '../../src/const/code'
 
 const app = tcb.init({
     ...config,
@@ -68,6 +67,9 @@ describe('auth 注入环境变量', () => {
         process.env.TCB_UUID = 'TCB_UUID'
         process.env.TCB_CUSTOM_USER_ID = 'TCB_CUSTOM_USER_ID'
         process.env.TCB_ISANONYMOUS_USER = 'true'
+        process.env.TCB_CONTEXT_KEYS = 'TCB_UUID,TCB_CUSTOM_USER_ID,TCB_ISANONYMOUS_USER'
+        process.env.WX_CONTEXT_KEYS = 'WX_OPENID,WX_APPID'
+
         assert.deepStrictEqual(app.auth().getUserInfo(), {
             openId: 'WX_OPENID',
             appId: 'WX_APPID',
@@ -79,6 +81,8 @@ describe('auth 注入环境变量', () => {
 
     it('获取客户端IP', async () => {
         process.env.TCB_SOURCE_IP = 'TCB_SOURCE_IP'
+        process.env.TCB_CONTEXT_KEYS = 'TCB_SOURCE_IP'
+
         assert.deepStrictEqual(app.auth().getClientIP(), 'TCB_SOURCE_IP')
     })
 

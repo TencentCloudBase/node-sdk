@@ -1,7 +1,6 @@
-import tcb from '../src/index'
+import tcb from '../lib/index'
 import assert from 'assert'
-import { ERROR } from '../src/const/code'
-import * as config from './config.local'
+import { ERROR } from '../lib/const/code'
 
 describe('tcb.init: 初始化tcb', () => {
     it.skip('mock 导入本地config报错', async () => {
