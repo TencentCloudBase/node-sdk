@@ -1,5 +1,5 @@
 import * as assert from 'power-assert'
-import tcb from '../../../src/index'
+import tcb from '../../../lib/index'
 import * as Config from '../../config.local'
 import * as common from '../../common/index'
 
@@ -7,7 +7,7 @@ const app = tcb.init(Config)
 const db = app.database()
 const _ = db.command
 
-const collName = 'test-query-date'
+const collName = 'db-test-query-date'
 let passagesCollection = null
 const data = [
     { date: new Date(1565314149491) },
@@ -16,13 +16,13 @@ const data = [
     { date: db.serverDate() }
 ]
 
-beforeEach(async () => {
+beforeAll(async () => {
     passagesCollection = await common.safeCollection(db, collName)
     const success = await passagesCollection.create(data)
     assert.strictEqual(success, true)
 })
 
-afterEach(async () => {
+afterAll(async () => {
     const success = await passagesCollection.remove()
     assert.strictEqual(success, true)
 })

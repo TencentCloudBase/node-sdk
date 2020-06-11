@@ -1,22 +1,33 @@
 import * as assert from 'power-assert'
 import * as Mock from '../unit/mock'
-import tcb from '../../../src/index'
+import tcb from '../../../lib/index'
 import * as config from '../../config.local'
 import * as common from '../../common/index'
 
 describe('正则表达式查询', async () => {
-    console.log(config)
-
     const app = tcb.init(config)
     const db = app.database()
 
-    const collName = 'coll-1'
+    const collName = 'db-test-order'
     const collection = db.collection(collName)
     // const nameList = ["f", "b", "e", "d", "a", "c"];
 
-    it('Document - createCollection()', async () => {
+    // it('Document - createCollection()', async () => {
+    //     await common.safeCollection(db, collName)
+    // })
+    beforeAll(async () => {
         await common.safeCollection(db, collName)
     })
+
+    afterAll(async () => {
+        await db
+            .collection(collName)
+            .where({
+                _id: /.*/
+            })
+            .remove()
+    })
+
     it('Document - OrderBy', async () => {
         // Create
 
@@ -26,7 +37,6 @@ describe('正则表达式查询', async () => {
                 category: /^类别/
             })
             .remove()
-        console.log('deleteRes1:', deleteRes1)
 
         for (var i = 0; i < 1; i++) {
             const res = await collection.add({
@@ -61,7 +71,6 @@ describe('正则表达式查询', async () => {
             })
             .orderBy('category', 'asc')
             .get()
-        console.log('result.data:', result.data)
         // assert(result.data.length >= 11)
         assert(result.data[0].category === '类别A')
         assert(result.data[result.data.length - 1].category === '类别C')
@@ -75,7 +84,6 @@ describe('正则表达式查询', async () => {
                 })
             })
             .remove()
-        console.log(deleteRes)
         assert(deleteRes.deleted >= 1)
     }, 30000)
 })

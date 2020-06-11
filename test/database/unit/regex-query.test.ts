@@ -1,6 +1,6 @@
 import * as assert from 'power-assert'
 import * as Mock from '../unit/mock'
-import tcb from '../../../src/index'
+import tcb from '../../../lib/index'
 import * as Config from '../../config.local'
 import * as common from '../../common/index'
 
@@ -8,13 +8,8 @@ describe('正则表达式查询', async () => {
     const app = tcb.init(Config)
     const db = app.database()
 
-    const collName = 'coll-1'
+    const collName = 'db-test-regex'
     const collection = db.collection(collName)
-    // const nameList = ["f", "b", "e", "d", "a", "c"];
-
-    it('Document - createCollection()', async () => {
-        await common.safeCollection(db, collName)
-    })
 
     const initialData = {
         name: 'AbCdEfxxxxxxxxxxxxxx1234结尾',
@@ -32,6 +27,20 @@ describe('正则表达式查询', async () => {
             }
         }
     }
+
+    beforeAll(async () => {
+        await common.safeCollection(db, collName)
+    })
+
+    afterAll(async () => {
+        await db
+            .collection(collName)
+            .where({
+                _id: /.*/
+            })
+            .remove()
+    })
+
     it('Document - CRUD', async () => {
         // Create
         const res = await collection.add(initialData)
@@ -61,7 +70,6 @@ describe('正则表达式查询', async () => {
                 })
             })
             .get()
-        console.log('result:', result)
         assert(result.data.length > 0)
 
         // db.RegExp
@@ -73,7 +81,6 @@ describe('正则表达式查询', async () => {
                 })
             })
             .get()
-        console.log(result)
         assert(result.data.length > 0)
 
         // 多字段
@@ -86,7 +93,6 @@ describe('正则表达式查询', async () => {
                 name2: /fff/
             })
             .get()
-        console.log(result)
         assert(result.data.length > 0)
 
         // or
@@ -104,7 +110,6 @@ describe('正则表达式查询', async () => {
                 })
             )
             .get()
-        console.log(result)
         assert(result.data.length > 0)
 
         result = await collection
@@ -121,7 +126,6 @@ describe('正则表达式查询', async () => {
                 )
             })
             .get()
-        console.log(result)
         assert(result.data.length > 0)
 
         result = await collection
@@ -140,7 +144,6 @@ describe('正则表达式查询', async () => {
             .update({
                 name: 'ABCDEFxxxx5678结尾'
             })
-        console.log(result)
         assert(result.updated > 0)
 
         // Delete
@@ -152,7 +155,6 @@ describe('正则表达式查询', async () => {
                 })
             })
             .remove()
-        console.log(deleteRes)
         assert(deleteRes.deleted > 0)
     })
 })

@@ -4,9 +4,9 @@ import assert from 'assert'
 import config from '../config.local'
 import fs from 'fs'
 import path from 'path'
-import tcb from '../../src/index'
+import tcb from '../../lib/index'
 import xml2js from 'xml2js'
-import { ERROR } from '../../src/const/code'
+import { ERROR } from '../../lib/const/code'
 
 describe('storage.uploadFile: 上传文件', () => {
     beforeEach(async () => {
@@ -25,7 +25,7 @@ describe('storage.uploadFile: 上传文件', () => {
             })
         })
 
-        const tcb1 = require('../../src/index')
+        const tcb1 = require('../../lib/index')
         const app1 = tcb1.init(config)
         try {
             let result = await app1.getUploadMetadata({
@@ -60,7 +60,7 @@ describe('storage.uploadFile: 上传文件', () => {
                 const builder = new xml2js.Builder()
                 const xml = builder.buildObject(obj)
 
-                callback(null, {body: xml}, xml)
+                callback(null, { body: xml }, xml)
             }
 
             let mR
@@ -81,7 +81,7 @@ describe('storage.uploadFile: 上传文件', () => {
             })
         })
 
-        const tcb2 = require('../../src/index')
+        const tcb2 = require('../../lib/index')
         const app2 = tcb2.init(config)
 
         try {
@@ -104,7 +104,7 @@ describe('storage.uploadFile: 上传文件', () => {
             })
         })
 
-        const tcb3 = require('../../src/index')
+        const tcb3 = require('../../lib/index')
         const app3 = tcb3.init(config)
         try {
             let result = await app3.uploadFile({
@@ -140,7 +140,7 @@ describe('storage.uploadFile: 上传文件', () => {
             })
         })
 
-        const tcb4 = require('../../src/index')
+        const tcb4 = require('../../lib/index')
         const app4 = tcb4.init(config)
 
         try {
@@ -173,7 +173,7 @@ describe('storage.uploadFile: 上传文件', () => {
                 // const builder = new xml2js.Builder();
                 // const xml = builder.buildObject('ERROR');
 
-                callback(null, {body: 'ERROR'}, 'ERROR')
+                callback(null, { body: 'ERROR' }, 'ERROR')
             }
 
             let mR
@@ -194,7 +194,7 @@ describe('storage.uploadFile: 上传文件', () => {
             })
         })
 
-        const tcb5 = require('../../src/index')
+        const tcb5 = require('../../lib/index')
         const app5 = tcb5.init(config)
 
         try {
@@ -230,7 +230,7 @@ describe('storage.uploadFile: 上传文件', () => {
                 const builder = new xml2js.Builder()
                 const xml = builder.buildObject(obj)
 
-                callback(null, {body: xml}, xml)
+                callback(null, { body: xml }, xml)
             }
 
             let mR
@@ -251,7 +251,7 @@ describe('storage.uploadFile: 上传文件', () => {
             })
         })
 
-        const tcb6 = require('../../src/index')
+        const tcb6 = require('../../lib/index')
         const app6 = tcb6.init(config)
 
         try {

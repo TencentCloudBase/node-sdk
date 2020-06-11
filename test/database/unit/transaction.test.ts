@@ -1,5 +1,5 @@
 import * as assert from 'power-assert'
-import tcb from '../../../src/index'
+import tcb from '../../../lib/index'
 import * as Config from '../../config.local'
 import * as common from '../../common/index'
 
@@ -10,7 +10,7 @@ const offset = 60 * 1000
 
 describe('transaction', async () => {
     let collection = null
-    const collectionName = 'test-passages'
+    const collectionName = 'db-test-transactions'
 
     const date = new Date()
     const data = [
@@ -128,6 +128,11 @@ describe('transaction', async () => {
             .collection(collectionName)
             .add({ _id: docId, category: 'Web', tags: ['JavaScript', 'C#'], date })
         assert(res.id == docId && res.inserted === 1)
+        const deleteRes = await transaction
+            .collection(collectionName)
+            .doc(docId)
+            .remove()
+        assert(deleteRes.deleted === 1)
         const result = await transaction.commit()
         assert.strictEqual(typeof result.requestId, 'string')
     })
@@ -554,12 +559,10 @@ describe('transaction', async () => {
 
         // 修改数据
         // console.log(await transaction.get(docRef1))
-        console.log(
-            await transaction
-                .collection(collectionName)
-                .doc('1')
-                .get()
-        )
+        await transaction
+            .collection(collectionName)
+            .doc('1')
+            .get()
 
         await docRef1.set({
             category: 'wwwwwwwwwwwwwwwww'

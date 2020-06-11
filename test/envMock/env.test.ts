@@ -1,10 +1,7 @@
 // import CloudBase from '@cloudbase/manager-node'
-import tcb from '../../src/index'
+import tcb from '../../lib/index'
 import assert from 'assert'
 import config from '../config.local'
-import { ERROR } from '../../src/const/code'
-import path from 'path'
-import { delay } from '../../src/utils/utils'
 
 // const { functions } = new CloudBase(config)
 
@@ -18,6 +15,7 @@ function setEnvValue() {
     process.env.TENCENTCLOUD_SECRETKEY = 'MOCK_TENCENTCLOUD_SECRETKEY'
     process.env.TENCENTCLOUD_SESSIONTOKEN = 'MOCK_TENCENTCLOUD_SESSIONTOKEN'
     process.env.TCB_SOURCE = 'MOCK_TCB_SOURCE'
+    process.env.TCB_CONTEXT_KEYS = 'TCB_ENV,TCB_SEQID,TCB_SOURCE'
 }
 
 function resetEnvValue() {
@@ -30,6 +28,7 @@ function resetEnvValue() {
     process.env.TENCENTCLOUD_SECRETKEY = ''
     process.env.TENCENTCLOUD_SESSIONTOKEN = ''
     process.env.TCB_SOURCE = ''
+    process.env.TCB_CONTEXT_KEYS = 'TCB_ENV,TCB_SEQID,TCB_SOURCE'
 }
 
 describe('mock 云函数环境', () => {
@@ -74,6 +73,7 @@ describe('mock 云函数环境', () => {
         const app = tcb.init(newConfig)
         const testEnv = 'luketest-0nmm1'
         // const testEnv = ''
+        process.env.TCB_CONTEXT_KEYS = 'TCB_ENV' // 模拟云函数内keys变量
         process.env.TCB_ENV = testEnv
         const res = await app.callFunction({
             name: 'testTCBENV',
@@ -83,7 +83,39 @@ describe('mock 云函数环境', () => {
         assert(res.result === testEnv)
     })
 
-    it.skip('注入mock 云函数环境变量', async () => {
+    it('验证 init环境变量  请求时未取到值', async () => {
+        process.env.TCB_ENV = ''
+        let newConfig = {
+            ...config,
+            env: tcb.SYMBOL_CURRENT_ENV
+        }
+
+        const app = tcb.init(newConfig)
+
+        try {
+            await app.callFunction({
+                name: 'testTCBENV',
+                data: { a: 1 }
+            })
+        } catch (e) {
+            // console.log(e)
+            assert(e.code === 'INVALID_PARAM')
+        }
+
+        newConfig = {
+            ...newConfig,
+            throwOnCode: false
+        }
+
+        const app1 = tcb.init(newConfig)
+        const res = await app1.callFunction({
+            name: 'testTCBENV',
+            data: { a: 1 }
+        })
+        assert(res.code === 'INVALID_PARAM')
+    })
+
+    it('注入mock 云函数环境变量', async () => {
         jest.resetModules()
         setEnvValue()
 
@@ -104,23 +136,34 @@ describe('mock 云函数环境', () => {
         app.logger().warn({ a: 1 })
 
         // 2. TENCENTCLOUD_SECRETID TENCENTCLOUD_SECRETKEY TENCENTCLOUD_SESSIONTOKEN TENCENTCLOUD_RUNENV
-        jest.mock('../../src/utils/request.ts', () => {
-            return jest.fn().mockImplementation(opts => {
-                let mockRes = null
-                if (opts.body.action === 'functions.invokeFunction') {
-                    mockRes = {
-                        data: { response_data: opts },
-                        requestId: 'testRequestId'
+        jest.mock('../../lib/utils/request', () => {
+            return {
+                extraRequest: jest.fn().mockImplementation(opts => {
+                    let mockRes = null
+                    if (opts.body.action === 'functions.invokeFunction') {
+                        mockRes = {
+                            statusCode: 200,
+                            body: {
+                                data: { response_data: opts },
+                                requestId: 'testRequestId'
+                            }
+                        }
                     }
-                }
-                if (opts.body.action === 'database.getDocument') {
-                    mockRes = { data: { list: [opts] } }
-                }
-                return Promise.resolve(mockRes)
-            })
+                    if (opts.body.action === 'database.getDocument') {
+                        mockRes = {
+                            statusCode: 200,
+                            body: {
+                                data: { data: { list: [opts] } },
+                                requestId: 'testRequestId'
+                            }
+                        }
+                    }
+                    return Promise.resolve(mockRes)
+                })
+            }
         })
 
-        const tcb1 = require('../../src/index')
+        const tcb1 = require('../../lib/index')
         const app1 = tcb1.init({ env: tcb1.SYMBOL_CURRENT_ENV })
 
         const appWithNoEnv = tcb1.init()

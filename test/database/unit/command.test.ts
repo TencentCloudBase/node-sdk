@@ -1,12 +1,12 @@
 import * as assert from 'power-assert'
-import tcb from '../../../src/index'
+import tcb from '../../../lib/index'
 import * as Config from '../../config.local'
 import * as common from '../../common/index'
 
 const app = tcb.init(Config)
 const db = app.database()
 
-describe('test/unit/collection.test.ts', () => {
+describe.skip('test/unit/collection.test.ts', () => {
     const collName = 'coll-1'
     const collection = db.collection(collName)
     const command = db.command

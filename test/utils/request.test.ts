@@ -1,4 +1,4 @@
-import tcb from '../../src/index'
+import tcb from '../../lib/index'
 import config from '../config.local'
 
 // jest.mock('request', () => {

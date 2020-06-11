@@ -1,7 +1,7 @@
-import tcb from '../../src/index'
+import tcb from '../../lib/index'
 import assert from 'assert'
 import config from '../config.local'
-import { ERROR } from '../../src/const/code'
+import { ERROR } from '../../lib/const/code'
 
 // TODO 删除前先创建
 describe('wx.openApi: 微信openapi', () => {
@@ -59,7 +59,7 @@ describe('wx.openApi: 微信openapi', () => {
             })
         })
 
-        const tcb1 = require('../../src/index')
+        const tcb1 = require('../../lib/index')
         const app1 = tcb1.init(config)
         try {
             let result = await app1.callWxOpenApi({

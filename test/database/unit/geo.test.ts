@@ -1,6 +1,6 @@
 import * as assert from 'power-assert'
 import * as Mock from '../unit/mock'
-import tcb from '../../../src/index'
+import tcb from '../../../lib/index'
 import * as config from '../../config.local'
 import * as common from '../../common/index'
 
@@ -8,13 +8,8 @@ describe('GEO类型', async () => {
     const app = tcb.init(config)
     const db = app.database()
 
-    const collName = 'coll-1'
+    const collName = 'db-test-geo'
     const collection = db.collection(collName)
-    // const nameList = ["f", "b", "e", "d", "a", "c"];
-
-    it('Document - createCollection()', async () => {
-        await common.safeCollection(db, collName)
-    })
 
     const longitude = -180
     const latitude = 20
@@ -40,6 +35,25 @@ describe('GEO类型', async () => {
             }
         ]
     }
+    // const nameList = ["f", "b", "e", "d", "a", "c"];
+
+    beforeAll(async () => {
+        await common.safeCollection(db, collName)
+    })
+
+    afterAll(async () => {
+        await db
+            .collection(collName)
+            .where({
+                _id: /.*/
+            })
+            .remove()
+    })
+
+    // it('Document - createCollection()', async () => {
+    //     await common.safeCollection(db, collName)
+    // })
+
     it('GEO Point - CRUD', async () => {
         // Create
         let res = await collection.add(initialData)
@@ -49,7 +63,6 @@ describe('GEO类型', async () => {
         assert(res.requestId)
 
         const res2 = await collection.doc(id).set(initialData)
-        console.log(res2)
         assert.strictEqual(res2.updated, 1)
         assert(res2.requestId)
 
@@ -59,7 +72,6 @@ describe('GEO类型', async () => {
                 _id: id
             })
             .get()
-        console.log(result.data)
         assert(result.data.length > 0)
         assert.deepEqual(result.data[0].point, { longitude, latitude })
 

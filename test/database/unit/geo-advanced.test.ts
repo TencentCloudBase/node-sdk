@@ -1,6 +1,6 @@
 import * as assert from 'power-assert'
 import * as Mock from './mock'
-import tcb from '../../../src/index'
+import tcb from '../../../lib/index'
 import * as config from '../../config.local'
 import * as common from '../../common/index'
 
@@ -9,15 +9,11 @@ describe('GEO高级功能', async () => {
     const db = app.database()
     const { Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon } = db.Geo
 
-    const collName = 'coll-1'
+    const collName = 'db-test-geo-advanced'
     const collection = db.collection(collName)
     function randomPoint() {
         return new Point(180 - 360 * Math.random(), 90 - 180 * Math.random())
     }
-
-    it('Document - createCollection()', async () => {
-        await common.safeCollection(db, collName)
-    })
 
     const geoNearPoint = new Point(0, 0)
     const line = new LineString([randomPoint(), randomPoint()])
@@ -59,6 +55,29 @@ describe('GEO高级功能', async () => {
         multiPolygon
     }
 
+    beforeEach(async () => {
+        await common.safeCollection(db, collName)
+        await db
+            .collection(collName)
+            .where({
+                _id: /.*/
+            })
+            .remove()
+    })
+
+    afterAll(async () => {
+        await db
+            .collection(collName)
+            .where({
+                _id: /.*/
+            })
+            .remove()
+    })
+
+    // it.skip('Document - createCollection()', async () => {
+    //     await common.safeCollection(db, collName)
+    // })
+
     it('GEO Advanced - CRUD', async () => {
         // Create
         const res = await collection.add(initialData)
@@ -73,7 +92,6 @@ describe('GEO高级功能', async () => {
                 _id: id
             })
             .get()
-        console.log(readRes.data)
         assert(readRes.data.length > 0)
         const data = readRes.data[0]
 
@@ -92,8 +110,8 @@ describe('GEO高级功能', async () => {
 
         // Update
         let result = await collection.doc(id).set(initialData)
-        console.log(result)
         assert.strictEqual(result.updated, 1)
+
         assert(result.requestId)
 
         // Delete
@@ -102,7 +120,6 @@ describe('GEO高级功能', async () => {
                 _id: id
             })
             .remove()
-        console.log(deleteRes)
         assert.strictEqual(deleteRes.deleted, 1)
     })
 
@@ -193,7 +210,6 @@ describe('GEO高级功能', async () => {
                 })
             })
             .get()
-        console.log(readRes)
         assert(readRes.data.length > 0)
         assert.deepStrictEqual(readRes.data[0].point, new Point(0, 0))
 
@@ -207,7 +223,6 @@ describe('GEO高级功能', async () => {
                 })
             })
             .remove()
-        console.log(deleteRes)
         assert(deleteRes.deleted >= 1)
     })
 })

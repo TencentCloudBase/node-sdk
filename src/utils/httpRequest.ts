@@ -11,7 +11,8 @@ import { handleWxOpenApiData } from './requestHook'
 import { getWxCloudApiToken } from './getWxCloudApiToken'
 import { sign } from '@cloudbase/signature-nodejs'
 import URL from 'url'
-import { version } from '../../package.json'
+// import { version } from '../../package.json'
+const { version } = require('../../package.json')
 
 const { E, second, processReturn, getServerInjectUrl } = utils
 
@@ -32,13 +33,16 @@ export class Request {
     private slowWarnTimer: NodeJS.Timer = null
 
     // 请求参数
-    private params: {[key: string]: any} = {}
+    private params: { [key: string]: any } = {}
 
     private hooks: IReqHooks = {}
 
     public constructor(args: IRequestInfo) {
         this.args = args
         this.config = args.config
+
+        // 密钥检查及设置
+        this.initSecret()
         this.params = this.makeParams()
     }
 
@@ -50,20 +54,32 @@ export class Request {
         const key = {
             functions: 'function_name',
             database: 'collectionName',
-            wx: 'apiName',
-          }[action.split('.')[0]]
+            wx: 'apiName'
+        }[action.split('.')[0]]
 
         const argopts: any = this.args.opts || {}
-        const config = this.args.config
+        const config = this.config
         const opts = this.makeReqOpts()
+
+        // 发请求时未找到有效环境字段
+        if (!this.params.envName) {
+            // 检查config中是否有设置
+            if (config.envName) {
+                return processReturn(config.throwOnCode, {
+                    ...ERROR.INVALID_PARAM,
+                    message: '未取到init 指定 env！'
+                })
+            } else {
+                console.warn(`当前未指定env，将默认使用第一个创建的环境！`)
+            }
+        }
 
         // 注意：必须初始化为 null
         let retryOptions: any = null
         if (argopts.retryOptions) {
             retryOptions = argopts.retryOptions
-        }
-        else if (config.retries && typeof config.retries === 'number') {
-            retryOptions = {retries: config.retries}
+        } else if (config.retries && typeof config.retries === 'number') {
+            retryOptions = { retries: config.retries }
         }
 
         return extraRequest(opts, {
@@ -72,7 +88,7 @@ export class Request {
             seqId: this.getSeqId(),
             retryOptions: retryOptions,
             timingsMeasurerOptions: config.timingsMeasurerOptions || {}
-          }).then((response: any) => {
+        }).then((response: any) => {
             this.slowWarnTimer && clearTimeout(this.slowWarnTimer)
             const { body } = response
             if (response.statusCode === 200) {
@@ -132,6 +148,7 @@ export class Request {
      * 构造params
      */
     public makeParams(): any {
+        const { TCB_SESSIONTOKEN, TCB_ENV, SCF_NAMESPACE } = CloudBase.getCloudbaseContext()
         const args = this.args
 
         const config = this.config
@@ -145,14 +162,14 @@ export class Request {
             // wxCloudApiToken: process.env.WX_API_TOKEN || '',
             wxCloudApiToken: getWxCloudApiToken(),
             // 对应服务端 wxCloudSessionToken
-            tcb_sessionToken: process.env.TCB_SESSIONTOKEN || '',
+            tcb_sessionToken: TCB_SESSIONTOKEN || '',
             sessionToken: config.sessionToken,
             sdk_version: version // todo 可去掉该参数
         }
 
         // 取当前云函数环境时，替换为云函数下环境变量
         if (params.envName === SYMBOL_CURRENT_ENV) {
-            params.envName = process.env.TCB_ENV || process.env.SCF_NAMESPACE
+            params.envName = TCB_ENV || SCF_NAMESPACE
         }
 
         // 过滤value undefined
@@ -165,9 +182,6 @@ export class Request {
      *  构造请求项
      */
     public makeReqOpts(): IReqOpts {
-        // 校验密钥是否存在
-        this.validateSecretIdAndKey()
-
         const config = this.config
         const args = this.args
         const url = this.getUrl()
@@ -230,14 +244,20 @@ export class Request {
     /**
      * 校验密钥和token是否存在
      */
-    private validateSecretIdAndKey(): void {
+    private initSecret(): void {
+        const {
+            TENCENTCLOUD_SECRETID,
+            TENCENTCLOUD_SECRETKEY,
+            TENCENTCLOUD_SESSIONTOKEN
+        } = CloudBase.getCloudbaseContext()
+
         const isInSCF = utils.checkIsInScf()
         const { secretId, secretKey } = this.config
         if (!secretId || !secretKey) {
             // 用户init未传入密钥对，读process.env
-            const envSecretId = process.env.TENCENTCLOUD_SECRETID
-            const envSecretKey = process.env.TENCENTCLOUD_SECRETKEY
-            const sessionToken = process.env.TENCENTCLOUD_SESSIONTOKEN
+            const envSecretId = TENCENTCLOUD_SECRETID
+            const envSecretKey = TENCENTCLOUD_SECRETKEY
+            const sessionToken = TENCENTCLOUD_SESSIONTOKEN
             if (!envSecretId || !envSecretKey) {
                 if (isInSCF) {
                     throw E({
@@ -267,13 +287,14 @@ export class Request {
      * 获取headers 此函数中设置authorization
      */
     private getHeaders(): any {
+        let { TCB_SOURCE } = CloudBase.getCloudbaseContext()
         const config = this.config
         const { secretId, secretKey } = config
         const args = this.args
         const method = this.getMethod()
         const isInSCF = utils.checkIsInScf()
         // Note: 云函数被调用时可能调用端未传递 SOURCE，TCB_SOURCE 可能为空
-        const TCB_SOURCE = process.env.TCB_SOURCE || ''
+        TCB_SOURCE = TCB_SOURCE || ''
         const SOURCE = isInSCF ? `${TCB_SOURCE},scf` : ',not_scf'
         const url = this.getUrl()
         // 默认
@@ -350,7 +371,7 @@ export default async (args: IRequestInfo): Promise<any> => {
     const { action } = args.params
 
     if (action === 'wx.openApi' || action === 'wx.wxPayApi') {
-        req.setHooks({handleData: handleWxOpenApiData})
+        req.setHooks({ handleData: handleWxOpenApiData })
     }
 
     if (action.startsWith('database')) {
@@ -366,6 +387,6 @@ export default async (args: IRequestInfo): Promise<any> => {
         }
         return res
     } finally {
-        // 
+        //
     }
 }

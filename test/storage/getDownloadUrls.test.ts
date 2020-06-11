@@ -1,9 +1,9 @@
-import tcb from '../../src/index'
+import tcb from '../../lib/index'
 import config from '../config.local'
 import fs from 'fs'
-import { ERROR } from '../../src/const/code'
+import { ERROR } from '../../lib/const/code'
 import assert from 'assert'
-import { ICustomErrRes } from '../../src/type'
+import { ICustomErrRes } from '../../lib/type'
 
 let fileContent = fs.createReadStream(`${__dirname}/cos.jpeg`)
 

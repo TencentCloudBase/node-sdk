@@ -1,5 +1,5 @@
 import * as assert from 'power-assert'
-import tcb from '../../../src/index'
+import tcb from '../../../lib/index'
 import * as config from '../../config.local'
 import * as common from '../../common/index'
 
@@ -8,7 +8,7 @@ const db = app.database()
 const _ = db.command
 const $ = _.aggregate
 
-const collName = 'test-projection'
+const collName = 'db-test-advanced-operator'
 let passagesCollection = null
 const data = [
     { category: 'Web', tags: ['JavaScript', 'C#'], index: 0, tags2: [1, 2, 3] },
@@ -46,6 +46,7 @@ const data = [
 
 beforeEach(async () => {
     passagesCollection = await common.safeCollection(db, collName)
+
     const success = await passagesCollection.create(data)
     assert.strictEqual(success, true)
 })
@@ -53,16 +54,6 @@ beforeEach(async () => {
 afterEach(async () => {
     const success = await passagesCollection.remove()
     assert.strictEqual(success, true)
-})
-
-beforeAll(async () => {
-    const result = await db
-        .collection(collName)
-        .where({
-            _id: /.*/
-        })
-        .remove()
-    console.log(`before remove: ${result.deleted}`)
 })
 
 describe('operator', async () => {
@@ -381,7 +372,9 @@ describe('aggregation $match with query', () => {
                 category: _.eq('Web')
             })
             .end()
-        console.log(result)
+        for (let item of result.data) {
+            assert(item.category === 'Web')
+        }
     })
 })
 
@@ -503,7 +496,6 @@ describe('not', async () => {
                 index: _.not(_.gt(1))
             })
             .get()
-        console.log(result)
         assert.strictEqual(result.data.length, 4)
     })
 

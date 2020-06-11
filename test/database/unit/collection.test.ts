@@ -1,19 +1,23 @@
 import * as assert from 'power-assert'
-import tcb from '../../../src/index'
+import tcb from '../../../lib/index'
 import { ErrorCode } from '@cloudbase/database/src/constant'
 import * as Config from '../../config.local'
 import * as common from '../../common'
+import { create } from 'domain'
 
 describe('test/unit/collection.test.ts', async () => {
-    const collName = 'coll-1'
+    const collName = 'db-test-collection'
 
     const app = tcb.init(Config)
     const db = app.database()
     const collection = db.collection(collName)
+    const data = [{ name: 'A' }, { name: 'B' }]
+    let createColl = null
 
     it('name test', async () => {
         assert(collection.name === collName)
-        await common.safeCollection(db, collName)
+        createColl = await common.safeCollection(db, collName)
+        createColl.create(data)
     })
 
     it('Error - use invalid docId to get reference', () => {
@@ -39,7 +43,7 @@ describe('test/unit/collection.test.ts', async () => {
     // })
 
     it('API - use orderBy', async () => {
-        const field = 'huming'
+        const field = 'name'
         const direction = 'asc'
         const data = await collection.orderBy(field, direction).get()
         assert(Array.isArray(data.data))
@@ -58,10 +62,12 @@ describe('test/unit/collection.test.ts', async () => {
     })
 
     it('API - add one doc, update and remove', async () => {
+        // 清除collection
+        await createColl.remove()
+
         const res = await collection.add({
             name: 'huming'
         })
-        console.log('res:', res)
         assert(res.id)
 
         const data = await collection
@@ -71,7 +77,6 @@ describe('test/unit/collection.test.ts', async () => {
             .update({
                 age: 18
             })
-        console.log('data:', data)
         assert(data.updated > 0)
 
         const remove = await collection
@@ -121,7 +126,6 @@ describe('test/unit/collection.test.ts', async () => {
             })
             .get()
 
-        console.log(result)
         assert(result.data.length === 0)
     })
 
@@ -151,7 +155,8 @@ describe('test/unit/collection.test.ts', async () => {
 
         const res2 = await collection.where({}).get()
         assert(res2.data.length > 0)
-    })
 
-    
+        // 清楚当前collection
+        await createColl.remove()
+    })
 })

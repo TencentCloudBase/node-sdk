@@ -1,7 +1,7 @@
-import tcb from '../../src/index'
+import tcb from '../../lib/index'
 import assert from 'assert'
 import config from '../config.local'
-import { ERROR } from '../../src/const/code'
+import { ERROR } from '../../lib/const/code'
 
 describe('functions.invokeFunction: 执行云函数', () => {
     const app = tcb.init(config)
@@ -78,11 +78,11 @@ describe('functions.invokeFunction: 执行云函数', () => {
         jest.mock('request', () => {
             return jest.fn().mockImplementation((params, callback) => {
                 const body = { data: { response_data: 'test' } }
-                callback(null, { statusCode: 200, body})
+                callback(null, { statusCode: 200, body })
             })
         })
 
-        const tcb1 = require('../../src/index')
+        const tcb1 = require('../../lib/index')
         const app1 = tcb1.init(config)
         try {
             let result = await app1.callFunction({

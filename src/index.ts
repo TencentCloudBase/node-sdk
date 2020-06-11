@@ -1,6 +1,7 @@
 import { CloudBase } from './cloudbase'
 import { ICloudBaseConfig, IContext } from './type'
 import { SYMBOL_CURRENT_ENV } from './const/symbol'
+const { version } = require('../package.json')
 
 export = {
     init: (config?: ICloudBaseConfig): CloudBase => {
@@ -9,6 +10,10 @@ export = {
     parseContext: (context: IContext) => {
         // 校验context 是否正确
         return CloudBase.parseContext(context)
+    },
+    version,
+    getCloudbaseContext: (context?: any) => {
+        return CloudBase.getCloudbaseContext(context)
     },
     /**
      * 云函数下获取当前env

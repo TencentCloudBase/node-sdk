@@ -4,6 +4,10 @@ import { Log } from './log';
 export declare class CloudBase {
     static scfContext: IContext;
     static parseContext(context: IContext): IContext;
+    /**
+     * 获取当前函数内的所有环境变量(作为获取变量的统一方法，取值来源process.env 和 context)
+     */
+    static getCloudbaseContext(context?: IContext): any;
     config: ICloudBaseConfig;
     private clsLogger;
     private extensionMap;

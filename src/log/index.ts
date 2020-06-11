@@ -1,5 +1,6 @@
 import { E } from '../utils/utils'
 import { ERROR } from '../const/code'
+import { CloudBase } from '../cloudbase'
 
 /**
  *
@@ -11,9 +12,10 @@ export class Log {
     private src
 
     public constructor() {
+        const { _SCF_TCB_LOG } = CloudBase.getCloudbaseContext()
         this.src = 'app'
         this.isSupportClsReport = true
-        if (`${process.env._SCF_TCB_LOG}` !== '1') {
+        if (`${_SCF_TCB_LOG}` !== '1') {
             this.isSupportClsReport = false
         } else if (!(console as any).__baseLog__) {
             this.isSupportClsReport = false

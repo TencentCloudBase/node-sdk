@@ -1,6 +1,6 @@
-import tcb from '../../src/index'
+import tcb from '../../lib/index'
 import config from '../config.local'
-import { ERROR } from '../../src/const/code'
+import { ERROR } from '../../lib/const/code'
 import * as assert from 'power-assert'
 
 describe('日志上报', () => {

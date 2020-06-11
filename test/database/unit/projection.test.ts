@@ -1,5 +1,5 @@
 import * as assert from 'power-assert'
-import tcb from '../../../src/index'
+import tcb from '../../../lib/index'
 import * as Config from '../../config.local'
 import * as common from '../../common/index'
 
@@ -8,7 +8,7 @@ const db = app.database()
 const _ = db.command
 
 describe('projection', async () => {
-    const collName = 'test-projection'
+    const collName = 'db-test-projection'
     let passagesCollection = null
     const data = [
         { category: 'Web', tags: ['JavaScript', 'C#'] },
@@ -34,7 +34,9 @@ describe('projection', async () => {
                 tags: db.command.project.slice(1)
             })
             .get()
-        console.log(result.data)
+        for (let item of result.data) {
+            assert(item.tags.length === 1)
+        }
     })
 
     it('projection true false', async () => {
@@ -44,8 +46,11 @@ describe('projection', async () => {
                 category: true
             })
             .get()
-        console.log('result:', result)
-        assert.strictEqual(result.data.length, 3)
+        // console.log('result:', result)
+        for (let item of result.data) {
+            assert(item.category)
+        }
+        // assert.strictEqual(result.data.length, 3)
     })
 
     it('projection 1 0', async () => {

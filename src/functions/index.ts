@@ -11,6 +11,7 @@ import { CloudBase } from '../cloudbase'
  * @return {Promise}
  */
 export async function callFunction(cloudbase: CloudBase, { name, data }, opts?: ICustomReqOpts) {
+    const { TCB_ROUTE_KEY } = CloudBase.getCloudbaseContext()
     let transformData
     try {
         transformData = data ? JSON.stringify(data) : ''
@@ -37,7 +38,7 @@ export async function callFunction(cloudbase: CloudBase, { name, data }, opts?: 
         opts,
         headers: {
             'content-type': 'application/json',
-            ...(process.env.TCB_ROUTE_KEY ? { 'X-Tcb-Route-Key': process.env.TCB_ROUTE_KEY } : {})
+            ...(TCB_ROUTE_KEY ? { 'X-Tcb-Route-Key': TCB_ROUTE_KEY } : {})
         }
     }).then(res => {
         if (res.code) {

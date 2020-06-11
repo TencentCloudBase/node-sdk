@@ -1,9 +1,9 @@
-import tcb from '../../src/index'
+import tcb from '../../lib/index'
 import fs from 'fs'
 import assert from 'assert'
 import config from '../config.local'
-import { ERROR } from '../../src/const/code'
-import { ICustomErrRes } from '../../src/type'
+import { ERROR } from '../../lib/const/code'
+import { ICustomErrRes } from '../../lib/type'
 
 describe('storage.uploadFile: 上传文件', () => {
     const app = tcb.init(config)

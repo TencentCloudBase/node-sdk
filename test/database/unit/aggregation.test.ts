@@ -1,12 +1,12 @@
 import * as assert from 'power-assert'
-import tcb from '../../../src/index'
+import tcb from '../../../lib/index'
 import * as Config from '../../config.local'
 import * as common from '../../common/index'
 
 const app = tcb.init(Config)
 const db = app.database()
 
-const collName = 'test-aggregate'
+const collName = 'db-test-aggregate'
 const collection = db.collection(collName)
 
 describe('sample', async () => {
@@ -53,8 +53,6 @@ describe('sortByCount', async () => {
             .aggregate()
             .sortByCount('$category')
             .end()
-
-        console.log('result:', result)
 
         assert.strictEqual(result.data.length, 2)
     })
@@ -466,7 +464,7 @@ describe('Date', async () => {
             .collection('articles')
             .where({})
             .get()
-        console.log('queryRes:', queryRes)
+        // console.log('queryRes:', queryRes)
     })
 
     afterAll(async () => {
@@ -482,7 +480,6 @@ describe('Date', async () => {
                 _id: 0
             })
             .end()
-        console.log('result:', result)
 
         assert.deepStrictEqual(result.data[0], { date })
     })

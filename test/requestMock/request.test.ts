@@ -14,7 +14,7 @@ describe('mock request 回包处理逻辑', () => {
             })
         })
 
-        const tcb1 = require('../../src/index')
+        const tcb1 = require('../../lib/index')
         const app1 = tcb1.init(config)
         try {
             let result = await app1.callFunction({
@@ -37,7 +37,7 @@ describe('mock request 回包处理逻辑', () => {
             })
         })
 
-        const tcb1 = require('../../src/index')
+        const tcb1 = require('../../lib/index')
         const app1 = tcb1.init(config)
         try {
             let result = await app1.callFunction({

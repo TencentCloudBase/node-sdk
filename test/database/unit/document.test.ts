@@ -1,11 +1,11 @@
 import * as assert from 'power-assert'
 import { Util } from '@cloudbase/database/src/util'
-import tcb from '../../../src/index'
+import tcb from '../../../lib/index'
 import * as Config from '../../config.local'
 import * as common from '../../common/index'
 
 describe('test/unit/document.test.ts', () => {
-    const collName = 'coll-2'
+    const collName = 'db-test-document'
     const docIDGenerated = Util.generateDocId()
 
     const app = tcb.init(Config)
@@ -19,9 +19,7 @@ describe('test/unit/document.test.ts', () => {
 
     beforeAll(async () => {
         await common.safeCollection(db, collName)
-        for (let item of data) {
-            await db.collection(collName).add([item])
-        }
+        await db.collection(collName).add(data)
     })
 
     afterAll(async () => {
@@ -52,7 +50,6 @@ describe('test/unit/document.test.ts', () => {
             .set({
                 name: 'jude'
             })
-        console.log(document)
         assert(document.upsertedId)
         const documents = await db
             .collection(collName)
@@ -93,7 +90,6 @@ describe('test/unit/document.test.ts', () => {
                 data: { arr: db.command.push([4, 5, 6]), foo: db.command.inc(1) },
                 array: db.command.pop()
             })
-        console.log(data)
         assert.strictEqual(data.updated, 1)
     })
 
