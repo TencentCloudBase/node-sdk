@@ -31,19 +31,6 @@ describe('functions.invokeFunction: 执行云函数', () => {
         }
     })
 
-    it('执行云函数', async () => {
-        try {
-            const result = await app.callFunction({
-                name: 'test-env',
-                data: { a: 1 }
-            })
-
-            console.log(result)
-        } catch (e) {
-            assert(e.code === 'FUNCTIONS_EXECUTE_FAIL')
-        }
-    }, 30000)
-
     it('执行不存在的云函数', async () => {
         try {
             const result = await app.callFunction({
@@ -51,7 +38,7 @@ describe('functions.invokeFunction: 执行云函数', () => {
                 data: { a: 1 }
             })
         } catch (e) {
-            assert(e.code === 'FUNCTIONS_EXECUTE_FAIL')
+            assert(e.code === 'FUNCTION_NOT_FOUND')
         }
     })
 

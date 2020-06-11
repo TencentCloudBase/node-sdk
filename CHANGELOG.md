@@ -1,3 +1,7 @@
+# v2.1.1
+
+-   [fix] 修复数据库处理 query 或 data 内容时 undefined 转为 null 导致报错的问题
+
 # v2.1.0
 
 -   [add] 新增获取云函数下全部环境变量方法 getCloudbaseContext
