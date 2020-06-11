@@ -180,6 +180,19 @@ describe('GEO高级功能', async () => {
         assert(readRes.data.length > 0)
         assert.deepStrictEqual(readRes.data[0].point, geoPoint)
 
+        // 验证geoNear 不填maxDistance minDistance
+        const readRes1 = await collection
+            .where({
+                point: db.command.geoNear({
+                    geometry: geoPoint
+                })
+            })
+            .get()
+
+        assert(readRes1.data.length > 0)
+
+        assert.deepStrictEqual(readRes1.data[0].point, geoPoint)
+
         // Delete
         // const deleteRes = await collection
         //     .where({
