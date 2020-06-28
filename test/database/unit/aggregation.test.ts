@@ -70,6 +70,8 @@ describe('sortByCount', async () => {
 
 describe('match', async () => {
     let coll = null
+    const $ = db.command.aggregate
+    const _ = db.command
     const data = [
         { author: 'stark', score: 80 },
         { author: 'stark', score: 85 },
@@ -91,6 +93,18 @@ describe('match', async () => {
         assert.strictEqual(success, true)
     })
 
+    it('匹配 字段 or 逻辑', async () => {
+        const result = await db
+            .collection('articles')
+            .aggregate()
+            .match({
+                author: _.or(_.eq('stark'), _.neq('stark'))
+            })
+            .end()
+
+        assert(result.data.length === data.length)
+    })
+
     it('匹配', async () => {
         const result = await db
             .collection('articles')
@@ -103,7 +117,9 @@ describe('match', async () => {
     })
 
     it('计数', async () => {
-        const { gt, sum } = db.command.aggregate
+        const { sum } = db.command.aggregate
+
+        const { gt } = db.command
         const result = await db
             .collection('articles')
             .aggregate()
