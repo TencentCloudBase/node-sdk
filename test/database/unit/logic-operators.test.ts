@@ -29,6 +29,15 @@ describe('逻辑操作符', async () => {
         assert.strictEqual(success, true)
     })
 
+    it('验证多字段or', async () => {
+        const res = await db
+            .collection(collName)
+            .where(_.or({ category: 'Life' }, { date }))
+            .get()
+        // console.log(res)
+        assert(res.data.length === 2)
+    })
+
     it('nor', async () => {
         const result = await db
             .collection(collName)

@@ -56,6 +56,21 @@ describe('Date类型', async () => {
             .remove()
     })
 
+    it('验证 long 值offset', async () => {
+        const offset = 31536000000 // 1年的毫秒数
+        const currYear = new Date().getFullYear()
+        const res = await collection.add({
+            name: 'longOffsetTest',
+            serverDate1: db.serverDate({ offset })
+        })
+
+        const queryRes = await collection.where({ _id: res.id }).get()
+        const newYear = queryRes.data[0].serverDate1.getFullYear()
+        // console.log(queryRes.data[0].serverDate1)
+        // console.log('res:', res)
+        assert(newYear - currYear === 1)
+    })
+
     it('Document - CRUD', async () => {
         // Create
         const res = await collection.add(initialData)

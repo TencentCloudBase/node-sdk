@@ -3,6 +3,7 @@ import tcb from '../../lib/index'
 import * as config from '../config.local'
 import * as common from '../common/index'
 import { ERROR } from '../../lib/const/code'
+import { getPriority } from 'os'
 
 describe('test/index.test.ts', async () => {
     const app = tcb.init({
@@ -65,6 +66,28 @@ describe('test/index.test.ts', async () => {
                 _id: /.*/
             })
             .remove()
+    })
+
+    it('插入字段null', async () => {
+        const addRes = await collection.add({ name: null })
+        assert(addRes.id !== undefined)
+        const queryRes = await collection.where({ _id: addRes.id }).get()
+        assert(queryRes.data)
+    })
+
+    it('更新字段为空数组', async () => {
+        const addRes = await collection.add({ a: 1 })
+        const updateRes = await collection.where({ _id: addRes.id }).update({ a: [] })
+        const queryRes = await collection.where({ _id: addRes.id }).get()
+        assert(Array.isArray(queryRes.data[0].a))
+        await collection.where({ _id: addRes.id }).remove()
+    })
+
+    it('验证插入24位可转objid 的id', async () => {
+        const addRes = await collection.add({ a: 'test', _id: '5e7b474a5e54c773b58d7b39' })
+        const queryRes = await collection.where({ _id: '5e7b474a5e54c773b58d7b39' }).get()
+        // console.log(queryRes)
+        assert(queryRes.data.length === 0)
     })
 
     it('验证throwOnCode', async () => {

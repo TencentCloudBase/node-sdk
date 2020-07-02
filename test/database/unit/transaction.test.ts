@@ -88,6 +88,47 @@ describe('transaction', async () => {
         })
     })
 
+    it('事务内批量插入 条件查询', async () => {
+        const transaction = await db.startTransaction()
+        const addRes = await transaction
+            .collection(collectionName)
+            .add([{ name: 'a' }, { name: 'b' }])
+        assert(addRes.ids.length === 2)
+
+        const queryRes = await transaction
+            .collection(collectionName)
+            .where(_.or([{ name: 'a' }, { name: 'b' }]))
+            .get()
+        assert(queryRes.data.length === 2)
+
+        const result = await transaction.commit()
+        assert.strictEqual(typeof result.requestId, 'string')
+    })
+
+    it('事务内批量插入1000条文档', async () => {
+        const transaction = await db.startTransaction()
+        // 构造1001条数据
+        const mockData = []
+        let i = 0
+        while (i++ <= 1000) {
+            mockData.push({ name: `luketest${i}` })
+        }
+        const addRes = await transaction.collection(collectionName).add(mockData)
+
+        assert(addRes.ids.length === 1001)
+
+        const queryRes = await transaction
+            .collection(collectionName)
+            .where({ name: /^luketest/ })
+            .limit(1000)
+            .get()
+        // console.log('queryRes:', queryRes)
+        assert(queryRes.data.length === 1000)
+
+        const result = await transaction.commit()
+        assert.strictEqual(typeof result.requestId, 'string')
+    })
+
     it('事务内更新含特殊类型 字段文档', async () => {
         await db.runTransaction(async function(transaction) {
             const newDate = new Date()
