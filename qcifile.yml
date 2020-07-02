@@ -6,5 +6,5 @@ worker:
 stages:
     - stage: testQCI # 自定义stage的名称，多个stage为顺序执行
       cmds: # 多条命令顺序执行
-          - tnpm install
+          - npm install
           - npm test
