@@ -13,24 +13,29 @@ jest.mock('request')
 describe('函数支持灰度发布功能', () => {
     const app = Tcb.init(config)
 
-    it('无 TCB_ROUTE_KEY 等灰度发布环境变量时调用云函数不透传 X-Tcb-Route-Key header参数', async function() {
+    it('无 TCB_ROUTE_KEY 等灰度发布环境变量时调用云函数不透传 X-Tcb-Route-Key header参数', async function () {
         process.env.TCB_ROUTE_KEY = ''
         process.env.TCB_CONTEXT_KEYS = 'TCB_ROUTE_KEY'
 
         const mockedRequest = require('request')
-        mockedRequest.mockClear()
+        // mockedRequest.mockClear()
 
         app.callFunction({
             name: 'test',
             data: { a: 1 }
         })
 
-        expect(mockedRequest).toBeCalled()
-        expect(mockedRequest.mock.calls[0][0].headers).not.toHaveProperty('X-Tcb-Route-Key')
-        expect(mockedRequest.mock.calls[0][0].headers['X-Tcb-Route-Key']).toBe(undefined)
+        return new Promise(resolve => {
+            setImmediate(() => {
+                expect(mockedRequest).toBeCalled()
+                expect(mockedRequest.mock.calls[0][0].headers).not.toHaveProperty('X-Tcb-Route-Key')
+                expect(mockedRequest.mock.calls[0][0].headers['X-Tcb-Route-Key']).toBe(undefined)
+                resolve()
+            })
+        })
     })
 
-    it('存在 TCB_ROUTE_KEY 等灰度发布相关变量时透传 X-Tcb-Route-Key header参数', async function() {
+    it('存在 TCB_ROUTE_KEY 等灰度发布相关变量时透传 X-Tcb-Route-Key header参数', async function () {
         const randomRouteKey = String(Math.floor(Math.random() * 100) + 1)
         process.env.TCB_ROUTE_KEY = randomRouteKey
         process.env.TCB_CONTEXT_KEYS = 'TCB_ROUTE_KEY'
@@ -43,7 +48,12 @@ describe('函数支持灰度发布功能', () => {
             data: { a: 1 }
         })
 
-        expect(mockedRequest).toBeCalled()
-        expect(mockedRequest.mock.calls[0][0].headers['X-Tcb-Route-Key']).toBe(randomRouteKey)
+        return new Promise(resolve => {
+            setImmediate(() => {
+                expect(mockedRequest).toBeCalled()
+                expect(mockedRequest.mock.calls[0][0].headers['X-Tcb-Route-Key']).toBe(randomRouteKey)
+                resolve()
+            })
+        })
     })
 })

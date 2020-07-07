@@ -12,6 +12,7 @@ import { getWxCloudApiToken } from './getWxCloudApiToken'
 import { sign } from '@cloudbase/signature-nodejs'
 import URL from 'url'
 // import { version } from '../../package.json'
+import SecretManager from './secretManager'
 const { version } = require('../../package.json')
 
 const { E, second, processReturn, getServerInjectUrl } = utils
@@ -29,27 +30,29 @@ export class Request {
         eventId: string
         seqId: string
     } = generateTracingInfo()
+    private secretManager: SecretManager
 
     private slowWarnTimer: NodeJS.Timer = null
 
     // 请求参数
-    private params: { [key: string]: any } = {}
 
     private hooks: IReqHooks = {}
 
     public constructor(args: IRequestInfo) {
         this.args = args
         this.config = args.config
-
-        // 密钥检查及设置
-        this.initSecret()
-        this.params = this.makeParams()
+        this.secretManager = new SecretManager()
     }
 
     /**
      * 最终发送请求
      */
-    public request(): Promise<any> {
+    public async request(): Promise<any> {
+        // 校验密钥是否存在
+        await this.validateSecretIdAndKey()
+        // 构造请求参数
+        const params = this.makeParams()
+        const opts = this.makeReqOpts(params)
         const action = this.getAction()
         const key = {
             functions: 'function_name',
@@ -59,10 +62,9 @@ export class Request {
 
         const argopts: any = this.args.opts || {}
         const config = this.config
-        const opts = this.makeReqOpts()
 
         // 发请求时未找到有效环境字段
-        if (!this.params.envName) {
+        if (!params.envName) {
             // 检查config中是否有设置
             if (config.envName) {
                 return processReturn(config.throwOnCode, {
@@ -84,7 +86,7 @@ export class Request {
 
         return extraRequest(opts, {
             debug: config.debug,
-            op: `${action}:${this.args.params[key]}@${this.params.envName}`,
+            op: `${action}:${this.args.params[key]}@${params.envName}`,
             seqId: this.getSeqId(),
             retryOptions: retryOptions,
             timingsMeasurerOptions: config.timingsMeasurerOptions || {}
@@ -181,12 +183,11 @@ export class Request {
     /**
      *  构造请求项
      */
-    public makeReqOpts(): IReqOpts {
+    public makeReqOpts(params): IReqOpts {
         const config = this.config
         const args = this.args
         const url = this.getUrl()
         const method = this.getMethod()
-        const params = this.params
 
         const opts: IReqOpts = {
             url,
@@ -195,7 +196,7 @@ export class Request {
             // timeout: args.timeout || config.timeout || 15000,
             timeout: this.getTimeout(), // todo 细化到api维度 timeout
             // 优先取config，其次取模块，最后取默认
-            headers: this.getHeaders(),
+            headers: this.getHeaders(params),
             proxy: config.proxy
         }
 
@@ -244,40 +245,44 @@ export class Request {
     /**
      * 校验密钥和token是否存在
      */
-    private initSecret(): void {
-        const {
-            TENCENTCLOUD_SECRETID,
-            TENCENTCLOUD_SECRETKEY,
-            TENCENTCLOUD_SESSIONTOKEN
-        } = CloudBase.getCloudbaseContext()
-
+    private async validateSecretIdAndKey(): Promise<void> {
         const isInSCF = utils.checkIsInScf()
+        const isInContainer = utils.checkIsInContainer()
         const { secretId, secretKey } = this.config
         if (!secretId || !secretKey) {
-            // 用户init未传入密钥对，读process.env
-            const envSecretId = TENCENTCLOUD_SECRETID
-            const envSecretKey = TENCENTCLOUD_SECRETKEY
-            const sessionToken = TENCENTCLOUD_SESSIONTOKEN
-            if (!envSecretId || !envSecretKey) {
-                if (isInSCF) {
+            if (isInSCF) {
+                // 用户init未传入密钥对，读process.env
+                const {
+                    TENCENTCLOUD_SECRETID,
+                    TENCENTCLOUD_SECRETKEY,
+                    TENCENTCLOUD_SESSIONTOKEN
+                } = CloudBase.getCloudbaseContext()
+                if (!TENCENTCLOUD_SECRETID || !TENCENTCLOUD_SECRETKEY) {
                     throw E({
                         ...ERROR.INVALID_PARAM,
                         message: 'missing authoration key, redeploy the function'
                     })
-                } else {
-                    throw E({
-                        ...ERROR.INVALID_PARAM,
-                        message: 'missing secretId or secretKey of tencent cloud'
-                    })
                 }
-            } else {
                 this.config = {
                     ...this.config,
-                    secretId: envSecretId,
-                    secretKey: envSecretKey,
-                    sessionToken: sessionToken
+                    secretId: TENCENTCLOUD_SECRETID,
+                    secretKey: TENCENTCLOUD_SECRETKEY,
+                    sessionToken: TENCENTCLOUD_SESSIONTOKEN
                 }
-                return
+            } else if (isInContainer) {
+                // 这种情况有可能是在容器内，此时尝试拉取临时
+                const tmpSecret = await this.secretManager.getTmpSecret()
+                this.config = {
+                    ...this.config,
+                    secretId: tmpSecret.id,
+                    secretKey: tmpSecret.key,
+                    sessionToken: tmpSecret.token
+                }
+            } else {
+                throw E({
+                    ...ERROR.INVALID_PARAM,
+                    message: 'missing secretId or secretKey of tencent cloud'
+                })
             }
         }
     }
@@ -286,7 +291,7 @@ export class Request {
      *
      * 获取headers 此函数中设置authorization
      */
-    private getHeaders(): any {
+    private getHeaders(params): any {
         let { TCB_SOURCE } = CloudBase.getCloudbaseContext()
         const config = this.config
         const { secretId, secretKey } = config
@@ -317,7 +322,7 @@ export class Request {
             secretKey: secretKey,
             method: method,
             url: url,
-            params: this.params,
+            params: this.makeParams(),
             headers: requiredHeaders,
             withSignedParams: true,
             timestamp: second() - 1
@@ -337,12 +342,13 @@ export class Request {
     private getUrl(): string {
         const protocol = this.getProtocol()
         const isInSCF = utils.checkIsInScf()
+        const isInContainer = utils.checkIsInContainer()
         const { eventId, seqId } = this.tracingInfo
         const { customApiUrl } = this.args
         const { serviceUrl } = this.config
         const serverInjectUrl = getServerInjectUrl()
 
-        const defaultUrl = isInSCF
+        const defaultUrl = isInSCF || isInContainer
             ? `http://${this.inScfHost}${this.urlPath}`
             : `${protocol}://${this.defaultEndPoint}${this.urlPath}`
 
