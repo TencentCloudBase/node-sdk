@@ -8,8 +8,8 @@ export declare class Request {
     private defaultTimeout;
     private timestamp;
     private tracingInfo;
+    private secretManager;
     private slowWarnTimer;
-    private params;
     private hooks;
     constructor(args: IRequestInfo);
     /**
@@ -33,7 +33,7 @@ export declare class Request {
     /**
      *  构造请求项
      */
-    makeReqOpts(): IReqOpts;
+    makeReqOpts(params: any): IReqOpts;
     /**
      * 协议
      */
@@ -49,7 +49,7 @@ export declare class Request {
     /**
      * 校验密钥和token是否存在
      */
-    private initSecret;
+    private validateSecretIdAndKey;
     /**
      *
      * 获取headers 此函数中设置authorization

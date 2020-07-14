@@ -87,6 +87,10 @@ export const checkIsInScf = () => {
     return TENCENTCLOUD_RUNENV === 'SCF'
 }
 
+export const checkIsInContainer = () => {
+    return !!process.env.KUBERNETES_SERVICE_HOST;
+}
+
 export const delay = ms => {
     return new Promise(resolve => setTimeout(resolve, ms))
 }

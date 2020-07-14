@@ -13,6 +13,7 @@ export declare const camSafeUrlEncode: (str: any) => string;
 export declare const map: (obj: any, fn: any) => {};
 export declare const clone: (obj: any) => {};
 export declare const checkIsInScf: () => boolean;
+export declare const checkIsInContainer: () => boolean;
 export declare const delay: (ms: any) => Promise<unknown>;
 export declare function second(): number;
 export declare function processReturn(throwOnCode: boolean, res: any): any;
