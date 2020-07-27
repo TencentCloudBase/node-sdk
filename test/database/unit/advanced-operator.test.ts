@@ -238,7 +238,7 @@ describe('size', async () => {
                 tags: _.size(2)
             })
             .get()
-        assert.strictEqual(result.data[0].category, 'Web')
+        assert.strictEqual(result.data.length, 3)
     })
 })
 

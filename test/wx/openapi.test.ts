@@ -29,7 +29,6 @@ describe('wx.openApi: 微信openapi', () => {
                 apiName: '/inner/svrkitclientcall',
                 requestData: { name: 'jamespeng' }
             })
-            console.log(result)
         } catch (e) {
             assert(e.code === ERROR.INVALID_PARAM.code)
         }

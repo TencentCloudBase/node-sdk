@@ -77,7 +77,6 @@ describe('tcb.init: 初始化tcb', () => {
             namespace: 'luke-87pns'
         }
         const contextObj = tcb.parseContext(mockContext)
-        console.log(contextObj)
 
         // 验证environ有value含;情形  如a=b;;sfsdf 解析结果为a=b 忽略分号后字符串
         const mockContext1 = {

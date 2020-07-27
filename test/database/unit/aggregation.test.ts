@@ -476,10 +476,7 @@ describe('Date', async () => {
         coll = await common.safeCollection(db, 'articles')
         const success = await coll.create(data)
         assert.strictEqual(success, true)
-        const queryRes = await db
-            .collection('articles')
-            .where({})
-            .get()
+        const queryRes = await db.collection('articles').where({}).get()
         // console.log('queryRes:', queryRes)
     })
 
@@ -599,5 +596,90 @@ describe('lookup', async () => {
         assert(result.data[0].name === 'stark')
         assert(result.data[0].age === 24)
         assert(result.data[0].join[0].gender === 'male')
+    })
+})
+
+describe.skip('geoNear', async () => {
+    let coll1 = null
+    const date = new Date()
+
+    const data1 = [
+        {
+            _id: 'geoNear.0',
+            city: 'Guangzhou',
+            docType: 'geoNear',
+            date: date,
+            location: {
+                type: 'Point',
+                coordinates: [113.30593, 23.1361155]
+            },
+            name: 'Canton Tower'
+        },
+        {
+            _id: 'geoNear.1',
+            city: 'Hangzhou',
+            docType: 'geoNear',
+            date: new Date(date.getTime() - 1000),
+            location: {
+                type: 'Point',
+                coordinates: [113.306789, 23.1564721]
+            },
+            name: 'Baiyun Mountain'
+        },
+        {
+            _id: 'geoNear.2',
+            city: 'Beijing',
+            docType: 'geoNear',
+            date: new Date(date.getTime() + 1000),
+            location: {
+                type: 'Point',
+                coordinates: [116.3949659, 39.9163447]
+            },
+            name: 'The Palace Museum'
+        },
+        {
+            _id: 'geoNear.3',
+            city: 'Beijing',
+            docType: 'geoNear',
+            location: {
+                type: 'Point',
+                coordinates: [116.2328567, 40.242373]
+            },
+            name: 'Great Wall'
+        }
+    ]
+
+    beforeAll(async () => {
+        coll1 = await common.safeCollection(db, 'attractions')
+
+        const success1 = await coll1.create(data1)
+
+        assert.strictEqual(success1, true)
+    })
+
+    afterAll(async () => {
+        const success1 = await coll1.remove()
+        assert.strictEqual(success1, true)
+    })
+
+    it('geoNear', async () => {
+        const $ = db.command.aggregate
+        const _ = db.command
+        const res = await db
+            .collection('attractions')
+            .aggregate()
+            .geoNear({
+                distanceField: 'distance', // 输出的每个记录中 distance 即是与给定点的距离
+                spherical: true,
+                near: new db.Geo.Point(113.3089506, 23.0968251),
+                query: {
+                    city: /zhou/,
+                    date: _.lt(date)
+                },
+                key: 'location', // 若只有 location 一个地理位置索引的字段，则不需填
+                includeLocs: 'location' // 若只有 location 一个是地理位置，则不需填
+            })
+            .end()
+        assert.strictEqual(res.data.length === 1 && res.data[0].city === 'Hangzhou', true)
     })
 })

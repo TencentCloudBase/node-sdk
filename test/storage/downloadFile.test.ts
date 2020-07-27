@@ -28,7 +28,6 @@ describe('storage.downloadFile: 下载文件', () => {
             fileContent
         })
         expect(result1.fileID).not.toBeNull()
-        console.log(result1)
         const fileID = result1.fileID
 
         // 下载文件

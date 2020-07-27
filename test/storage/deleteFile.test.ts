@@ -51,7 +51,6 @@ describe('storage.uploadFile: 上传文件', () => {
                 cloudPath: 'ab.jpeg',
                 fileContent
             })
-            console.log('result1:', result1)
         } catch (e) {
             console.log('e:', e)
         }
