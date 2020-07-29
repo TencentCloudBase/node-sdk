@@ -203,7 +203,7 @@ describe('GEO高级功能', async () => {
         // assert.strictEqual(deleteRes.deleted, 1)
     })
 
-    it('GEO - geoWithin', async () => {
+    it('GEO - geoWithin geometry', async () => {
         const res = await collection.add({
             ...initialData,
             point: new Point(0, 0)
@@ -237,5 +237,53 @@ describe('GEO高级功能', async () => {
             })
             .remove()
         assert(deleteRes.deleted >= 1)
+    })
+
+    it('GEO - geoWithin centerSphere', async () => {
+        const res = await collection.add({
+            ...initialData,
+            point: new Point(-88, 30.001)
+        })
+        const id = res.id
+        assert(id)
+        assert(res.requestId)
+
+        // Read
+        const readRes = await collection
+            .where({
+                point: db.command.geoWithin({
+                    centerSphere: [new Point(-88, 30), 10 / 6378.1]
+                })
+            })
+            .get()
+        assert(readRes.data.length > 0)
+        assert.deepStrictEqual(readRes.data[0].point, new Point(-88, 30.001))
+
+        // 校验第一个参数不传point
+        try {
+            await collection
+                .where({
+                    point: db.command.geoWithin({
+                        centerSphere: [[-88, 30], 10 / 6378.1]
+                    })
+                })
+                .get()
+        } catch (e) {
+            assert(e !== undefined)
+        }
+
+        // 校验第二个参数不传数字
+        try {
+            await collection
+                .where({
+                    point: db.command.geoWithin({
+                        centerSphere: [new Point(-88, 30), '10']
+                    })
+                })
+                .get()
+        } catch (e) {
+            console.log(e)
+            assert(e !== undefined)
+        }
     })
 })

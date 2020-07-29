@@ -1,3 +1,7 @@
+# v2.3.1
+
+-   [fix] geoWithin api 补齐 centerSphere 用法
+
 # v2.3.0
 
 -   [add] 新增 updateAndReturn 接口

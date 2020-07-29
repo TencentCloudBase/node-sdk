@@ -599,7 +599,7 @@ describe('lookup', async () => {
     })
 })
 
-describe.skip('geoNear', async () => {
+describe('geoNear', async () => {
     let coll1 = null
     const date = new Date()
 
