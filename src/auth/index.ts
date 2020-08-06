@@ -20,7 +20,25 @@ function validateUid(uid) {
 
 export function auth(cloudbase: CloudBase) {
     return {
-        getUserInfo(uid?: string, opts?: ICustomReqOpts) {
+        getUserInfo() {
+            const {
+                WX_OPENID,
+                WX_APPID,
+                TCB_UUID,
+                TCB_CUSTOM_USER_ID,
+                TCB_ISANONYMOUS_USER
+            } = CloudBase.getCloudbaseContext()
+
+            return {
+                openId: WX_OPENID || '',
+                appId: WX_APPID || '',
+                uid: TCB_UUID || '',
+                customUserId: TCB_CUSTOM_USER_ID || '',
+                isAnonymous: TCB_ISANONYMOUS_USER === 'true' ? true : false
+            }
+        },
+
+        getEndUserInfo(uid: string, opts?: ICustomReqOpts) {
             const {
                 WX_OPENID,
                 WX_APPID,
@@ -39,7 +57,7 @@ export function auth(cloudbase: CloudBase) {
 
             if (uid === undefined) {
                 return {
-                    result: defaultUserInfo
+                    userInfo: defaultUserInfo
                 }
             }
             validateUid(uid)
@@ -63,7 +81,7 @@ export function auth(cloudbase: CloudBase) {
                 }
         
                 return {
-                    result: {
+                    userInfo: {
                         ...res.data,
                         ...defaultUserInfo
                     },
