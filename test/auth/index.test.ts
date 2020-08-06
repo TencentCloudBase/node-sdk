@@ -79,7 +79,7 @@ describe('auth 注入环境变量', () => {
         })
     })
 
-    it.skip('获取云开发用户信息 getEndUserInfo 传入uid', async () => {
+    it('获取云开发用户信息 getEndUserInfo 传入uid', async () => {
         try {
             const { userInfo } = await app.auth().getEndUserInfo('c7446481324445a0bca211d747281ca3')
             const keysAreValid = [
