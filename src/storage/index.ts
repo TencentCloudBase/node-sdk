@@ -320,7 +320,7 @@ export async function getFileAuthority(cloudbase: CloudBase, { fileList }) {
         })
     }
 
-    const userInfo = this.auth().getUserInfo()
+    const { result: userInfo } = this.auth().getUserInfo()
     const { openId, uid } = userInfo
 
     if (!openId && !uid) {

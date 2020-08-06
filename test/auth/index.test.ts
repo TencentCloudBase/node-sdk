@@ -29,23 +29,6 @@ describe('auth 不注入环境变量', () => {
             assert(e.message === `Invalid uid: "${uid}"`)
         }
     })
-
-    it('不注入环境变量 默认取空字符串', async () => {
-        process.env.WX_OPENID = ''
-        process.env.WX_APPID = ''
-        process.env.TCB_UUID = ''
-        process.env.TCB_CUSTOM_USER_ID = ''
-        process.env.TCB_SOURCE_IP = ''
-
-        assert.deepStrictEqual(app.auth().getUserInfo(), {
-            openId: '',
-            appId: '',
-            uid: '',
-            customUserId: '',
-            isAnonymous: false
-        })
-        assert.deepStrictEqual(app.auth().getClientIP(), '')
-    })
 })
 
 describe('auth 注入环境变量', () => {
@@ -61,7 +44,26 @@ describe('auth 注入环境变量', () => {
     //     assert(result)
     // }, 30000)
 
-    it('获取用户信息getUserInfo', async () => {
+    it('不注入环境变量 默认取空字符串', async () => {
+        process.env.WX_OPENID = ''
+        process.env.WX_APPID = ''
+        process.env.TCB_UUID = ''
+        process.env.TCB_CUSTOM_USER_ID = ''
+        process.env.TCB_SOURCE_IP = ''
+
+        assert.deepStrictEqual(app.auth().getUserInfo(), {
+            result: {
+                openId: '',
+                appId: '',
+                uid: '',
+                customUserId: '',
+                isAnonymous: false
+            }
+        })
+        assert.deepStrictEqual(app.auth().getClientIP(), '')
+    })
+
+    it('获取用户信息getUserInfo 不传入uid', () => {
         process.env.WX_OPENID = 'WX_OPENID'
         process.env.WX_APPID = 'WX_APPID'
         process.env.TCB_UUID = 'TCB_UUID'
@@ -71,12 +73,50 @@ describe('auth 注入环境变量', () => {
         process.env.WX_CONTEXT_KEYS = 'WX_OPENID,WX_APPID'
 
         assert.deepStrictEqual(app.auth().getUserInfo(), {
-            openId: 'WX_OPENID',
-            appId: 'WX_APPID',
-            uid: 'TCB_UUID',
-            customUserId: 'TCB_CUSTOM_USER_ID',
-            isAnonymous: true
+            result: {
+                openId: 'WX_OPENID',
+                appId: 'WX_APPID',
+                uid: 'TCB_UUID',
+                customUserId: 'TCB_CUSTOM_USER_ID',
+                isAnonymous: true
+            }
         })
+    })
+
+    it('获取用户信息getUserInfo 传入uid', async () => {
+        try {
+            const { result } = await app.auth().getUserInfo('c7446481324445a0bca211d747281ca3')
+            const keysAreValid = [
+                'openId',
+                'appId',
+                'uid',
+                'customUserId',
+                'isAnonymous',
+                
+                'envName',
+                'nickName',
+                'gender',
+                'country',
+                'province',
+                'city',
+                'avatarUrl',
+                'uuid',
+                'wxOpenid',
+                'wxOpenId',
+                'wxUnionId',
+                'wxPublicId',
+                'qqMiniOpenId',
+                'email',
+                'hasPassword',
+                'username',
+                'createTime',
+                'updateTime'
+            ].every(key => result.hasOwnProperty(key))
+
+            assert.ok(keysAreValid)
+        } catch (error) {
+            assert.ok(error instanceof Error)
+        }
     })
 
     it('获取客户端IP', async () => {

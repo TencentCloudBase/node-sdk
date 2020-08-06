@@ -83,8 +83,8 @@ describe('test/index.test.ts', async () => {
         await collection.where({ _id: addRes.id }).remove()
     })
 
-    it('验证插入24位可转objid 的id', async () => {
-        const addRes = await collection.add({ a: 'test', _id: '5e7b474a5e54c773b58d7b39' })
+    it.skip('验证插入24位可转objid 的id', async () => {
+        await collection.add({ a: 'test', _id: '5e7b474a5e54c773b58d7b39' })
         const queryRes = await collection.where({ _id: '5e7b474a5e54c773b58d7b39' }).get()
         // console.log(queryRes)
         assert(queryRes.data.length === 0)
