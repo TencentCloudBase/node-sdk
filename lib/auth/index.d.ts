@@ -1,8 +1,15 @@
 import { CloudBase } from '../cloudbase';
 import { ICustomReqOpts } from '../type';
 export declare function auth(cloudbase: CloudBase): {
-    getUserInfo(uid?: string, opts?: ICustomReqOpts): Promise<any> | {
-        result: {
+    getUserInfo(): {
+        openId: any;
+        appId: any;
+        uid: any;
+        customUserId: any;
+        isAnonymous: boolean;
+    };
+    getEndUserInfo(uid: string, opts?: ICustomReqOpts): Promise<any> | {
+        userInfo: {
             openId: any;
             appId: any;
             uid: any;

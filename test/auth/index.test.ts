@@ -52,13 +52,11 @@ describe('auth 注入环境变量', () => {
         process.env.TCB_SOURCE_IP = ''
 
         assert.deepStrictEqual(app.auth().getUserInfo(), {
-            result: {
-                openId: '',
-                appId: '',
-                uid: '',
-                customUserId: '',
-                isAnonymous: false
-            }
+            openId: '',
+            appId: '',
+            uid: '',
+            customUserId: '',
+            isAnonymous: false
         })
         assert.deepStrictEqual(app.auth().getClientIP(), '')
     })
@@ -73,19 +71,17 @@ describe('auth 注入环境变量', () => {
         process.env.WX_CONTEXT_KEYS = 'WX_OPENID,WX_APPID'
 
         assert.deepStrictEqual(app.auth().getUserInfo(), {
-            result: {
-                openId: 'WX_OPENID',
-                appId: 'WX_APPID',
-                uid: 'TCB_UUID',
-                customUserId: 'TCB_CUSTOM_USER_ID',
-                isAnonymous: true
-            }
+            openId: 'WX_OPENID',
+            appId: 'WX_APPID',
+            uid: 'TCB_UUID',
+            customUserId: 'TCB_CUSTOM_USER_ID',
+            isAnonymous: true
         })
     })
 
-    it('获取用户信息getUserInfo 传入uid', async () => {
+    it('获取云开发用户信息 getEndUserInfo 传入uid', async () => {
         try {
-            const { result } = await app.auth().getUserInfo('c7446481324445a0bca211d747281ca3')
+            const { userInfo } = await app.auth().getEndUserInfo('c7446481324445a0bca211d747281ca3')
             const keysAreValid = [
                 'openId',
                 'appId',
@@ -111,7 +107,7 @@ describe('auth 注入环境变量', () => {
                 'username',
                 'createTime',
                 'updateTime'
-            ].every(key => result.hasOwnProperty(key))
+            ].every(key => userInfo.hasOwnProperty(key))
 
             assert.ok(keysAreValid)
         } catch (error) {
