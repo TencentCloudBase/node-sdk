@@ -38,7 +38,7 @@ export function auth(cloudbase: CloudBase) {
             }
         },
 
-        getEndUserInfo(uid: string, opts?: ICustomReqOpts) {
+        getEndUserInfo(uid?: string, opts?: ICustomReqOpts) {
             const {
                 WX_OPENID,
                 WX_APPID,
@@ -82,8 +82,8 @@ export function auth(cloudbase: CloudBase) {
         
                 return {
                     userInfo: {
+                        ...defaultUserInfo,
                         ...res.data,
-                        ...defaultUserInfo
                     },
                     requestId: res.requestId
                 }

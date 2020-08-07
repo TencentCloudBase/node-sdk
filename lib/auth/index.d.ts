@@ -8,7 +8,7 @@ export declare function auth(cloudbase: CloudBase): {
         customUserId: any;
         isAnonymous: boolean;
     };
-    getEndUserInfo(uid: string, opts?: ICustomReqOpts): Promise<any> | {
+    getEndUserInfo(uid?: string, opts?: ICustomReqOpts): Promise<any> | {
         userInfo: {
             openId: any;
             appId: any;
