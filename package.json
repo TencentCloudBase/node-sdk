@@ -29,7 +29,7 @@
     "license": "MIT",
     "typings": "lib/index.d.ts",
     "dependencies": {
-        "@cloudbase/database": "1.1.0",
+        "@cloudbase/database": "1.2.0",
         "@cloudbase/signature-nodejs": "1.0.0-beta.0",
         "@types/retry": "^0.12.0",
         "is-regex": "^1.0.4",

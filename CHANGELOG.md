@@ -1,3 +1,12 @@
+# v2.3.0
+
+-   [add] 新增 updateAndReturn 接口
+-   [refactor] 重构 aggregate 接口
+
+# v2.2.5
+
+-   [add] 新增 getEndUserInfo 接口
+
 # v2.2.4
 
 -   [fix] 修复获取用户信息接口

@@ -263,6 +263,18 @@ describe('transaction', async () => {
         assert(res.requestId)
     })
 
+    it('modifyAndReturnDoc', async () => {
+        const transaction = await db.startTransaction()
+        let modifyAndReturnRes = await transaction
+            .collection(collectionName)
+            .where({ category: 'Web' })
+            .updateAndReturn({
+                category: 'web'
+            })
+        const res = await transaction.commit()
+        assert(modifyAndReturnRes.doc.category === 'web')
+    })
+
     it('set doc', async () => {
         // const docRef = db.collection(collectionName).doc('1')
         const transaction = await db.startTransaction()

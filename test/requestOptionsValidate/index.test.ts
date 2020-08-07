@@ -163,7 +163,6 @@ describe('校验config设置  请求入参', () => {
                 apiName: '/inner/svrkitclientcall',
                 requestData: { name: 'jamespeng' }
             })
-            console.log(result, 'result')
             // assert(typeof result.result === 'string')
         } catch (err) {
             // assert(err.code === 'STORAGE_REQUEST_FAIL')

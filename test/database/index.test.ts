@@ -83,11 +83,12 @@ describe('test/index.test.ts', async () => {
         await collection.where({ _id: addRes.id }).remove()
     })
 
-    it.skip('验证插入24位可转objid 的id', async () => {
-        await collection.add({ a: 'test', _id: '5e7b474a5e54c773b58d7b39' })
+    it('验证插入24位可转objid 的id', async () => {
+        // 删除{a: 'test'}的数据
+        const deleteRes = await collection.where({ a: 'test' }).remove()
+        const addRes = await collection.add({ a: 'test', _id: '5e7b474a5e54c773b58d7b39' })
         const queryRes = await collection.where({ _id: '5e7b474a5e54c773b58d7b39' }).get()
-        // console.log(queryRes)
-        assert(queryRes.data.length === 0)
+        assert(queryRes.data.length === 1)
     })
 
     it('验证throwOnCode', async () => {
@@ -138,11 +139,7 @@ describe('test/index.test.ts', async () => {
     })
 
     it('document query custom timeout', async () => {
-        const res = await collection
-            .where({})
-            .options({ timeout: 3000 })
-            .limit(1)
-            .get()
+        const res = await collection.where({}).options({ timeout: 3000 }).limit(1).get()
         assert(res.data)
     })
 
@@ -262,5 +259,27 @@ describe('test/index.test.ts', async () => {
             .options({})
             .remove()
         assert(deleteMultiRes.deleted === 2)
+    })
+
+    it('验证findAndModify', async () => {
+        const addRes = await collection.add([{ a: 1 }, { a: 1 }])
+        const res = await collection.where({ a: 1 }).updateAndReturn({
+            a: 2
+        })
+
+        assert(res.doc.a === 2)
+    })
+
+    it('验证findAndModify 更新相同值', async () => {
+        const addRes = await collection.add([{ a: 1 }])
+        const res = await collection.where({ a: 1 }).updateAndReturn({
+            a: 1
+        })
+        assert(res.updated === 1)
+    })
+
+    it('验证findAndModify 更新失败', async () => {
+        const res = await collection.where({ a: -1 }).updateAndReturn({ a: 1 })
+        assert(res.updated === 0 && res.doc === null)
     })
 })
