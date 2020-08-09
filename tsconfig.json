@@ -11,7 +11,8 @@
         "esModuleInterop": true,
         "declaration": true,
         // "declarationDir": "./types",
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
+        "newLine": "lf"
     },
     "include": ["src/**/*"],
     "exclude": ["node_modules", "test"]

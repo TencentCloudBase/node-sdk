@@ -1,7 +1,14 @@
 import http from 'http'
 import { generateTracingInfo } from './tracing'
 import * as utils from './utils'
-import { ICloudBaseConfig, IRequestInfo, ICustomParam, IReqOpts, IReqHooks } from '../type/index'
+import {
+    ICloudBaseConfig,
+    IRequestInfo,
+    ICustomParam,
+    IReqOpts,
+    IReqHooks,
+    ICustomReqOpts
+} from '../type/index'
 import { ERROR } from '../const/code'
 import { SYMBOL_CURRENT_ENV } from '../const/symbol'
 import { CloudBase } from '../cloudbase'
@@ -20,6 +27,7 @@ const { E, second, processReturn, getServerInjectUrl } = utils
 export class Request {
     private args: IRequestInfo
     private config: ICloudBaseConfig
+    private opts: ICustomReqOpts
     private defaultEndPoint = 'tcb-admin.tencentcloudapi.com'
     private inScfHost = 'tcb-admin.tencentyun.com'
     // private openApiHost: string = 'tcb-open.tencentcloudapi.com'
@@ -41,6 +49,7 @@ export class Request {
     public constructor(args: IRequestInfo) {
         this.args = args
         this.config = args.config
+        this.opts = args.opts || {}
         this.secretManager = new SecretManager()
     }
 
@@ -51,8 +60,8 @@ export class Request {
         // 校验密钥是否存在
         await this.validateSecretIdAndKey()
         // 构造请求参数
-        const params = this.makeParams()
-        const opts = this.makeReqOpts(params)
+        const params = await this.makeParams()
+        const opts = await this.makeReqOpts(params)
         const action = this.getAction()
         const key = {
             functions: 'function_name',
@@ -60,7 +69,7 @@ export class Request {
             wx: 'apiName'
         }[action.split('.')[0]]
 
-        const argopts: any = this.args.opts || {}
+        const argopts: any = this.opts
         const config = this.config
 
         // 发请求时未找到有效环境字段
@@ -149,13 +158,15 @@ export class Request {
     /**
      * 构造params
      */
-    public makeParams(): any {
+    public async makeParams(): Promise<any> {
         const { TCB_SESSIONTOKEN, TCB_ENV, SCF_NAMESPACE } = CloudBase.getCloudbaseContext()
         const args = this.args
-
+        const opts = this.opts
         const config = this.config
 
         const { eventId } = this.tracingInfo
+        let crossAuthorizationData =
+            opts.getCrossAccountInfo && (await opts.getCrossAccountInfo()).authorization
 
         const params: ICustomParam = {
             ...args.params,
@@ -166,7 +177,10 @@ export class Request {
             // 对应服务端 wxCloudSessionToken
             tcb_sessionToken: TCB_SESSIONTOKEN || '',
             sessionToken: config.sessionToken,
-            sdk_version: version // todo 可去掉该参数
+            sdk_version: version, // todo 可去掉该参数
+            crossAuthorizationToken: crossAuthorizationData
+                ? Buffer.from(JSON.stringify(crossAuthorizationData)).toString('base64')
+                : ''
         }
 
         // 取当前云函数环境时，替换为云函数下环境变量
@@ -183,20 +197,20 @@ export class Request {
     /**
      *  构造请求项
      */
-    public makeReqOpts(params): IReqOpts {
+    public async makeReqOpts(params): Promise<IReqOpts> {
         const config = this.config
         const args = this.args
         const url = this.getUrl()
         const method = this.getMethod()
 
         const opts: IReqOpts = {
-            url,
+            url: url,
             method,
             // 先取模块的timeout，没有则取sdk的timeout，还没有就使用默认值
             // timeout: args.timeout || config.timeout || 15000,
             timeout: this.getTimeout(), // todo 细化到api维度 timeout
             // 优先取config，其次取模块，最后取默认
-            headers: this.getHeaders(params),
+            headers: await this.getHeaders(params),
             proxy: config.proxy
         }
 
@@ -254,38 +268,60 @@ export class Request {
 
         const isInSCF = utils.checkIsInScf()
         const isInContainer = utils.checkIsInContainer()
-        const { secretId, secretKey } = this.config
-        if (!secretId || !secretKey) {
-            if (isInContainer) {
-                // 这种情况有可能是在容器内，此时尝试拉取临时
-                const tmpSecret = await this.secretManager.getTmpSecret()
-                this.config = {
-                    ...this.config,
-                    secretId: tmpSecret.id,
-                    secretKey: tmpSecret.key,
-                    sessionToken: tmpSecret.token
-                }
-                return
-            }
 
-            if (!TENCENTCLOUD_SECRETID || !TENCENTCLOUD_SECRETKEY) {
-                if (isInSCF) {
-                    throw E({
-                        ...ERROR.INVALID_PARAM,
-                        message: 'missing authoration key, redeploy the function'
-                    })
-                } else {
-                    throw E({
-                        ...ERROR.INVALID_PARAM,
-                        message: 'missing secretId or secretKey of tencent cloud'
-                    })
+        let opts = this.opts
+        let getCrossAccountInfo = opts.getCrossAccountInfo || this.config.getCrossAccountInfo
+        if (getCrossAccountInfo) {
+            let crossAccountInfo = await getCrossAccountInfo()
+            let { credential } = await getCrossAccountInfo()
+            let { secretId, secretKey, token } = credential || {}
+            this.config = {
+                ...this.config,
+                secretId,
+                secretKey,
+                sessionToken: token
+            }
+            this.opts.getCrossAccountInfo = () => Promise.resolve(crossAccountInfo)
+            if (!this.config.secretId || !this.config.secretKey) {
+                throw E({
+                    ...ERROR.INVALID_PARAM,
+                    message: 'missing secretId or secretKey of tencent cloud'
+                })
+            }
+        } else {
+            const { secretId, secretKey } = this.config
+            if (!secretId || !secretKey) {
+                if (isInContainer) {
+                    // 这种情况有可能是在容器内，此时尝试拉取临时
+                    const tmpSecret = await this.secretManager.getTmpSecret()
+                    this.config = {
+                        ...this.config,
+                        secretId: tmpSecret.id,
+                        secretKey: tmpSecret.key,
+                        sessionToken: tmpSecret.token
+                    }
+                    return
                 }
-            } else {
-                this.config = {
-                    ...this.config,
-                    secretId: TENCENTCLOUD_SECRETID,
-                    secretKey: TENCENTCLOUD_SECRETKEY,
-                    sessionToken: TENCENTCLOUD_SESSIONTOKEN
+
+                if (!TENCENTCLOUD_SECRETID || !TENCENTCLOUD_SECRETKEY) {
+                    if (isInSCF) {
+                        throw E({
+                            ...ERROR.INVALID_PARAM,
+                            message: 'missing authoration key, redeploy the function'
+                        })
+                    } else {
+                        throw E({
+                            ...ERROR.INVALID_PARAM,
+                            message: 'missing secretId or secretKey of tencent cloud'
+                        })
+                    }
+                } else {
+                    this.config = {
+                        ...this.config,
+                        secretId: TENCENTCLOUD_SECRETID,
+                        secretKey: TENCENTCLOUD_SECRETKEY,
+                        sessionToken: TENCENTCLOUD_SESSIONTOKEN
+                    }
                 }
             }
         }
@@ -295,7 +331,7 @@ export class Request {
      *
      * 获取headers 此函数中设置authorization
      */
-    private getHeaders(params): any {
+    private async getHeaders(params): Promise<any> {
         let { TCB_SOURCE } = CloudBase.getCloudbaseContext()
         const config = this.config
         const { secretId, secretKey } = config
@@ -326,7 +362,7 @@ export class Request {
             secretKey: secretKey,
             method: method,
             url: url,
-            params: this.makeParams(),
+            params: await this.makeParams(),
             headers: requiredHeaders,
             withSignedParams: true,
             timestamp: second() - 1

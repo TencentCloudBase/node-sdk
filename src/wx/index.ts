@@ -4,6 +4,16 @@ import { E, getWxUrl } from '../utils/utils'
 import { ERROR } from '../const/code'
 import { CloudBase } from '../cloudbase'
 
+function validateCrossAccount(config, opts = {}) {
+    let getCrossAccountInfo = (opts as any).getCrossAccountInfo || config.getCrossAccountInfo
+    if (getCrossAccountInfo) {
+        throw E({
+            ...ERROR.INVALID_PARAM,
+            message: 'invalid config: getCrossAccountInfo'
+        })
+    }
+}
+
 export async function callWxOpenApi(
     cloudbase: CloudBase,
     { apiName, requestData },
@@ -15,6 +25,8 @@ export async function callWxOpenApi(
     } catch (e) {
         throw E({ ...e, code: ERROR.INVALID_PARAM.code, message: '对象出现了循环引用' })
     }
+
+    validateCrossAccount(cloudbase.config, opts)
 
     const params = {
         action: 'wx.api',
@@ -62,6 +74,8 @@ export async function callCompatibleWxOpenApi(
     { apiName, requestData },
     opts?: ICustomReqOpts
 ) {
+    validateCrossAccount(cloudbase.config, opts)
+
     const params = {
         action: 'wx.openApi',
         apiName,
@@ -90,6 +104,8 @@ export async function callWxPayApi(
     { apiName, requestData },
     opts?: ICustomReqOpts
 ) {
+    validateCrossAccount(cloudbase.config, opts)
+
     const params = {
         action: 'wx.wxPayApi',
         apiName,

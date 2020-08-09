@@ -176,18 +176,10 @@ export class CloudBase {
             secretKey,
             sessionToken,
             env,
-            proxy,
             timeout,
-            serviceUrl,
-            version,
             headers = {},
-            credentials,
-            isHttp,
             throwOnCode,
-
-            forever,
-            timingsMeasurerOptions,
-            retries
+            ...restConfig
         } = config
 
         if ((secretId && !secretKey) || (!secretId && secretKey)) {
@@ -198,23 +190,15 @@ export class CloudBase {
         }
 
         const newConfig: ICloudBaseConfig = {
+            ...restConfig,
             debug: !!debug,
             secretId: secretId,
             secretKey: secretKey,
             sessionToken: sessionToken,
             envName: env,
-            proxy,
-            isHttp,
             headers: { ...headers },
             timeout: timeout || 15000,
-            serviceUrl,
-            credentials,
-            version,
-            throwOnCode: throwOnCode !== undefined ? throwOnCode : true,
-
-            forever,
-            timingsMeasurerOptions,
-            retries
+            throwOnCode: throwOnCode !== undefined ? throwOnCode : true
         }
 
         this.config = newConfig

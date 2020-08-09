@@ -24,6 +24,10 @@ export interface ICloudBaseConfig extends IKeyValue {
     credentials?: ICredentialsInfo
     throwOnCode?: boolean // 错误回包(带code) throw
     forever?: boolean // 是否开启keep alive
+    /**
+     * 获取跨帐号调用信息
+     */
+    getCrossAccountInfo?: () => Promise<ICrossAccountInfo>
 }
 
 export interface IRequestInfo {
@@ -76,10 +80,31 @@ export interface IRetryOptions {
     }
 }
 
+interface ICrossAccountInfo {
+    /**
+     * 帐号凭证
+     */
+    credential: {
+        secretId: string
+        secretKey: string
+        token: string
+    }
+    /**
+     * 认证信息加密
+     */
+    authorization: {
+        mpToken?: string //base64 buffer
+    }
+}
+
 export interface ICustomReqOpts {
     timeout?: number
     // 重试选项，优先级高于全局配置
     retryOptions?: IRetryOptions
+    /**
+     * 获取跨帐号调用信息
+     */
+    getCrossAccountInfo?: () => Promise<ICrossAccountInfo>
 }
 
 export interface IErrorInfo {
