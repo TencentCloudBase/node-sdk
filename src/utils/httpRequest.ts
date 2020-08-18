@@ -246,30 +246,17 @@ export class Request {
      * 校验密钥和token是否存在
      */
     private async validateSecretIdAndKey(): Promise<void> {
+        const {
+            TENCENTCLOUD_SECRETID,
+            TENCENTCLOUD_SECRETKEY,
+            TENCENTCLOUD_SESSIONTOKEN
+        } = CloudBase.getCloudbaseContext() // 放在此处是为了兼容本地环境下读环境变量
+
         const isInSCF = utils.checkIsInScf()
         const isInContainer = utils.checkIsInContainer()
         const { secretId, secretKey } = this.config
         if (!secretId || !secretKey) {
-            if (isInSCF) {
-                // 用户init未传入密钥对，读process.env
-                const {
-                    TENCENTCLOUD_SECRETID,
-                    TENCENTCLOUD_SECRETKEY,
-                    TENCENTCLOUD_SESSIONTOKEN
-                } = CloudBase.getCloudbaseContext()
-                if (!TENCENTCLOUD_SECRETID || !TENCENTCLOUD_SECRETKEY) {
-                    throw E({
-                        ...ERROR.INVALID_PARAM,
-                        message: 'missing authoration key, redeploy the function'
-                    })
-                }
-                this.config = {
-                    ...this.config,
-                    secretId: TENCENTCLOUD_SECRETID,
-                    secretKey: TENCENTCLOUD_SECRETKEY,
-                    sessionToken: TENCENTCLOUD_SESSIONTOKEN
-                }
-            } else if (isInContainer) {
+            if (isInContainer) {
                 // 这种情况有可能是在容器内，此时尝试拉取临时
                 const tmpSecret = await this.secretManager.getTmpSecret()
                 this.config = {
@@ -278,11 +265,28 @@ export class Request {
                     secretKey: tmpSecret.key,
                     sessionToken: tmpSecret.token
                 }
+                return
+            }
+
+            if (!TENCENTCLOUD_SECRETID || !TENCENTCLOUD_SECRETKEY) {
+                if (isInSCF) {
+                    throw E({
+                        ...ERROR.INVALID_PARAM,
+                        message: 'missing authoration key, redeploy the function'
+                    })
+                } else {
+                    throw E({
+                        ...ERROR.INVALID_PARAM,
+                        message: 'missing secretId or secretKey of tencent cloud'
+                    })
+                }
             } else {
-                throw E({
-                    ...ERROR.INVALID_PARAM,
-                    message: 'missing secretId or secretKey of tencent cloud'
-                })
+                this.config = {
+                    ...this.config,
+                    secretId: TENCENTCLOUD_SECRETID,
+                    secretKey: TENCENTCLOUD_SECRETKEY,
+                    sessionToken: TENCENTCLOUD_SESSIONTOKEN
+                }
             }
         }
     }
@@ -348,9 +352,10 @@ export class Request {
         const { serviceUrl } = this.config
         const serverInjectUrl = getServerInjectUrl()
 
-        const defaultUrl = isInSCF || isInContainer
-            ? `http://${this.inScfHost}${this.urlPath}`
-            : `${protocol}://${this.defaultEndPoint}${this.urlPath}`
+        const defaultUrl =
+            isInSCF || isInContainer
+                ? `http://${this.inScfHost}${this.urlPath}`
+                : `${protocol}://${this.defaultEndPoint}${this.urlPath}`
 
         let url = serviceUrl || serverInjectUrl || customApiUrl || defaultUrl
 

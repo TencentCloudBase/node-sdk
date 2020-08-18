@@ -3,8 +3,6 @@ import tcb from '../../lib/index'
 import assert from 'assert'
 import config from '../config.local'
 
-// const { functions } = new CloudBase(config)
-
 function setEnvValue() {
     process.env.TENCENTCLOUD_RUNENV = 'SCF'
     process.env._SCF_TCB_LOG = '1'
@@ -229,5 +227,25 @@ describe('mock 云函数环境', () => {
         }
 
         resetEnvValue()
+    })
+
+    it('模拟注入环境密钥', async () => {
+        process.env.TENCENTCLOUD_SECRETID = config.secretId
+        process.env.TENCENTCLOUD_SECRETKEY = config.secretKey
+
+        //
+        const app = tcb.init({
+            env: config.env
+        })
+
+        let result = await app.callFunction({
+            name: 'test',
+            data: { a: 1 }
+        })
+
+        delete process.env.TENCENTCLOUD_SECRETID
+        delete process.env.TENCENTCLOUD_SECRETKEY
+
+        assert(result.requestId)
     })
 })
