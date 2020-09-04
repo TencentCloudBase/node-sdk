@@ -2,6 +2,7 @@ import { IRequestInfo, IReqOpts, IReqHooks } from '../type/index';
 export declare class Request {
     private args;
     private config;
+    private opts;
     private defaultEndPoint;
     private inScfHost;
     private urlPath;
@@ -29,11 +30,11 @@ export declare class Request {
     /**
      * 构造params
      */
-    makeParams(): any;
+    makeParams(): Promise<any>;
     /**
      *  构造请求项
      */
-    makeReqOpts(params: any): IReqOpts;
+    makeReqOpts(params: any): Promise<IReqOpts>;
     /**
      * 协议
      */
