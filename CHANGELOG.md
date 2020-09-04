@@ -1,3 +1,11 @@
+# v2.3.3
+
+-   [feat] 跨帐号支持调用支持
+
+# v2.3.2
+
+-   [fix] 本地注入环境变量使用bug修复
+
 # v2.3.1
 
 -   [fix] geoWithin api 补齐 centerSphere 用法
