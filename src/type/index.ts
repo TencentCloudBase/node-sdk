@@ -16,6 +16,7 @@ export interface ICloudBaseConfig extends IKeyValue {
     secretKey?: string
     envName?: string | Symbol
     env?: string
+    region?: string
     sessionToken?: string
     serviceUrl?: string
     headers?: any
@@ -93,7 +94,7 @@ interface ICrossAccountInfo {
      * 认证信息加密
      */
     authorization: {
-        mpToken?: string //base64 buffer
+        mpToken?: string // base64 buffer
     }
 }
 

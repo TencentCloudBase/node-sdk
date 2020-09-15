@@ -28,9 +28,6 @@ export class Request {
     private args: IRequestInfo
     private config: ICloudBaseConfig
     private opts: ICustomReqOpts
-    private defaultEndPoint = 'tcb-admin.tencentcloudapi.com'
-    private inScfHost = 'tcb-admin.tencentyun.com'
-    // private openApiHost: string = 'tcb-open.tencentcloudapi.com'
     private urlPath = '/admin'
     private defaultTimeout = 15000
     private timestamp: number = new Date().valueOf()
@@ -385,34 +382,53 @@ export class Request {
      * @param action
      */
     private getUrl(): string {
-        const protocol = this.getProtocol()
         const isInSCF = utils.checkIsInScf()
         const isInContainer = utils.checkIsInContainer()
         const { eventId, seqId } = this.tracingInfo
-        const { customApiUrl } = this.args
         const { serviceUrl } = this.config
         const serverInjectUrl = getServerInjectUrl()
 
-        const defaultUrl =
-            isInSCF || isInContainer
-                ? `http://${this.inScfHost}${this.urlPath}`
-                : `${protocol}://${this.defaultEndPoint}${this.urlPath}`
-
-        let url = serviceUrl || serverInjectUrl || customApiUrl || defaultUrl
-
-        let urlQueryStr = `&eventId=${eventId}&seqId=${seqId}`
-        const scfContext = CloudBase.scfContext
-        if (scfContext) {
-            urlQueryStr = `&eventId=${eventId}&seqId=${seqId}&scfRequestId=${scfContext.request_id}`
+        if (isInSCF) {
+            // 云函数环境下，应该包含以下环境变量，如果没有，后续逻辑可能会有问题
+            if (!process.env.TENCENTCLOUD_REGION) {
+                console.error('[ERROR] missing `TENCENTCLOUD_REGION` environment')
+            }
+            if (!process.env.SCF_NAMESPACE) {
+                console.error('[ERROR] missing `SCF_NAMESPACE` environment')
+            }
         }
 
-        if (url.includes('?')) {
-            url = `${url}${urlQueryStr}`
-        } else {
-            url = `${url}?${urlQueryStr}`
-        }
+        const { TCB_ENV, SCF_NAMESPACE } = CloudBase.getCloudbaseContext()
 
-        return url
+        // 优先级：用户配置 > 环境变量
+        const region = this.config.region || process.env.TENCENTCLOUD_REGION || ''
+        const envId = this.config.envName === SYMBOL_CURRENT_ENV
+            ? TCB_ENV || SCF_NAMESPACE
+            : this.config.envName || ''
+
+        // 有地域信息则访问地域级别域名，无地域信息则访问默认域名，默认域名固定解析到上海地域保持兼容
+        const internetRegionEndpoint = region
+            ? `${region}.tcb-api.tencentcloudapi.com`
+            : `tcb-api.tencentcloudapi.com`
+        const internalRegionEndpoint = region
+            ? `internal.${region}.tcb-api.tencentcloudapi.com`
+            : `internal.tcb-api.tencentcloudapi.com`
+
+        const endpoint = (isInSCF || isInContainer) ? internalRegionEndpoint : internetRegionEndpoint
+
+        const envEndpoint = envId ? `${envId}.${endpoint}` : endpoint
+
+        const protocol = isInSCF ? 'http' : this.getProtocol()
+        // 注意：云函数环境下有地域信息，云应用环境下不确定是否有，如果没有，用户必须显式的传入
+        const defaultUrl = `${protocol}://${envEndpoint}${this.urlPath}`
+
+        const url = serviceUrl || serverInjectUrl || defaultUrl
+
+        const qs = CloudBase.scfContext
+            ? `&eventId=${eventId}&seqId=${seqId}&scfRequestId=${CloudBase.scfContext.request_id}`
+            : `&eventId=${eventId}&seqId=${seqId}`
+
+        return url.includes('?') ? `${url}${qs}` : `${url}?${qs}`
     }
 }
 

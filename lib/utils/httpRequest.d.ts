@@ -3,8 +3,6 @@ export declare class Request {
     private args;
     private config;
     private opts;
-    private defaultEndPoint;
-    private inScfHost;
     private urlPath;
     private defaultTimeout;
     private timestamp;
