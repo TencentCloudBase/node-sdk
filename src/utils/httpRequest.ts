@@ -37,6 +37,7 @@ export class Request {
     private tracingInfo: {
         eventId: string
         seqId: string
+        trace: string
     } = generateTracingInfo()
     private secretManager: SecretManager
 
@@ -118,7 +119,7 @@ export class Request {
                     code: response.statusCode,
                     message: ` ${response.statusCode} ${
                         http.STATUS_CODES[response.statusCode]
-                    } | [${opts.url}]`
+                        } | [${opts.url}]`
                 })
                 throw e
             }
@@ -353,6 +354,10 @@ export class Request {
 
         if (config.version) {
             requiredHeaders['X-SDK-Version'] = config.version
+        }
+
+        if (this.tracingInfo.trace) {
+            requiredHeaders['x-tcb-tracelog'] = this.tracingInfo.trace
         }
 
         requiredHeaders = { ...config.headers, ...args.headers, ...requiredHeaders }
