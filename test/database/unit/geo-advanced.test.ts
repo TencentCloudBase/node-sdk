@@ -259,12 +259,23 @@ describe('GEO高级功能', async () => {
         assert(readRes.data.length > 0)
         assert.deepStrictEqual(readRes.data[0].point, new Point(-88, 30.001))
 
-        // 校验第一个参数不传point
+        // 校验第一个参数传二维数组
+        const readRes1 = await collection
+            .where({
+                point: db.command.geoWithin({
+                    centerSphere: [[-88, 30], 10 / 6378.1]
+                })
+            })
+            .get()
+        assert(readRes1.data.length > 0)
+        assert.deepStrictEqual(readRes1.data[0].point, new Point(-88, 30.001))
+
+        // 校验第一个参数传 不符合地理位置规范 二维数组
         try {
             await collection
                 .where({
                     point: db.command.geoWithin({
-                        centerSphere: [[-88, 30], 10 / 6378.1]
+                        centerSphere: [[-288, 30], 10 / 6378.1]
                     })
                 })
                 .get()
@@ -282,7 +293,6 @@ describe('GEO高级功能', async () => {
                 })
                 .get()
         } catch (e) {
-            console.log(e)
             assert(e !== undefined)
         }
     })
