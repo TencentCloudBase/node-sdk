@@ -1,3 +1,7 @@
+# v2.3.4
+
+-   [bugfix] 修复geo centerSphere 兼容问题
+
 # v2.3.3
 
 -   [feat] 跨帐号支持调用支持
