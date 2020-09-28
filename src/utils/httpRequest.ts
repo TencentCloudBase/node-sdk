@@ -116,7 +116,7 @@ export class Request {
                     code: response.statusCode,
                     message: ` ${response.statusCode} ${
                         http.STATUS_CODES[response.statusCode]
-                        } | [${opts.url}]`
+                    } | [${opts.url}]`
                 })
                 throw e
             }
@@ -357,6 +357,12 @@ export class Request {
             requiredHeaders['x-tcb-tracelog'] = this.tracingInfo.trace
         }
 
+        const region = this.config.region || process.env.TENCENTCLOUD_REGION || ''
+
+        if (region) {
+            requiredHeaders['X-TCB-Region'] = region
+        }
+
         requiredHeaders = { ...config.headers, ...args.headers, ...requiredHeaders }
 
         const { authorization, timestamp } = sign({
@@ -402,9 +408,10 @@ export class Request {
 
         // 优先级：用户配置 > 环境变量
         const region = this.config.region || process.env.TENCENTCLOUD_REGION || ''
-        const envId = this.config.envName === SYMBOL_CURRENT_ENV
-            ? TCB_ENV || SCF_NAMESPACE
-            : this.config.envName || ''
+        const envId =
+            this.config.envName === SYMBOL_CURRENT_ENV
+                ? TCB_ENV || SCF_NAMESPACE
+                : this.config.envName || ''
 
         // 有地域信息则访问地域级别域名，无地域信息则访问默认域名，默认域名固定解析到上海地域保持兼容
         const internetRegionEndpoint = region
@@ -414,7 +421,7 @@ export class Request {
             ? `internal.${region}.tcb-api.tencentcloudapi.com`
             : `internal.tcb-api.tencentcloudapi.com`
 
-        const endpoint = (isInSCF || isInContainer) ? internalRegionEndpoint : internetRegionEndpoint
+        const endpoint = isInSCF || isInContainer ? internalRegionEndpoint : internetRegionEndpoint
 
         const envEndpoint = envId ? `${envId}.${endpoint}` : endpoint
 

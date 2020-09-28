@@ -84,7 +84,7 @@ describe('functions.invokeFunction: 执行云函数', () => {
         }
     })
 
-    it('function debug', async () => {
+    it.only('function debug', async () => {
         const app = tcb.init(config)
         const callRes = await app.callFunction({
             name: 'invoke',
