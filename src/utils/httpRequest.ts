@@ -387,6 +387,7 @@ export class Request {
      * 获取url
      * @param action
      */
+    /* eslint-disable-next-line complexity */
     private getUrl(): string {
         const isInSCF = utils.checkIsInScf()
         const isInContainer = utils.checkIsInContainer()
@@ -421,7 +422,14 @@ export class Request {
             ? `internal.${region}.tcb-api.tencentcloudapi.com`
             : `internal.tcb-api.tencentcloudapi.com`
 
-        const endpoint = isInSCF || isInContainer ? internalRegionEndpoint : internetRegionEndpoint
+        // 同地域走内网，跨地域走公网
+        const isSameRegionVisit = this.config.region
+            ? this.config.region === process.env.TENCENTCLOUD_REGION
+            : true
+        const endpoint =
+            isSameRegionVisit && (isInSCF || isInContainer)
+                ? internalRegionEndpoint
+                : internetRegionEndpoint
 
         const envEndpoint = envId ? `${envId}.${endpoint}` : endpoint
 
