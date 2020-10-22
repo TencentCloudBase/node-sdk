@@ -11,10 +11,10 @@ function generateEventId() {
 }
 
 export const generateTracingInfo = () => {
-    let { TCB_SEQID } = CloudBase.getCloudbaseContext()
+    let { TCB_SEQID, TCB_TRACELOG } = CloudBase.getCloudbaseContext()
     TCB_SEQID = TCB_SEQID || ''
     const eventId = generateEventId()
     const seqId = TCB_SEQID ? `${TCB_SEQID}-${eventId}` : eventId
 
-    return { eventId, seqId }
+    return { eventId, seqId, trace: TCB_TRACELOG }
 }
