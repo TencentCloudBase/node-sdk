@@ -4,7 +4,7 @@ import assert from 'assert'
 import config from '../config.local'
 import fs from 'fs'
 import path from 'path'
-import tcb from '../../lib/index'
+import tcb from '../../src/index'
 import xml2js from 'xml2js'
 import { ERROR } from '../../lib/const/code'
 
@@ -25,7 +25,7 @@ describe('storage.uploadFile: 上传文件', () => {
             })
         })
 
-        const tcb1 = require('../../lib/index')
+        const tcb1 = require('../../src/index')
         const app1 = tcb1.init(config)
         try {
             let result = await app1.getUploadMetadata({
@@ -81,7 +81,7 @@ describe('storage.uploadFile: 上传文件', () => {
             })
         })
 
-        const tcb2 = require('../../lib/index')
+        const tcb2 = require('../../src/index')
         const app2 = tcb2.init(config)
 
         try {
@@ -104,7 +104,7 @@ describe('storage.uploadFile: 上传文件', () => {
             })
         })
 
-        const tcb3 = require('../../lib/index')
+        const tcb3 = require('../../src/index')
         const app3 = tcb3.init(config)
         try {
             let result = await app3.uploadFile({
@@ -140,7 +140,7 @@ describe('storage.uploadFile: 上传文件', () => {
             })
         })
 
-        const tcb4 = require('../../lib/index')
+        const tcb4 = require('../../src/index')
         const app4 = tcb4.init(config)
 
         try {
@@ -194,7 +194,7 @@ describe('storage.uploadFile: 上传文件', () => {
             })
         })
 
-        const tcb5 = require('../../lib/index')
+        const tcb5 = require('../../src/index')
         const app5 = tcb5.init(config)
 
         try {
@@ -251,7 +251,7 @@ describe('storage.uploadFile: 上传文件', () => {
             })
         })
 
-        const tcb6 = require('../../lib/index')
+        const tcb6 = require('../../src/index')
         const app6 = tcb6.init(config)
 
         try {

@@ -14,10 +14,12 @@ export default class SecretManager {
     private tmpSecret: Secret | null
     private TMP_SECRET_URL: string
     public constructor() {
-        this.TMP_SECRET_URL = 'http://metadata.tencentyun.com/meta-data/cam/security-credentials/TCB_QcsRole'
+        this.TMP_SECRET_URL =
+            'http://metadata.tencentyun.com/meta-data/cam/security-credentials/TCB_QcsRole'
         this.tmpSecret = null
     }
 
+    /* istanbul ignore next */
     public async getTmpSecret(): Promise<Secret> {
         if (this.tmpSecret) {
             const now = new Date().getTime()
@@ -35,6 +37,7 @@ export default class SecretManager {
         }
     }
 
+    /* istanbul ignore next */
     private async fetchTmpSecret(): Promise<Secret> {
         const body: any = await this.get(this.TMP_SECRET_URL)
         const payload = JSON.parse(body)
@@ -47,6 +50,7 @@ export default class SecretManager {
         return this.tmpSecret
     }
 
+    /* istanbul ignore next */
     private get(url) {
         return new Promise((resolve, reject) => {
             request.get(url, (err, res, body) => {

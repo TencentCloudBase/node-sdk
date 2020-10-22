@@ -79,11 +79,11 @@ export function auth(cloudbase: CloudBase) {
                 if (res.code) {
                     return res
                 }
-        
+
                 return {
                     userInfo: {
                         ...defaultUserInfo,
-                        ...res.data,
+                        ...res.data
                     },
                     requestId: res.requestId
                 }
@@ -91,15 +91,14 @@ export function auth(cloudbase: CloudBase) {
         },
 
         async getAuthContext(context) {
-            const { environment, environ } = CloudBase.parseContext(context)
-            const env = environment || environ || {}
-            const { TCB_UUID, LOGINTYPE } = env
+            const { TCB_UUID, LOGINTYPE, QQ_OPENID, QQ_APPID } = CloudBase.getCloudbaseContext(
+                context
+            )
             const res: any = {
                 uid: TCB_UUID,
                 loginType: LOGINTYPE
             }
             if (LOGINTYPE === 'QQ-MINI') {
-                const { QQ_OPENID, QQ_APPID } = env
                 res.appId = QQ_APPID
                 res.openId = QQ_OPENID
             }

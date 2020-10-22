@@ -1,5 +1,5 @@
 import { CloudBase } from './cloudbase'
-import { ICloudBaseConfig, IContext } from './type'
+import { ICloudBaseConfig, IContextParam } from './type'
 import { SYMBOL_CURRENT_ENV } from './const/symbol'
 const { version } = require('../package.json')
 
@@ -7,7 +7,7 @@ export = {
     init: (config?: ICloudBaseConfig): CloudBase => {
         return new CloudBase(config)
     },
-    parseContext: (context: IContext) => {
+    parseContext: (context: IContextParam) => {
         // 校验context 是否正确
         return CloudBase.parseContext(context)
     },

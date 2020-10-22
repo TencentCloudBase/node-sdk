@@ -1,4 +1,4 @@
-import tcb from '../../lib/index'
+import tcb from '../../src/index'
 import assert from 'assert'
 import config from '../config.local'
 import { ERROR } from '../../lib/const/code'
@@ -48,6 +48,25 @@ describe('wx.openApi: 微信openapi', () => {
         // assert(result.result, '微信openapi失败');
     }, 30000)
 
+    it('mock callCompatibleWxOpenApi return', async () => {
+        jest.resetModules()
+        jest.mock('request', () => {
+            return jest.fn().mockImplementation((params, callback) => {
+                const body = { data: { name: 'luke' } }
+                callback(null, { statusCode: 200, body }, body)
+            })
+        })
+
+        const tcb1 = require('../../src/index')
+        const app1 = tcb1.init(config)
+
+        const res = await app1.callCompatibleWxOpenApi({
+            apiName: '/AAA/BBB/sample',
+            requestData: Buffer.from(JSON.stringify({ name: 'jamespeng' }))
+        })
+        assert.ok(res.data.name === 'luke')
+    })
+
     // mock callWxOpenApi 回包为string
     it('微信openapi mock回包为string', async () => {
         jest.resetModules()
@@ -58,7 +77,7 @@ describe('wx.openApi: 微信openapi', () => {
             })
         })
 
-        const tcb1 = require('../../lib/index')
+        const tcb1 = require('../../src/index')
         const app1 = tcb1.init(config)
         try {
             let result = await app1.callWxOpenApi({
@@ -85,4 +104,48 @@ describe('wx.openApi: 微信openapi', () => {
         // console.log(result)
         // assert(result.result, '微信openapi失败');
     }, 30000)
+
+    it('mock callWxOpenApi code', async () => {
+        jest.resetModules()
+        jest.mock('request', () => {
+            return jest.fn().mockImplementation((params, callback) => {
+                const body = { code: 'mockCode', message: 'mockMessage' }
+                callback(null, { statusCode: 200, body })
+            })
+        })
+
+        const tcb1 = require('../../src/index')
+        const app1 = tcb1.init(config)
+
+        expect(
+            app1.callWxOpenApi({
+                apiName: 'cloudPay.getRefundStatus',
+                requestData: { name: 'luke' }
+            })
+        ).rejects.toThrow(new Error('mockMessage'))
+
+        const app2 = tcb1.init({
+            ...config,
+            throwOnCode: false
+        })
+        const res = await app2.callWxOpenApi({
+            apiName: 'cloudPay.getRefundStatus',
+            requestData: { name: 'luke' }
+        })
+        assert(res.code === 'mockCode')
+    })
+
+    it('getCrossAccountInfo err', async () => {
+        expect(
+            app.callWxOpenApi(
+                {
+                    apiName: 'cloudPay.getRefundStatus',
+                    requestData: { name: 'luke' }
+                },
+                {
+                    getCrossAccountInfo: 'test'
+                }
+            )
+        ).rejects.toThrow(new Error('invalid config: getCrossAccountInfo'))
+    })
 })

@@ -243,6 +243,7 @@ export async function downloadFile(
     return new Promise((resolve, reject) => {
         let fileContent = Buffer.alloc(0)
         req.on('response', function(response) {
+            /* istanbul ignore else  */
             if (response && Number(response.statusCode) === 200) {
                 if (tempFilePath) {
                     response.pipe(fs.createWriteStream(tempFilePath))
@@ -294,7 +295,7 @@ export async function getUploadMetadata(
     // }
 }
 
-export async function getFileAuthority(cloudbase: CloudBase, { fileList }) {
+export async function getFileAuthority(cloudbase: CloudBase, { fileList }, opts?: ICustomReqOpts) {
     const { LOGINTYPE } = CloudBase.getCloudbaseContext()
     if (!Array.isArray(fileList)) {
         throw E({
@@ -320,7 +321,7 @@ export async function getFileAuthority(cloudbase: CloudBase, { fileList }) {
         })
     }
 
-    const userInfo = this.auth().getUserInfo()
+    const userInfo = cloudbase.auth().getUserInfo()
     const { openId, uid } = userInfo
 
     if (!openId && !uid) {
@@ -338,7 +339,7 @@ export async function getFileAuthority(cloudbase: CloudBase, { fileList }) {
         fileList
     }
     const res = await httpRequest({
-        config: this.config,
+        config: cloudbase.config,
         params,
         method: 'post',
         headers: {
@@ -347,6 +348,7 @@ export async function getFileAuthority(cloudbase: CloudBase, { fileList }) {
     })
 
     if (res.code) {
+        /* istanbul ignore next  */
         throw E({ ...res, message: '[node-sdk] getCosFileAuthority failed: ' + res.code })
     } else {
         return res
