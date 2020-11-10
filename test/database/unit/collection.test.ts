@@ -5,7 +5,7 @@ import * as Config from '../../config.local'
 import * as common from '../../common'
 import { create } from 'domain'
 
-describe('test/unit/collection.test.ts', async () => {
+describe('test/unit/collection.test.ts', () => {
     const collName = 'db-test-collection'
 
     const app = tcb.init(Config)

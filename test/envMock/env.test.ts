@@ -180,7 +180,9 @@ describe('mock 云函数环境', () => {
         const checkRes1 = result1.result
 
         // scf url
-        assert(checkRes.url.indexOf('http://tcb-admin.tencentyun.com') === 0)
+        assert(
+            checkRes.url.indexOf('http://MOCK_TCB_ENV.internal.tcb-api.tencentcloudapi.com') === 0
+        )
         // tcb-source
         assert(checkRes.headers['x-tcb-source'].indexOf('MOCK_TCB_SOURCE') >= 0)
         // seqId

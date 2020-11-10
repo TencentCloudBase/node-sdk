@@ -7,7 +7,7 @@ const app = tcb.init(Config)
 const db = app.database()
 const _ = db.command
 
-describe('projection', async () => {
+describe('projection', () => {
     const collName = 'db-test-projection'
     let passagesCollection = null
     const data = [

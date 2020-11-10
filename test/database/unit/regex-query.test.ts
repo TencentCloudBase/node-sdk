@@ -4,7 +4,7 @@ import tcb from '../../../lib/index'
 import * as Config from '../../config.local'
 import * as common from '../../common/index'
 
-describe('正则表达式查询', async () => {
+describe('正则表达式查询', () => {
     const app = tcb.init(Config)
     const db = app.database()
 

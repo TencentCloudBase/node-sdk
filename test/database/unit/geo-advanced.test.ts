@@ -4,7 +4,7 @@ import tcb from '../../../lib/index'
 import * as config from '../../config.local'
 import * as common from '../../common/index'
 
-describe('GEO高级功能', async () => {
+describe('GEO高级功能', () => {
     const app = tcb.init(config)
     const db = app.database()
     const { Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon } = db.Geo
