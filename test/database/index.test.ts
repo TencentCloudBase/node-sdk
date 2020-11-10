@@ -5,7 +5,7 @@ import * as common from '../common/index'
 import { ERROR } from '../../lib/const/code'
 import { getPriority } from 'os'
 
-describe('test/index.test.ts', async () => {
+describe('test/index.test.ts', () => {
     const app = tcb.init({
         ...config,
         // env: Mock.env,
@@ -139,7 +139,11 @@ describe('test/index.test.ts', async () => {
     })
 
     it('document query custom timeout', async () => {
-        const res = await collection.where({}).options({ timeout: 3000 }).limit(1).get()
+        const res = await collection
+            .where({})
+            .options({ timeout: 3000 })
+            .limit(1)
+            .get()
         assert(res.data)
     })
 

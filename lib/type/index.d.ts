@@ -15,6 +15,7 @@ export interface ICloudBaseConfig extends IKeyValue {
     secretKey?: string;
     envName?: string | Symbol;
     env?: string;
+    region?: string;
     sessionToken?: string;
     serviceUrl?: string;
     headers?: any;

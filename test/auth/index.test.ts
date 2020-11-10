@@ -88,7 +88,7 @@ describe('auth 注入环境变量', () => {
                 'uid',
                 'customUserId',
                 'isAnonymous',
-                
+
                 'envName',
                 'nickName',
                 'gender',

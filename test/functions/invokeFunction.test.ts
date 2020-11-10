@@ -32,13 +32,14 @@ describe('functions.invokeFunction: 执行云函数', () => {
     })
 
     it('执行不存在的云函数', async () => {
+        expect.assertions(1)
         try {
             const result = await app.callFunction({
                 name: 'unexistFunction',
                 data: { a: 1 }
             })
         } catch (e) {
-            assert(e.code === 'FUNCTION_NOT_FOUND')
+            expect(e.code).toBe('FUNCTION_NOT_FOUND')
         }
     })
 
@@ -83,7 +84,7 @@ describe('functions.invokeFunction: 执行云函数', () => {
         }
     })
 
-    it('function debug', async () => {
+    it.only('function debug', async () => {
         const app = tcb.init(config)
         const callRes = await app.callFunction({
             name: 'invoke',

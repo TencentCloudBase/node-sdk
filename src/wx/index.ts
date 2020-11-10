@@ -41,8 +41,7 @@ export async function callWxOpenApi(
         opts,
         headers: {
             'content-type': 'application/json'
-        },
-        customApiUrl: getWxUrl(cloudbase.config)
+        }
     }).then(res => {
         if (res.code) {
             return res
@@ -88,7 +87,6 @@ export async function callCompatibleWxOpenApi(
         headers: { 'content-type': 'multipart/form-data' },
         params,
         isFormData: true,
-        customApiUrl: getWxUrl(cloudbase.config),
         opts
     }).then(res => res)
 }
@@ -118,7 +116,6 @@ export async function callWxPayApi(
         headers: { 'content-type': 'multipart/form-data' },
         params,
         isFormData: true,
-        customApiUrl: getWxUrl(cloudbase.config),
         opts
     })
 }

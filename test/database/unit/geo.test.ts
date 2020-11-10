@@ -4,7 +4,7 @@ import tcb from '../../../lib/index'
 import * as config from '../../config.local'
 import * as common from '../../common/index'
 
-describe('GEO类型', async () => {
+describe('GEO类型', () => {
     const app = tcb.init(config)
     const db = app.database()
 

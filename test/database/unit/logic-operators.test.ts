@@ -9,7 +9,7 @@ const _ = db.command
 
 const date = new Date()
 
-describe('逻辑操作符', async () => {
+describe('逻辑操作符', () => {
     const collName = 'db-test-logic-operators'
     let passagesCollection = null
     const data = [

@@ -9,26 +9,28 @@ const db = app.database()
 const collName = 'db-test-aggregate'
 const collection = db.collection(collName)
 
-describe('sample', async () => {
-    const data = [{ name: 'a' }, { name: 'b' }]
-    const usersCollection = await common.safeCollection(db, 'test-users')
+describe('sample', () => {
+    it('sample', async () => {
+        const data = [{ name: 'a' }, { name: 'b' }]
+        const usersCollection = await common.safeCollection(db, 'test-users')
 
-    const createSuccess = await usersCollection.create(data)
-    assert.strictEqual(createSuccess, true)
+        const createSuccess = await usersCollection.create(data)
+        assert.strictEqual(createSuccess, true)
 
-    const result = await db
-        .collection('test-users')
-        .aggregate()
-        .sample({
-            size: 1
-        })
-        .end()
-    assert.strictEqual(result.data.length, 1)
+        const result = await db
+            .collection('test-users')
+            .aggregate()
+            .sample({
+                size: 1
+            })
+            .end()
+        assert.strictEqual(result.data.length, 1)
 
-    usersCollection.remove()
+        usersCollection.remove()
+    })
 })
 
-describe('sortByCount', async () => {
+describe('sortByCount', () => {
     let passagesCollection = null
     const data = [
         { category: 'Web', tags: ['JavaScript', 'C#'] },
@@ -68,7 +70,7 @@ describe('sortByCount', async () => {
     })
 })
 
-describe('match', async () => {
+describe('match', () => {
     let coll = null
     const $ = db.command.aggregate
     const _ = db.command
@@ -135,7 +137,7 @@ describe('match', async () => {
     })
 })
 
-describe('project', async () => {
+describe('project', () => {
     let coll = null
     const data = [
         {
@@ -246,7 +248,7 @@ describe('project', async () => {
     })
 })
 
-describe('replaceRoot', async () => {
+describe('replaceRoot', () => {
     it('使用已有字段作为根节点', async () => {
         const data = [
             {
@@ -307,7 +309,7 @@ describe('replaceRoot', async () => {
     })
 })
 
-describe('skip', async () => {
+describe('skip', () => {
     let coll = null
     const data = [
         { author: 'stark', score: 80 },
@@ -343,7 +345,7 @@ describe('skip', async () => {
     })
 })
 
-describe('sort', async () => {
+describe('sort', () => {
     let coll = null
     const data = [
         { author: 'stark', score: 80, age: 18 },
@@ -389,7 +391,7 @@ describe('sort', async () => {
     })
 })
 
-describe('unwind', async () => {
+describe('unwind', () => {
     let coll = null
     const data = [
         { product: 'tshirt', size: ['S', 'M', 'L'] },
@@ -466,7 +468,7 @@ describe('unwind', async () => {
     })
 })
 
-describe('Date', async () => {
+describe('Date', () => {
     let coll = null
 
     const date = new Date(1557826731686)
@@ -476,7 +478,10 @@ describe('Date', async () => {
         coll = await common.safeCollection(db, 'articles')
         const success = await coll.create(data)
         assert.strictEqual(success, true)
-        const queryRes = await db.collection('articles').where({}).get()
+        const queryRes = await db
+            .collection('articles')
+            .where({})
+            .get()
         // console.log('queryRes:', queryRes)
     })
 
@@ -551,7 +556,7 @@ describe('Date', async () => {
     })
 })
 
-describe('lookup', async () => {
+describe('lookup', () => {
     let coll1 = null
     let coll2 = null
 
@@ -599,7 +604,7 @@ describe('lookup', async () => {
     })
 })
 
-describe('geoNear', async () => {
+describe('geoNear', () => {
     let coll1 = null
     const date = new Date()
 

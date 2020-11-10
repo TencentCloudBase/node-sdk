@@ -8,7 +8,7 @@ const db = app.database()
 const _ = db.command
 const offset = 60 * 1000
 
-describe('transaction', async () => {
+describe('transaction', () => {
     let collection = null
     const collectionName = 'db-test-transactions'
 

@@ -3,7 +3,7 @@ import assert from 'assert'
 import { ERROR } from '../lib/const/code'
 
 describe('tcb.init: 初始化tcb', () => {
-    it.skip('mock 导入本地config报错', async () => {
+    it('mock 导入本地config报错', async () => {
         jest.resetModules()
         jest.mock('./config', () => {
             throw Error('mock config require err')
