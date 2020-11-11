@@ -12,7 +12,8 @@ import {
     IGetFileUrlRes,
     IDownloadFileRes,
     IUploadFileRes,
-    IContext
+    IContext,
+    ICallWxOpenApiOptions
 } from './type'
 import { DBRequest } from './utils/dbRequest'
 import { Log, logger } from './log'
@@ -257,8 +258,8 @@ export class CloudBase {
      * @param param0
      * @param opts
      */
-    public callWxOpenApi({ apiName, requestData }, opts?: ICustomReqOpts): Promise<any> {
-        return callWxOpenApi(this, { apiName, requestData }, opts)
+    public callWxOpenApi({ apiName, cgiName, requestData }: ICallWxOpenApiOptions, opts?: ICustomReqOpts): Promise<any> {
+        return callWxOpenApi(this, { apiName, cgiName, requestData }, opts)
     }
 
     /**
@@ -267,8 +268,8 @@ export class CloudBase {
      * @param param0
      * @param opts
      */
-    public callWxPayApi({ apiName, requestData }, opts?: ICustomReqOpts): Promise<any> {
-        return callWxPayApi(this, { apiName, requestData }, opts)
+    public callWxPayApi({ apiName, cgiName, requestData }: ICallWxOpenApiOptions, opts?: ICustomReqOpts): Promise<any> {
+        return callWxPayApi(this, { apiName, cgiName, requestData }, opts)
     }
 
     /**
@@ -277,8 +278,8 @@ export class CloudBase {
      * @param param0
      * @param opts
      */
-    public callCompatibleWxOpenApi({ apiName, requestData }, opts?: ICustomReqOpts): Promise<any> {
-        return callCompatibleWxOpenApi(this, { apiName, requestData }, opts)
+    public callCompatibleWxOpenApi({ apiName, cgiName, requestData }: ICallWxOpenApiOptions, opts?: ICustomReqOpts): Promise<any> {
+        return callCompatibleWxOpenApi(this, { apiName, cgiName, requestData }, opts)
     }
 
     /**

@@ -1,5 +1,5 @@
 import { Db } from '@cloudbase/database';
-import { ICloudBaseConfig, ICustomReqOpts, ICustomErrRes, IDeleteFileRes, IGetFileUrlRes, IDownloadFileRes, IUploadFileRes, IContext } from './type';
+import { ICloudBaseConfig, ICustomReqOpts, ICustomErrRes, IDeleteFileRes, IGetFileUrlRes, IDownloadFileRes, IUploadFileRes, IContext, ICallWxOpenApiOptions } from './type';
 import { Log } from './log';
 export declare class CloudBase {
     static scfContext: IContext;
@@ -33,30 +33,21 @@ export declare class CloudBase {
      * @param param0
      * @param opts
      */
-    callWxOpenApi({ apiName, requestData }: {
-        apiName: any;
-        requestData: any;
-    }, opts?: ICustomReqOpts): Promise<any>;
+    callWxOpenApi({ apiName, cgiName, requestData }: ICallWxOpenApiOptions, opts?: ICustomReqOpts): Promise<any>;
     /**
      * wxpayapi调用
      *
      * @param param0
      * @param opts
      */
-    callWxPayApi({ apiName, requestData }: {
-        apiName: any;
-        requestData: any;
-    }, opts?: ICustomReqOpts): Promise<any>;
+    callWxPayApi({ apiName, cgiName, requestData }: ICallWxOpenApiOptions, opts?: ICustomReqOpts): Promise<any>;
     /**
      * 微信云调用
      *
      * @param param0
      * @param opts
      */
-    callCompatibleWxOpenApi({ apiName, requestData }: {
-        apiName: any;
-        requestData: any;
-    }, opts?: ICustomReqOpts): Promise<any>;
+    callCompatibleWxOpenApi({ apiName, cgiName, requestData }: ICallWxOpenApiOptions, opts?: ICustomReqOpts): Promise<any>;
     /**
      * 上传文件
      *
