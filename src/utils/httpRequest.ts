@@ -272,7 +272,7 @@ export class Request {
         if (getCrossAccountInfo) {
             let crossAccountInfo = await getCrossAccountInfo()
             let { credential } = await getCrossAccountInfo()
-            let { secretId, secretKey, token } = credential || {}
+            let { secretId, secretKey, token }: any = credential || {}
             this.config = {
                 ...this.config,
                 secretId,

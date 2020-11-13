@@ -165,3 +165,9 @@ export interface IContext {
     function_name: string
     namespace: string
 }
+
+export interface ICallWxOpenApiOptions {
+    apiName: string,
+    cgiName?: string,
+    requestData: any,
+}
