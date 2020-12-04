@@ -13,7 +13,7 @@ interface IHeaderOpts {
 export interface ICredentialsInfo {
     private_key_id: string
     private_key: string
-    env_id?: string
+    env_id: string
 }
 export interface ICloudBaseConfig extends IKeyValue {
     debug?: boolean
@@ -21,7 +21,6 @@ export interface ICloudBaseConfig extends IKeyValue {
     isHttp?: boolean
     secretId?: string
     secretKey?: string
-    envName?: string | Symbol
     env?: string | Symbol
     sessionToken?: string
     serviceUrl?: string
@@ -36,8 +35,13 @@ export interface ICloudBaseConfig extends IKeyValue {
      */
     getCrossAccountInfo?: () => Promise<ICrossAccountInfo>
 }
+
+interface IInnerCloudBaseConfig extends ICloudBaseConfig {
+    envName?: string | Symbol
+}
+
 interface IRequestInfo {
-    config: ICloudBaseConfig
+    config: IInnerCloudBaseConfig
     method: string
     headers: IHeaderOpts
     params: ICustomParam
@@ -101,8 +105,8 @@ export interface IErrorInfo extends IBaseRes {
     message?: string
 }
 
-export interface ICallFunctionRes<T> extends IBaseRes {
-    result?: T
+export interface ICallFunctionRes extends IBaseRes {
+    result?: any
 }
 
 export interface IUploadFileRes extends IBaseRes {
@@ -119,7 +123,7 @@ export interface IDeleteFileOpts {
 }
 
 export interface IBaseRes {
-    requestId: string
+    requestId?: string
 }
 
 export interface IDeleteFileRes extends IBaseRes {
@@ -240,6 +244,11 @@ export interface ICompleteCloudbaseContext {
 export declare namespace Database {
     interface GeoType {
         Point: typeof Point
+        LineString: typeof LineString
+        MultiLineString: typeof MultiLineString
+        MultiPoint: typeof MultiPoint
+        MultiPolygon: typeof MultiPolygon
+        Polygon: typeof Polygon
     }
 
     class HiddenSymbol {
@@ -432,7 +441,7 @@ export declare namespace Database {
      * @author haroldhu
      * @internal
      */
-    export class DBRequest {
+    class DBRequest {
         private config
         /**
          * 初始化
@@ -440,7 +449,7 @@ export declare namespace Database {
          * @internal
          * @param config
          */
-        constructor(config: ICloudBaseConfig)
+        constructor(config: IInnerCloudBaseConfig)
         /**
          * 发送请求
          *
@@ -453,19 +462,19 @@ export declare namespace Database {
     export class Db {
         Geo: GeoType
         command: typeof Command
-        RegExp: RegExp
-        serverDate: ServerDate
+        RegExp: (param: { regexp: string; options: string }) => RegExp
+        serverDate: (opt: { offset: number }) => ServerDate
         startTransaction: () => Promise<Transaction>
         runTransaction: (
             callback: (transaction: Transaction) => void | Promise<any>,
             times?: number
         ) => Promise<any>
-        config: ICloudBaseConfig
+        config: IInnerCloudBaseConfig
         static reqClass: DBRequest
         static dataVersion: string
-        constructor(config?: ICloudBaseConfig)
+        constructor(config?: IInnerCloudBaseConfig)
         collection(collName: string): CollectionReference
-        createCollection(collName: string): IErrorInfo
+        createCollection(collName: string): IBaseRes
     }
 
     export class DocumentReference {
@@ -473,11 +482,11 @@ export declare namespace Database {
         readonly _transactionId: string
         readonly projection: Object
         private _apiOptions
-        set(data: Object): Promise<IUpdateResult | IErrorInfo>
-        update(data: Object): Promise<IUpdateResult | IErrorInfo>
-        delete(): Promise<IDeleteResult | IErrorInfo>
-        remove(): Promise<IDeleteResult | IErrorInfo>
-        get(): Promise<IGetRes | IErrorInfo>
+        set(data: Object): Promise<IUpdateResult>
+        update(data: Object): Promise<IUpdateResult>
+        delete(): Promise<IDeleteResult>
+        remove(): Promise<IDeleteResult>
+        get(): Promise<IGetRes>
         field(projection: Object): DocumentReference
     }
 
@@ -520,15 +529,7 @@ export declare namespace Database {
         protected _transactionId: string
         readonly name: string
         doc(docID: string | number): DocumentReference
-        add(
-            data: IKeyValue
-        ): Promise<{
-            ids?: string[]
-            id?: string
-            inserted?: number
-            ok?: number
-            requestId: string
-        }>
+        add(data: IKeyValue): Promise<IAddRes>
         aggregate(): Aggregation
         options(apiOptions: QueryOption | UpdateOption): CollectionReference
     }
@@ -538,6 +539,12 @@ export declare namespace Database {
     }
     export type CenterSphere = [Point, number] | [[number, number], number]
 
+    export interface IAddRes extends IBaseRes {
+        ids?: string[] // 批量插入返回
+        id?: string
+        inserted?: number
+        ok?: number
+    }
     export interface IGetRes extends IBaseRes {
         data: any[]
         total: number
@@ -562,8 +569,8 @@ export declare namespace Database {
 
     export class Query {
         protected _transactionId: string
-        get(): Promise<IGetRes | IErrorInfo>
-        count(): Promise<ICountRes | IErrorInfo>
+        get(): Promise<IGetRes>
+        count(): Promise<ICountRes>
         where(query: object): Query
         options(apiOptions: QueryOption | UpdateOption): Query
         orderBy(fieldPath: string, directionStr: OrderByDirection): Query
@@ -572,7 +579,7 @@ export declare namespace Database {
         update(data: Object): Promise<IUpdateResult>
         field(projection: any): Query
         remove(): Promise<IDeleteResult>
-        updateAndReturn(data: Object): Promise<IUpdateAndReturnResult | IErrorInfo>
+        updateAndReturn(data: Object): Promise<IUpdateAndReturnResult>
     }
 
     export enum QUERY_COMMANDS_LITERAL {
@@ -973,14 +980,20 @@ declare class Log {
 
 declare function parseXML(str: any): Promise<unknown>
 
-export declare function getFileAuthority(
-    cloudbase: CloudBase,
-    {
-        fileList
-    }: {
-        fileList: any
-    }
-): Promise<any>
+export interface IGetFileAuthorityFileItem {
+    type: string
+    path: string
+}
+
+export interface IGetFileAuthorityFileRes {
+    data: IGetFileAuthorityFileDataItem[]
+}
+
+export interface IGetFileAuthorityFileDataItem {
+    path: string
+    cosFileId: string
+    read: boolean
+}
 
 export interface ICreateTicketOpts {
     refresh?: number
@@ -993,12 +1006,23 @@ export interface IGetTempFileURLItem {
 }
 
 export interface IGetUploadMetadataRes extends IBaseRes {
+    data: IGetUploadMetadataItem
+}
+
+export interface IGetUploadMetadataItem {
     url: string
     token: string
     authorization: string
     fileId: string
     cosFileId: string
     download_url: string
+}
+
+export interface IGetAuthContextRes {
+    uid: string
+    loginType: string
+    appId?: string
+    openId?: string
 }
 
 export declare class CloudBase {
@@ -1008,8 +1032,8 @@ export declare class CloudBase {
      * 获取当前函数内的所有环境变量(作为获取变量的统一方法，取值来源process.env 和 context)
      */
     static getCloudbaseContext(context?: IContextParam): ICompleteCloudbaseContext
-    config: ICloudBaseConfig
-    private clsLogger
+    config: IInnerCloudBaseConfig
+    private clsLogger: Log
     private extensionMap
     constructor(config?: ICloudBaseConfig)
     init(config?: ICloudBaseConfig): void
@@ -1022,16 +1046,16 @@ export declare class CloudBase {
      * @param param0
      * @param opts
      */
-    callFunction<T>(
+    callFunction(
         {
             name,
             data
         }: {
-            name: any
+            name: string
             data: any
         },
         opts?: ICustomReqOpts
-    ): Promise<ICallFunctionRes<T> | IErrorInfo>
+    ): Promise<ICallFunctionRes>
     auth(): {
         getUserInfo(): {
             openId: string
@@ -1054,7 +1078,7 @@ export declare class CloudBase {
                       isAnonymous: boolean
                   }
               }
-        getAuthContext(context: IContextParam): Promise<any>
+        getAuthContext(context: IContextParam): Promise<IGetAuthContextRes>
         getClientIP(): string
         createTicket: (uid: string, options?: ICreateTicketOpts) => string
     }
@@ -1073,7 +1097,7 @@ export declare class CloudBase {
             requestData: any
         },
         opts?: ICustomReqOpts
-    ): Promise<ICallWxOpenApiRes | IErrorInfo>
+    ): Promise<ICallWxOpenApiRes>
     /**
      * wxpayapi调用
      *
@@ -1121,7 +1145,7 @@ export declare class CloudBase {
             fileContent: any
         },
         opts?: ICustomReqOpts
-    ): Promise<IUploadFileRes | IErrorInfo>
+    ): Promise<IUploadFileRes>
     /**
      * 删除文件
      *
@@ -1135,7 +1159,7 @@ export declare class CloudBase {
             fileList: string[]
         },
         opts?: ICustomReqOpts
-    ): Promise<IErrorInfo | IDeleteFileRes>
+    ): Promise<IDeleteFileRes>
     /**
      * 获取临时连接
      *
@@ -1149,7 +1173,7 @@ export declare class CloudBase {
             fileList: (string | IGetTempFileURLItem)[]
         },
         opts?: ICustomReqOpts
-    ): Promise<IErrorInfo | IGetFileUrlRes>
+    ): Promise<IGetFileUrlRes>
     /**
      * 下载文件
      *
@@ -1162,7 +1186,7 @@ export declare class CloudBase {
             tempFilePath?: string
         },
         opts?: ICustomReqOpts
-    ): Promise<IErrorInfo | IDownloadFileRes>
+    ): Promise<IDownloadFileRes>
     /**
      * 获取上传元数据
      *
@@ -1176,10 +1200,15 @@ export declare class CloudBase {
             cloudPath: string
         },
         opts?: ICustomReqOpts
-    ): Promise<IErrorInfo | IGetUploadMetadataRes>
+    ): Promise<IGetUploadMetadataRes>
+
+    getFileAuthority({
+        fileList
+    }: {
+        fileList: IGetFileAuthorityFileItem[]
+    }): Promise<IGetFileAuthorityFileRes>
     /**
      * 获取logger
-     *
      */
     logger(): Log
 }
