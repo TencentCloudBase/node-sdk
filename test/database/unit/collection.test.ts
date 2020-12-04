@@ -1,5 +1,5 @@
 import * as assert from 'power-assert'
-import tcb from '../../../lib/index'
+import tcb from '../../../src/index'
 import { ErrorCode } from '@cloudbase/database/src/constant'
 import * as Config from '../../config.local'
 import * as common from '../../common'

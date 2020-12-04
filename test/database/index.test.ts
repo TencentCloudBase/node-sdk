@@ -1,9 +1,8 @@
 import * as assert from 'power-assert'
-import tcb from '../../lib/index'
+import tcb from '../../src/index'
 import * as config from '../config.local'
 import * as common from '../common/index'
 import { ERROR } from '../../lib/const/code'
-import { getPriority } from 'os'
 
 describe('test/index.test.ts', () => {
     const app = tcb.init({
@@ -286,4 +285,9 @@ describe('test/index.test.ts', () => {
         const res = await collection.where({ a: -1 }).updateAndReturn({ a: 1 })
         assert(res.updated === 0 && res.doc === null)
     })
+
+    // it.only('insert null', async () => {
+    //     const addRes = await collection.add(null)
+    //     console.log('addRes:', addRes)
+    // })
 })

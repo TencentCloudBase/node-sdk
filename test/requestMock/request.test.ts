@@ -6,15 +6,17 @@ describe('mock request 回包处理逻辑', () => {
         jest.resetModules()
         jest.mock('request', () => {
             return jest.fn().mockImplementation((params, callback) => {
+                console.log('debug')
+
                 callback(
                     null,
-                    { statusCode: 200 },
+                    { statusCode: 200, body: JSON.stringify({ data: { response_data: 'test' } }) },
                     JSON.stringify({ data: { response_data: 'test' } })
                 )
             })
         })
 
-        const tcb1 = require('../../lib/index')
+        const tcb1 = require('../../src/index')
         const app1 = tcb1.init(config)
         try {
             let result = await app1.callFunction({
@@ -24,8 +26,7 @@ describe('mock request 回包处理逻辑', () => {
             // console.log(result)
             assert(typeof result.result === 'string')
         } catch (err) {
-            // assert(err.code === 'STORAGE_REQUEST_FAIL')
-            console.log(err)
+            console.log('err:', err)
         }
     })
 
@@ -37,19 +38,15 @@ describe('mock request 回包处理逻辑', () => {
             })
         })
 
-        const tcb1 = require('../../lib/index')
+        const tcb1 = require('../../src/index')
         const app1 = tcb1.init(config)
         try {
-            let result = await app1.callFunction({
+            await app1.callFunction({
                 name: 'unexistFunction',
                 data: { a: 1 }
             })
-            // console.log(result)
-            // assert(typeof result.result === 'string')
         } catch (err) {
             assert(err.code === 400)
-
-            // console.log(err)
         }
     })
 })

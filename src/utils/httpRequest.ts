@@ -147,8 +147,10 @@ export class Request {
         const action = this.getAction()
         const { seqId } = this.tracingInfo
         this.slowWarnTimer = setTimeout(() => {
+            /* istanbul ignore next */
             const msg = `Your current request ${action ||
                 ''} is longer than 3s, it may be due to the network or your query performance | [${seqId}]`
+            /* istanbul ignore next */
             console.warn(msg)
         }, timeout)
     }
@@ -225,6 +227,7 @@ export class Request {
                 opts.json = true
             }
         } else {
+            /* istanbul ignore next */
             opts.qs = params
         }
 
@@ -269,6 +272,7 @@ export class Request {
 
         let opts = this.opts
         let getCrossAccountInfo = opts.getCrossAccountInfo || this.config.getCrossAccountInfo
+        /* istanbul ignore if  */
         if (getCrossAccountInfo) {
             let crossAccountInfo = await getCrossAccountInfo()
             let { credential } = await getCrossAccountInfo()
@@ -289,6 +293,7 @@ export class Request {
         } else {
             const { secretId, secretKey } = this.config
             if (!secretId || !secretKey) {
+                /* istanbul ignore if  */
                 if (isInContainer) {
                     // 这种情况有可能是在容器内，此时尝试拉取临时
                     const tmpSecret = await this.secretManager.getTmpSecret()
@@ -440,7 +445,7 @@ export class Request {
         const url = serviceUrl || serverInjectUrl || defaultUrl
 
         const qs = CloudBase.scfContext
-            ? `&eventId=${eventId}&seqId=${seqId}&scfRequestId=${CloudBase.scfContext.request_id}`
+            ? `&eventId=${eventId}&seqId=${seqId}&scfRequestId=${CloudBase.scfContext.requestId}`
             : `&eventId=${eventId}&seqId=${seqId}`
 
         return url.includes('?') ? `${url}${qs}` : `${url}?${qs}`

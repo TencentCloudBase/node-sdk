@@ -1,4 +1,4 @@
-import tcb from '../../lib/index'
+import tcb from '../../src/index'
 import assert from 'assert'
 import config from '../config.local'
 import { ERROR } from '../../lib/const/code'
@@ -70,7 +70,7 @@ describe('functions.invokeFunction: 执行云函数', () => {
             })
         })
 
-        const tcb1 = require('../../lib/index')
+        const tcb1 = require('../../src/index')
         const app1 = tcb1.init(config)
         try {
             let result = await app1.callFunction({

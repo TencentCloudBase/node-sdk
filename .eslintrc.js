@@ -14,7 +14,10 @@ module.exports = {
                 '@typescript-eslint/prefer-optional-chain': 'off',
                 '@typescript-eslint/no-require-imports': 'off',
                 'max-params': 'off',
-                '@typescript-eslint/no-this-alias': 'off'
+                '@typescript-eslint/no-this-alias': 'off',
+                '@typescript-eslint/no-duplicate-imports': 'off',
+                '@typescript-eslint/no-loss-of-precision': 'off',
+                '@typescript-eslint/method-signature-style': 'off'
             }
         }
     ]

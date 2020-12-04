@@ -1,4 +1,4 @@
-import { getWxCloudApiToken } from '../../lib/utils/getWxCloudApiToken'
+import { getWxCloudApiToken } from '../../src/utils/getWxCloudApiToken'
 
 let wxApiToken
 let wxTriggerApiTokenV0

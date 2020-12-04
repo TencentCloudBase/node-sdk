@@ -9,7 +9,7 @@
         "removeComments": false,
         "types": ["node"],
         "esModuleInterop": true,
-        "declaration": true,
+        // "declaration": true,
         // "declarationDir": "./types",
         "resolveJsonModule": true,
         "newLine": "lf"

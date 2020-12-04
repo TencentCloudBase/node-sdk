@@ -1,6 +1,6 @@
 import * as assert from 'power-assert'
 import * as Mock from './mock'
-import tcb from '../../../lib/index'
+import tcb from '../../../src/index'
 import * as Config from '../../config.local'
 import * as common from '../../common/index'
 import * as util from 'util'

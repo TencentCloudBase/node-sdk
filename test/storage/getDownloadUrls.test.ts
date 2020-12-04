@@ -1,4 +1,4 @@
-import tcb from '../../lib/index'
+import tcb from '../../src/index'
 import config from '../config.local'
 import fs from 'fs'
 import { ERROR } from '../../lib/const/code'
@@ -139,5 +139,33 @@ describe('storage.batchGetDownloadUrl: 获取文件下载链接', () => {
         } catch (err) {
             assert(err.code === 'ESOCKETTIMEDOUT')
         }
+    })
+
+    it('mock getTempFileURL return code', async () => {
+        jest.resetModules()
+        jest.mock('request', () => {
+            return jest.fn().mockImplementation((params, callback) => {
+                const body = { code: 'mockCode', message: 'mockMessage' }
+                callback(null, { statusCode: 200, body })
+            })
+        })
+
+        const tcb1 = require('../../src/index')
+        const app1 = tcb1.init(config)
+
+        expect(
+            app1.getTempFileURL({
+                fileList: ['mockFileID']
+            })
+        ).rejects.toThrow(new Error('mockMessage'))
+
+        const app2 = tcb1.init({
+            ...config,
+            throwOnCode: false
+        })
+        const res = await app2.getTempFileURL({
+            fileList: ['mockFileID']
+        })
+        assert(res.code === 'mockCode')
     })
 })

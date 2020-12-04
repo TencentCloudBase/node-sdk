@@ -1,6 +1,8 @@
-import tcb from '../../lib/index'
-import assert from 'assert'
+import tcb from '../../src/index'
+import assert, { rejects } from 'assert'
 import config from '../config.local'
+import { SYMBOL_CURRENT_ENV } from '../../src/const/symbol'
+import { create } from 'domain'
 
 const app = tcb.init({
     ...config,
@@ -59,6 +61,61 @@ describe('auth 注入环境变量', () => {
             isAnonymous: false
         })
         assert.deepStrictEqual(app.auth().getClientIP(), '')
+
+        assert.deepStrictEqual(app.auth().getEndUserInfo(), {
+            userInfo: {
+                openId: '',
+                appId: '',
+                uid: '',
+                customUserId: '',
+                isAnonymous: false
+            }
+        })
+    })
+
+    it('mock getEndUserInfo return code', async () => {
+        jest.resetModules()
+        jest.mock('request', () => {
+            return jest.fn().mockImplementation((params, callback) => {
+                const body = { code: 'mockCode', message: 'mockMessage' }
+                callback(null, { statusCode: 200, body })
+            })
+        })
+
+        const tcb1 = require('../../src/index')
+
+        const app1 = tcb1.init({
+            ...config,
+            credentials: {
+                private_key_id: 'da86590d-dd17-45bd-84df-433f05612d0a',
+                private_key:
+                    '-----BEGIN RSA PRIVATE KEY-----\nMIICXAIBAAKBgQDNo9vk/GFDkihEJv5SbN4zQKW9OAjf4C2Z13eGYxLYIYhwNDi5\nl2O5+NLpPzH4Q839ULJIYQ6hfBAVO7mvQ+WP2oYeIqQyRe9NkDlCLmJ10SDwGQRq\nqekVHbz+2fIugxJf3BqIDX3nSHC4TkZZldSgZJIBwIUI5h0t2/IqEjFaHwIDAQAB\nAoGBALdRZrrIPhDVn2258Sgbgy3faKC47jhdiWlGinfTpD3mDtIvy42vJqjn52Uk\n/+/Yyi4THQum8jsE9PVoy8wxU9eDJN4AVjNf8Y98a/z8FCEVyXsvUPp4+Y9pPSmd\nmZe6JKU3mDTXtQDMrtZlkSHVGhSCo/vLMccrAdus8DEnWD0BAkEA2scDuCx9qb4A\nHs8t2j1jL483lsTT8dV8bX5UCwIpOP8jCgQmBbxIyL3/IIwonS7eRSeUDhh2aim+\ng2uhxqSygQJBAPCgo9jOQ/uwy2YjSOE3r6Q1gDCfclvY9z2Xb2IH0AZg529l2rg2\nqh3PPFEB7dBxzNimu9rhDG+dre61ilNwfJ8CQFrCfTSGoIsum3YslOUY2nD8hR8z\nAIou+rOh2NPITbmrfqnFFtECT1+YEqM6Ag9TRjqCNNW0KEvajYKPwElcQgECQHQj\nJFGM5FUDNHh8iT1iUhywUcml+10HL/WDNJgc6zNY6/rhLxqAD8VJc3QpuS1E77iV\naM+wlP7+HKe86SFyhkMCQFWmIveCeb0U0MTHV+Uem1vYWu5gLwSRvvvQlBiTx8Nb\ngLo8C8GxW6uCVPxk4gqnvwVSIN8sBfxQksHMOU3zQYo=\n-----END RSA PRIVATE KEY-----\n'
+            }
+        })
+
+        expect(app1.auth().getEndUserInfo('c7446481324445a0bca211d747281ca3')).rejects.toThrow(
+            new Error('mockMessage')
+        )
+
+        const app2 = tcb1.init({
+            ...config,
+            credentials: {
+                private_key_id: 'da86590d-dd17-45bd-84df-433f05612d0a',
+                private_key:
+                    '-----BEGIN RSA PRIVATE KEY-----\nMIICXAIBAAKBgQDNo9vk/GFDkihEJv5SbN4zQKW9OAjf4C2Z13eGYxLYIYhwNDi5\nl2O5+NLpPzH4Q839ULJIYQ6hfBAVO7mvQ+WP2oYeIqQyRe9NkDlCLmJ10SDwGQRq\nqekVHbz+2fIugxJf3BqIDX3nSHC4TkZZldSgZJIBwIUI5h0t2/IqEjFaHwIDAQAB\nAoGBALdRZrrIPhDVn2258Sgbgy3faKC47jhdiWlGinfTpD3mDtIvy42vJqjn52Uk\n/+/Yyi4THQum8jsE9PVoy8wxU9eDJN4AVjNf8Y98a/z8FCEVyXsvUPp4+Y9pPSmd\nmZe6JKU3mDTXtQDMrtZlkSHVGhSCo/vLMccrAdus8DEnWD0BAkEA2scDuCx9qb4A\nHs8t2j1jL483lsTT8dV8bX5UCwIpOP8jCgQmBbxIyL3/IIwonS7eRSeUDhh2aim+\ng2uhxqSygQJBAPCgo9jOQ/uwy2YjSOE3r6Q1gDCfclvY9z2Xb2IH0AZg529l2rg2\nqh3PPFEB7dBxzNimu9rhDG+dre61ilNwfJ8CQFrCfTSGoIsum3YslOUY2nD8hR8z\nAIou+rOh2NPITbmrfqnFFtECT1+YEqM6Ag9TRjqCNNW0KEvajYKPwElcQgECQHQj\nJFGM5FUDNHh8iT1iUhywUcml+10HL/WDNJgc6zNY6/rhLxqAD8VJc3QpuS1E77iV\naM+wlP7+HKe86SFyhkMCQFWmIveCeb0U0MTHV+Uem1vYWu5gLwSRvvvQlBiTx8Nb\ngLo8C8GxW6uCVPxk4gqnvwVSIN8sBfxQksHMOU3zQYo=\n-----END RSA PRIVATE KEY-----\n'
+            },
+            throwOnCode: false
+        })
+
+        const res = await app2.auth().getEndUserInfo('c7446481324445a0bca211d747281ca3')
+        assert.ok(res.code === 'mockCode')
+    })
+
+    it('mock auth.getUserInfoForAdmin 接口报错', async () => {
+        const uid = 'luke123'
+        expect(app.auth().getEndUserInfo(uid)).rejects.toThrow(
+            new Error('[100007] user_do_not_exist')
+        )
     })
 
     it('获取用户信息getUserInfo 不传入uid', () => {
@@ -88,7 +145,6 @@ describe('auth 注入环境变量', () => {
                 'uid',
                 'customUserId',
                 'isAnonymous',
-
                 'envName',
                 'nickName',
                 'gender',
@@ -120,6 +176,41 @@ describe('auth 注入环境变量', () => {
         process.env.TCB_CONTEXT_KEYS = 'TCB_SOURCE_IP'
 
         assert.deepStrictEqual(app.auth().getClientIP(), 'TCB_SOURCE_IP')
+    })
+
+    it('校验createTicket 时，init config 不含 env', async () => {
+        const app1 = tcb.init({
+            ...config,
+            credentials: {
+                private_key_id: 'da86590d-dd17-45bd-84df-433f05612d0a',
+                private_key:
+                    '-----BEGIN RSA PRIVATE KEY-----\nMIICXAIBAAKBgQDNo9vk/GFDkihEJv5SbN4zQKW9OAjf4C2Z13eGYxLYIYhwNDi5\nl2O5+NLpPzH4Q839ULJIYQ6hfBAVO7mvQ+WP2oYeIqQyRe9NkDlCLmJ10SDwGQRq\nqekVHbz+2fIugxJf3BqIDX3nSHC4TkZZldSgZJIBwIUI5h0t2/IqEjFaHwIDAQAB\nAoGBALdRZrrIPhDVn2258Sgbgy3faKC47jhdiWlGinfTpD3mDtIvy42vJqjn52Uk\n/+/Yyi4THQum8jsE9PVoy8wxU9eDJN4AVjNf8Y98a/z8FCEVyXsvUPp4+Y9pPSmd\nmZe6JKU3mDTXtQDMrtZlkSHVGhSCo/vLMccrAdus8DEnWD0BAkEA2scDuCx9qb4A\nHs8t2j1jL483lsTT8dV8bX5UCwIpOP8jCgQmBbxIyL3/IIwonS7eRSeUDhh2aim+\ng2uhxqSygQJBAPCgo9jOQ/uwy2YjSOE3r6Q1gDCfclvY9z2Xb2IH0AZg529l2rg2\nqh3PPFEB7dBxzNimu9rhDG+dre61ilNwfJ8CQFrCfTSGoIsum3YslOUY2nD8hR8z\nAIou+rOh2NPITbmrfqnFFtECT1+YEqM6Ag9TRjqCNNW0KEvajYKPwElcQgECQHQj\nJFGM5FUDNHh8iT1iUhywUcml+10HL/WDNJgc6zNY6/rhLxqAD8VJc3QpuS1E77iV\naM+wlP7+HKe86SFyhkMCQFWmIveCeb0U0MTHV+Uem1vYWu5gLwSRvvvQlBiTx8Nb\ngLo8C8GxW6uCVPxk4gqnvwVSIN8sBfxQksHMOU3zQYo=\n-----END RSA PRIVATE KEY-----\n'
+                // env_id: 'luke-87pns'
+            },
+            env: ''
+        })
+        expect(() => {
+            app1.auth().createTicket('luke123')
+        }).toThrow(new Error('no env in config'))
+    })
+
+    it('校验createTicket时，init config 为 symbol_current_env', async () => {
+        process.env.SCF_NAMESPACE = 'luke-87pns'
+
+        const app1 = tcb.init({
+            ...config,
+            credentials: {
+                private_key_id: 'da86590d-dd17-45bd-84df-433f05612d0a',
+                private_key:
+                    '-----BEGIN RSA PRIVATE KEY-----\nMIICXAIBAAKBgQDNo9vk/GFDkihEJv5SbN4zQKW9OAjf4C2Z13eGYxLYIYhwNDi5\nl2O5+NLpPzH4Q839ULJIYQ6hfBAVO7mvQ+WP2oYeIqQyRe9NkDlCLmJ10SDwGQRq\nqekVHbz+2fIugxJf3BqIDX3nSHC4TkZZldSgZJIBwIUI5h0t2/IqEjFaHwIDAQAB\nAoGBALdRZrrIPhDVn2258Sgbgy3faKC47jhdiWlGinfTpD3mDtIvy42vJqjn52Uk\n/+/Yyi4THQum8jsE9PVoy8wxU9eDJN4AVjNf8Y98a/z8FCEVyXsvUPp4+Y9pPSmd\nmZe6JKU3mDTXtQDMrtZlkSHVGhSCo/vLMccrAdus8DEnWD0BAkEA2scDuCx9qb4A\nHs8t2j1jL483lsTT8dV8bX5UCwIpOP8jCgQmBbxIyL3/IIwonS7eRSeUDhh2aim+\ng2uhxqSygQJBAPCgo9jOQ/uwy2YjSOE3r6Q1gDCfclvY9z2Xb2IH0AZg529l2rg2\nqh3PPFEB7dBxzNimu9rhDG+dre61ilNwfJ8CQFrCfTSGoIsum3YslOUY2nD8hR8z\nAIou+rOh2NPITbmrfqnFFtECT1+YEqM6Ag9TRjqCNNW0KEvajYKPwElcQgECQHQj\nJFGM5FUDNHh8iT1iUhywUcml+10HL/WDNJgc6zNY6/rhLxqAD8VJc3QpuS1E77iV\naM+wlP7+HKe86SFyhkMCQFWmIveCeb0U0MTHV+Uem1vYWu5gLwSRvvvQlBiTx8Nb\ngLo8C8GxW6uCVPxk4gqnvwVSIN8sBfxQksHMOU3zQYo=\n-----END RSA PRIVATE KEY-----\n',
+                env_id: 'luke-87pns'
+            },
+            env: SYMBOL_CURRENT_ENV
+        })
+
+        const createTicketRes = app1.auth().createTicket('luke123')
+        assert.ok(typeof createTicketRes === 'string')
+        process.env.TCB_ENV = ''
     })
 
     it('校验credentials 不含env', async () => {

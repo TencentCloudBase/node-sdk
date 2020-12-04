@@ -1,6 +1,7 @@
-import tcb from '../lib/index'
+import tcb from '../src/index'
 import assert from 'assert'
 import { ERROR } from '../lib/const/code'
+import config from './config.local'
 
 describe('tcb.init: 初始化tcb', () => {
     it('mock 导入本地config报错', async () => {
@@ -119,5 +120,43 @@ describe('tcb.init: 初始化tcb', () => {
 
         const contextObj2 = tcb.parseContext(mockContext2)
         assert(contextObj2.environment.a === 'b;c;fs;d')
+
+        // 验证getCloudbaseContext
+        const cloudbaseContext = tcb.getCloudbaseContext(mockContext)
+        assert(cloudbaseContext.WX_CLIENTIP === '10.12.23.71')
+
+        // 验证parseContext 参数错误
+        expect(() => {
+            tcb.parseContext('wrong context')
+        }).toThrow(new Error('context 必须为对象类型'))
+
+        // 验证envrionment 解析报错
+        const mockContext3 = {
+            environment: {}
+        }
+
+        expect(() => {
+            tcb.parseContext(mockContext3)
+        }).toThrow(new Error('无效的context对象，请使用 云函数入口的context参数'))
+    })
+
+    it('测试 getAuthContext', async () => {
+        const app = tcb.init(config)
+        const mockContext = {
+            environment: JSON.stringify({
+                TCB_UUID: 'uuid',
+                LOGINTYPE: 'QQ-MINI',
+                QQ_OPENID: 'QQ_OPENID',
+                QQ_APPID: 'QQ_APPID'
+            })
+        }
+
+        const authContextRes = await app.auth().getAuthContext(mockContext)
+        assert.deepStrictEqual(authContextRes, {
+            uid: 'uuid',
+            loginType: 'QQ-MINI',
+            appId: 'QQ_APPID',
+            openId: 'QQ_OPENID'
+        })
     })
 })

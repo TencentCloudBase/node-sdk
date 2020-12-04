@@ -1,4 +1,4 @@
-import tcb from '../../lib/index'
+import tcb from '../../src/index'
 import config from '../config.local'
 import { ERROR } from '../../lib/const/code'
 import * as assert from 'power-assert'

@@ -2,7 +2,14 @@ import { Db } from '@cloudbase/database'
 import { callFunction } from './functions'
 import { auth } from './auth'
 import { callWxOpenApi, callCompatibleWxOpenApi, callWxPayApi } from './wx'
-import { uploadFile, deleteFile, getTempFileURL, downloadFile, getUploadMetadata } from './storage'
+import {
+    uploadFile,
+    deleteFile,
+    getTempFileURL,
+    downloadFile,
+    getUploadMetadata,
+    getFileAuthority
+} from './storage'
 
 import {
     ICloudBaseConfig,
@@ -12,8 +19,10 @@ import {
     IGetFileUrlRes,
     IDownloadFileRes,
     IUploadFileRes,
-    IContext,
-    ICallWxOpenApiOptions
+    ICallWxOpenApiOptions,
+    IContextParam,
+    ICompleteCloudbaseContext,
+    ISCFContext
 } from './type'
 import { DBRequest } from './utils/dbRequest'
 import { Log, logger } from './log'
@@ -21,8 +30,8 @@ import { ERROR } from './const/code'
 import { E } from './utils/utils'
 
 export class CloudBase {
-    public static scfContext: IContext
-    public static parseContext(context: IContext): IContext {
+    public static scfContext: ISCFContext
+    public static parseContext(context: IContextParam): ISCFContext {
         if (typeof context !== 'object') {
             throw E({ ...ERROR.INVALID_CONTEXT, message: 'context 必须为对象类型' })
         }
@@ -82,7 +91,7 @@ export class CloudBase {
     /**
      * 获取当前函数内的所有环境变量(作为获取变量的统一方法，取值来源process.env 和 context)
      */
-    public static getCloudbaseContext(context?: IContext) {
+    public static getCloudbaseContext(context?: IContextParam): ICompleteCloudbaseContext {
         // WX_CONTEXT_ENV  WX_APPID WX_OPENID WX_UNIONID WX_API_TOKEN
         // TCB_CONTEXT_ENV TCB_ENV TCB_SEQID TRIGGER_SRC LOGINTYPE QQ_OPENID QQ_APPID TCB_UUID TCB_ISANONYMOUS_USER TCB_SESSIONTOKEN TCB_CUSTOM_USER_ID TCB_SOURCE_IP TCB_SOURCE TCB_ROUTE_KEY TCB_HTTP_CONTEXT TCB_CONTEXT_CNFG
 
@@ -100,6 +109,7 @@ export class CloudBase {
             WX_CLIENTIP,
             WX_CLIENTIPV6,
             _SCF_TCB_LOG,
+            TCB_CONTEXT_CNFG,
             LOGINTYPE
         } = process.env
 
@@ -126,6 +136,7 @@ export class CloudBase {
             WX_CLIENTIPV6,
             WX_CONTEXT_KEYS,
             _SCF_TCB_LOG,
+            TCB_CONTEXT_CNFG,
             LOGINTYPE
         }
 
@@ -156,7 +167,6 @@ export class CloudBase {
                 finalContext[key] = rawContext[key]
             }
         }
-
         return finalContext
     }
 
@@ -258,7 +268,10 @@ export class CloudBase {
      * @param param0
      * @param opts
      */
-    public callWxOpenApi({ apiName, cgiName, requestData }: ICallWxOpenApiOptions, opts?: ICustomReqOpts): Promise<any> {
+    public callWxOpenApi(
+        { apiName, cgiName, requestData }: ICallWxOpenApiOptions,
+        opts?: ICustomReqOpts
+    ): Promise<any> {
         return callWxOpenApi(this, { apiName, cgiName, requestData }, opts)
     }
 
@@ -268,7 +281,10 @@ export class CloudBase {
      * @param param0
      * @param opts
      */
-    public callWxPayApi({ apiName, cgiName, requestData }: ICallWxOpenApiOptions, opts?: ICustomReqOpts): Promise<any> {
+    public callWxPayApi(
+        { apiName, cgiName, requestData }: ICallWxOpenApiOptions,
+        opts?: ICustomReqOpts
+    ): Promise<any> {
         return callWxPayApi(this, { apiName, cgiName, requestData }, opts)
     }
 
@@ -278,7 +294,10 @@ export class CloudBase {
      * @param param0
      * @param opts
      */
-    public callCompatibleWxOpenApi({ apiName, cgiName, requestData }: ICallWxOpenApiOptions, opts?: ICustomReqOpts): Promise<any> {
+    public callCompatibleWxOpenApi(
+        { apiName, cgiName, requestData }: ICallWxOpenApiOptions,
+        opts?: ICustomReqOpts
+    ): Promise<any> {
         return callCompatibleWxOpenApi(this, { apiName, cgiName, requestData }, opts)
     }
 
@@ -339,6 +358,10 @@ export class CloudBase {
      */
     public getUploadMetadata({ cloudPath }, opts?: ICustomReqOpts): Promise<any> {
         return getUploadMetadata(this, { cloudPath }, opts)
+    }
+
+    public getFileAuthority({ fileList }, opts?: ICustomReqOpts): Promise<any> {
+        return getFileAuthority(this, { fileList }, opts)
     }
 
     /**

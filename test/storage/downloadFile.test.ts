@@ -1,9 +1,10 @@
-import tcb from '../../lib/index'
+import tcb from '../../src/index'
 import assert from 'assert'
 import config from '../config.local'
 import fs from 'fs'
 import { ERROR } from '../../lib/const/code'
 import { ICustomErrRes } from '../../types/type'
+import path from 'path'
 let fileContent = fs.createReadStream(`${__dirname}/cos.jpeg`)
 
 describe('storage.downloadFile: 下载文件', () => {
@@ -32,15 +33,17 @@ describe('storage.downloadFile: 下载文件', () => {
 
         // 下载文件
         const result2 = await app.downloadFile({
-            fileID
-            // tempFilePath: '/Users/jimmyzhang/repo/tcb-admin-node/test/storage/my-photo.png'
+            fileID,
+            tempFilePath: path.join(__dirname, 'my-photo.png')
         })
         assert(result2.message, '文件下载完成')
-        // if (!result.code)
-        //   require('fs').writeFileSync(
-        //     '/Users/jimmyzhang/repo/tcb-admin-node/test/storage/my-photo.png',
-        //     result.fileContent
-        //   )
-        // assert(result, '下载文件结果')
+
+        // 下载文件 不知道tempFilePath
+        const result3 = await app.downloadFile({
+            fileID
+        })
+        assert.ok(result3.fileContent !== undefined)
     }, 30000)
+
+    it('mock downloadFile statusCode !== 200', async () => {})
 })

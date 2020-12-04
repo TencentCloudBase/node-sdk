@@ -10,7 +10,7 @@
         "tsc": "tsc -p tsconfig.json",
         "tsc:w": "tsc -p tsconfig.json -w",
         "tstest": "mocha --timeout 5000 --require espower-typescript/guess test/**/*.test.ts",
-        "test": "jest  --detectOpenHandles --coverage --verbose --runInBand",
+        "test": "jest  --detectOpenHandles --verbose --coverage --runInBand",
         "coverage": "jest --detectOpenHandles --coverage",
         "coveralls": "cat ./coverage/lcov.info | coveralls"
     },
@@ -27,7 +27,7 @@
     ],
     "author": "lukejyhuang",
     "license": "MIT",
-    "typings": "lib/index.d.ts",
+    "typings": "types/index.d.ts",
     "dependencies": {
         "@cloudbase/database": "1.2.2",
         "@cloudbase/signature-nodejs": "1.0.0-beta.0",
