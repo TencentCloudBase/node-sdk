@@ -21,7 +21,10 @@ describe('storage.uploadFile: 上传文件', () => {
         // mock错误
         jest.mock('request', () => {
             return jest.fn().mockImplementation((params, callback) => {
-                callback(null, { statusCode: 200, body: { code: 'STORAGE_EXCEED_AUTHORITY' } })
+                const body = { code: 'STORAGE_EXCEED_AUTHORITY' }
+                process.nextTick(() => {
+                    callback(null, { statusCode: 200, body })
+                })
             })
         })
 
@@ -42,11 +45,9 @@ describe('storage.uploadFile: 上传文件', () => {
         jest.mock('request', () => {
             function mockRequest1(params, callback) {
                 const body = { data: {} }
-                callback(null, { statusCode: 200, body }, body)
-                // yield callback(null, {statusCode: 200}, 'test')
-                // yield {data: {}}
-                // yield 'test'
-                // return
+                process.nextTick(() => {
+                    callback(null, { statusCode: 200, body })
+                })
             }
 
             function mockRequest2(params, callback) {
@@ -100,7 +101,9 @@ describe('storage.uploadFile: 上传文件', () => {
         // mock错误
         jest.mock('request', () => {
             return jest.fn().mockImplementation((params, callback) => {
-                callback({ code: 'testError' }, {}, {})
+                process.nextTick(() => {
+                    callback({ code: 'testError' }, { statusCode: 200, body: {} })
+                })
             })
         })
 
@@ -120,7 +123,9 @@ describe('storage.uploadFile: 上传文件', () => {
         // mock错误
         jest.mock('request', () => {
             function mockRequest1(params, callback) {
-                callback(null, { statusCode: 200, body: { data: {} } })
+                process.nextTick(() => {
+                    callback(null, { statusCode: 200, body: { data: {} } })
+                })
             }
 
             function mockRequest2(params, callback) {
@@ -157,11 +162,9 @@ describe('storage.uploadFile: 上传文件', () => {
         // mock错误
         jest.mock('request', () => {
             function mockRequest1(params, callback) {
-                callback(null, { statusCode: 200, body: { data: {} } })
-                // yield callback(null, {statusCode: 200}, 'test')
-                // yield {data: {}}
-                // yield 'test'
-                // return
+                process.nextTick(() => {
+                    callback(null, { statusCode: 200, body: { data: {} } })
+                })
             }
 
             function mockRequest2(params, callback) {
@@ -172,8 +175,9 @@ describe('storage.uploadFile: 上传文件', () => {
 
                 // const builder = new xml2js.Builder();
                 // const xml = builder.buildObject('ERROR');
-
-                callback(null, { body: 'ERROR' }, 'ERROR')
+                process.nextTick(() => {
+                    callback(null, { body: 'ERROR' }, 'ERROR')
+                })
             }
 
             let mR
@@ -212,11 +216,9 @@ describe('storage.uploadFile: 上传文件', () => {
         // mock错误
         jest.mock('request', () => {
             function mockRequest1(params, callback) {
-                callback(null, { statusCode: 200, body: { data: {} } }, { data: {} })
-                // yield callback(null, {statusCode: 200}, 'test')
-                // yield {data: {}}
-                // yield 'test'
-                // return
+                process.nextTick(() => {
+                    callback(null, { statusCode: 200, body: { data: {} } }, { data: {} })
+                })
             }
 
             function mockRequest2(params, callback) {

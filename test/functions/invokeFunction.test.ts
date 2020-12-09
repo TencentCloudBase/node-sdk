@@ -66,7 +66,9 @@ describe('functions.invokeFunction: 执行云函数', () => {
         jest.mock('request', () => {
             return jest.fn().mockImplementation((params, callback) => {
                 const body = { data: { response_data: 'test' } }
-                callback(null, { statusCode: 200, body })
+                process.nextTick(() => {
+                    callback(null, { statusCode: 200, body })
+                })
             })
         })
 
