@@ -24,7 +24,7 @@ export interface ICloudBaseConfig extends IKeyValue {
     version?: string
     credentials?: ICredentialsInfo
     throwOnCode?: boolean // 错误回包(带code) throw
-    forever?: boolean // 是否开启keep alive
+    keepalive?: boolean // 是否开启keep alive
     /**
      * 获取跨帐号调用信息
      */
@@ -144,7 +144,7 @@ export interface IReqOpts {
     body?: any
     formData?: any
     encoding?: any
-    forever?: boolean
+    keepalive?: boolean
     url: string
     method?: string
     timeout?: number

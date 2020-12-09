@@ -214,9 +214,7 @@ export class Request {
             proxy: config.proxy
         }
 
-        if (config.forever === true) {
-            opts.forever = true
-        }
+        opts.keepalive = config.keepalive === true
 
         if (args.method === 'post') {
             if (args.isFormData) {
