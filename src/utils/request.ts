@@ -3,6 +3,7 @@ import request from 'request'
 import { IReqOpts } from '../type/index'
 import { withRetry, IRetryOptions } from './retry'
 import { RequestTimgingsMeasurer } from './request-timings-measurer'
+import HttpKeepAliveAgent, { HttpsAgent as HttpsKeepAliveAgent } from 'agentkeepalive'
 
 const SAFE_RETRY_CODE_SET = new Set([
     'ENOTFOUND',
@@ -92,16 +93,37 @@ export function requestWithTimingsMeasure(opts: IReqOpts, extraOptions?: IExtraR
             )
         })
 
-        const clientRequest = request(opts, function(err, response, body) {
-            return err ? reject(err) : resolve(response)
-        })
-
-        if (
-            clientRequest instanceof request.Request ||
-            clientRequest instanceof http.ClientRequest
-        ) {
-            timingsMeasurer.measure(clientRequest)
+        if (opts.keepalive) {
+            ;(opts as any).agentClass = opts.url.startsWith('https')
+                ? HttpsKeepAliveAgent
+                : HttpKeepAliveAgent
+            ;(opts as any).agentOptions = {
+                // keepAlive: true,
+                keepAliveMsecs: 3000,
+                maxSockets: 100,
+                maxFreeSockets: 10,
+                freeSocketTimeout: 20000,
+                timeout: 20000,
+                socketActiveTTL: null
+            }
         }
+
+        ;(function r(times?: number) {
+            const clientRequest = request(opts, function(err, response, body) {
+                const reusedSocket = !!(clientRequest.req && clientRequest.req.reusedSocket)
+                if (err && err.code === 'ECONNRESET' && reusedSocket && times >= 0 && opts.keepalive) {
+                    return r(--times)
+                }
+                return err ? reject(err) : resolve(response)
+            })
+    
+            if (
+                clientRequest instanceof request.Request ||
+                clientRequest instanceof http.ClientRequest
+            ) {
+                timingsMeasurer.measure(clientRequest)
+            }
+        }(1))
     })
 }
 
