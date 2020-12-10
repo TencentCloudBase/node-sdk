@@ -99,7 +99,9 @@ describe('storage.getFileAuthority: ', () => {
                     code: 'mockCode',
                     message: 'mockMessage'
                 }
-                callback(null, { statusCode: 200, body })
+                process.nextTick(() => {
+                    callback(null, { statusCode: 200, body })
+                })
             })
         })
 

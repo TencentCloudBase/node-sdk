@@ -212,7 +212,7 @@ describe('test/index.test.ts', () => {
                 .options({ timeout: 10 })
                 .get()
         } catch (err) {
-            assert(err.code === 'ESOCKETTIMEDOUT')
+            assert(err.code === 'ETIMEDOUT' || err.code === 'ESOCKETTIMEDOUT')
         }
     })
 

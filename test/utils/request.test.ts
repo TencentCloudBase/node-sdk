@@ -22,7 +22,7 @@ describe('tcb.init: 初始化tcb', () => {
             )
             console.log(resp.attempt, resp.body, 'result|||||||||||||||||||||||')
         } catch (e) {
-            console.error(e.attempt)
+            // console.error(e.attempt)
         }
     })
 })

@@ -110,15 +110,15 @@ export function requestWithTimingsMeasure(opts: IReqOpts, extraOptions?: IExtraR
 
         ;(function r(times?: number) {
             const clientRequest = request(opts, function(err, response, body) {
-                const reusedSocket = !!(clientRequest.req && clientRequest.req.reusedSocket)
+                const reusedSocket = !!(clientRequest && clientRequest.req && clientRequest.req.reusedSocket)
                 if (err && err.code === 'ECONNRESET' && reusedSocket && times >= 0 && opts.keepalive) {
                     return r(--times)
                 }
                 return err ? reject(err) : resolve(response)
             })
-    
+
             if (
-                clientRequest instanceof request.Request ||
+                (request.Request && clientRequest instanceof request.Request) ||
                 clientRequest instanceof http.ClientRequest
             ) {
                 timingsMeasurer.measure(clientRequest)

@@ -125,7 +125,7 @@ describe('storage.batchGetDownloadUrl: 获取文件下载链接', () => {
         expect(result.fileList[0].code).toBe('STORAGE_FILE_NONEXIST')
     })
 
-    it('验证 文件存储接口自定义超时', async () => {
+    it.only('验证 文件存储接口自定义超时', async () => {
         try {
             const result = await app.getTempFileURL(
                 {
@@ -137,7 +137,7 @@ describe('storage.batchGetDownloadUrl: 获取文件下载链接', () => {
             )
             assert(!result)
         } catch (err) {
-            assert(err.code === 'ESOCKETTIMEDOUT')
+            assert(err.code === 'ETIMEDOUT' || err.code === 'ESOCKETTIMEDOUT')
         }
     })
 
@@ -146,7 +146,9 @@ describe('storage.batchGetDownloadUrl: 获取文件下载链接', () => {
         jest.mock('request', () => {
             return jest.fn().mockImplementation((params, callback) => {
                 const body = { code: 'mockCode', message: 'mockMessage' }
-                callback(null, { statusCode: 200, body })
+                process.nextTick(() => {
+                    callback(null, { statusCode: 200, body })
+                })
             })
         })
 

@@ -78,7 +78,9 @@ describe('auth 注入环境变量', () => {
         jest.mock('request', () => {
             return jest.fn().mockImplementation((params, callback) => {
                 const body = { code: 'mockCode', message: 'mockMessage' }
-                callback(null, { statusCode: 200, body })
+                process.nextTick(() => {
+                    callback(null, { req: {reusedSocket: false}, statusCode: 200, body })
+                })
             })
         })
 

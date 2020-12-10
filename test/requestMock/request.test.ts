@@ -6,13 +6,11 @@ describe('mock request 回包处理逻辑', () => {
         jest.resetModules()
         jest.mock('request', () => {
             return jest.fn().mockImplementation((params, callback) => {
-                console.log('debug')
 
-                callback(
-                    null,
-                    { statusCode: 200, body: JSON.stringify({ data: { response_data: 'test' } }) },
-                    JSON.stringify({ data: { response_data: 'test' } })
-                )
+                const body = JSON.stringify({ data: { response_data: 'test' } })
+                process.nextTick(() => {
+                    callback(null, { statusCode: 200, body })
+                })
             })
         })
 
@@ -34,7 +32,10 @@ describe('mock request 回包处理逻辑', () => {
         jest.resetModules()
         jest.mock('request', () => {
             return jest.fn().mockImplementation((params, callback) => {
-                callback(null, { statusCode: 400 }, null)
+                const body = null
+                process.nextTick(() => {
+                    callback(null, { statusCode: 400, body })
+                })
             })
         })
 

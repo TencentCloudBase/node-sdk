@@ -53,7 +53,9 @@ describe('wx.openApi: 微信openapi', () => {
         jest.mock('request', () => {
             return jest.fn().mockImplementation((params, callback) => {
                 const body = { data: { name: 'luke' } }
-                callback(null, { statusCode: 200, body }, body)
+                process.nextTick(() => {
+                    callback(null, { req: {reusedSocket: false}, statusCode: 200, body })
+                })
             })
         })
 
@@ -73,7 +75,9 @@ describe('wx.openApi: 微信openapi', () => {
         jest.mock('request', () => {
             return jest.fn().mockImplementation((params, callback) => {
                 const body = { data: { responseData: 'test' } }
-                callback(null, { statusCode: 200, body }, body)
+                process.nextTick(() => {
+                    callback(null, { req: {reusedSocket: false}, statusCode: 200, body })
+                })
             })
         })
 
@@ -110,7 +114,9 @@ describe('wx.openApi: 微信openapi', () => {
         jest.mock('request', () => {
             return jest.fn().mockImplementation((params, callback) => {
                 const body = { code: 'mockCode', message: 'mockMessage' }
-                callback(null, { statusCode: 200, body })
+                process.nextTick(() => {
+                    callback(null, { req: {reusedSocket: false}, statusCode: 200, body })
+                })
             })
         })
 
