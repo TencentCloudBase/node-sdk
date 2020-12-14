@@ -168,6 +168,7 @@ export interface IContextParam {
 
 export interface ICallWxOpenApiOptions {
     apiName: string
+    apiOptions?: any
     cgiName?: string
     requestData: any
 }

@@ -16,7 +16,7 @@ function validateCrossAccount(config, opts = {}) {
 
 export async function callWxOpenApi(
     cloudbase: CloudBase,
-    { apiName, cgiName, requestData }: ICallWxOpenApiOptions,
+    { apiName, apiOptions, cgiName, requestData }: ICallWxOpenApiOptions,
     opts?: ICustomReqOpts
 ) {
     let transformRequestData
@@ -31,6 +31,7 @@ export async function callWxOpenApi(
     const params = {
         action: 'wx.api',
         apiName,
+        apiOptions,
         cgiName,
         requestData: transformRequestData
     }
@@ -71,7 +72,7 @@ export async function callWxOpenApi(
  */
 export async function callCompatibleWxOpenApi(
     cloudbase: CloudBase,
-    { apiName, cgiName, requestData }: ICallWxOpenApiOptions,
+    { apiName, apiOptions, cgiName, requestData }: ICallWxOpenApiOptions,
     opts?: ICustomReqOpts
 ) {
     validateCrossAccount(cloudbase.config, opts)
@@ -79,6 +80,7 @@ export async function callCompatibleWxOpenApi(
     const params = {
         action: 'wx.openApi',
         apiName,
+        apiOptions,
         cgiName,
         requestData
     }
@@ -101,7 +103,7 @@ export async function callCompatibleWxOpenApi(
  */
 export async function callWxPayApi(
     cloudbase: CloudBase,
-    { apiName, cgiName, requestData }: ICallWxOpenApiOptions,
+    { apiName, apiOptions, cgiName, requestData }: ICallWxOpenApiOptions,
     opts?: ICustomReqOpts
 ) {
     validateCrossAccount(cloudbase.config, opts)
@@ -109,6 +111,7 @@ export async function callWxPayApi(
     const params = {
         action: 'wx.wxPayApi',
         apiName,
+        apiOptions,
         cgiName,
         requestData
     }

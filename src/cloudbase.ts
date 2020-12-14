@@ -269,10 +269,10 @@ export class CloudBase {
      * @param opts
      */
     public callWxOpenApi(
-        { apiName, cgiName, requestData }: ICallWxOpenApiOptions,
+        { apiName, apiOptions, cgiName, requestData }: ICallWxOpenApiOptions,
         opts?: ICustomReqOpts
     ): Promise<any> {
-        return callWxOpenApi(this, { apiName, cgiName, requestData }, opts)
+        return callWxOpenApi(this, { apiName, apiOptions, cgiName, requestData }, opts)
     }
 
     /**
@@ -282,10 +282,10 @@ export class CloudBase {
      * @param opts
      */
     public callWxPayApi(
-        { apiName, cgiName, requestData }: ICallWxOpenApiOptions,
+        { apiName, apiOptions, cgiName, requestData }: ICallWxOpenApiOptions,
         opts?: ICustomReqOpts
     ): Promise<any> {
-        return callWxPayApi(this, { apiName, cgiName, requestData }, opts)
+        return callWxPayApi(this, { apiName, apiOptions, cgiName, requestData }, opts)
     }
 
     /**
@@ -295,10 +295,10 @@ export class CloudBase {
      * @param opts
      */
     public callCompatibleWxOpenApi(
-        { apiName, cgiName, requestData }: ICallWxOpenApiOptions,
+        { apiName, apiOptions, cgiName, requestData }: ICallWxOpenApiOptions,
         opts?: ICustomReqOpts
     ): Promise<any> {
-        return callCompatibleWxOpenApi(this, { apiName, cgiName, requestData }, opts)
+        return callCompatibleWxOpenApi(this, { apiName, apiOptions, cgiName, requestData }, opts)
     }
 
     /**
