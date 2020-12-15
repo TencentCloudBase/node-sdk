@@ -1094,6 +1094,8 @@ export declare class CloudBase {
             requestData
         }: {
             apiName: string
+            apiOptions?: any
+            cgiName?: string
             requestData: any
         },
         opts?: ICustomReqOpts
@@ -1110,6 +1112,8 @@ export declare class CloudBase {
             requestData
         }: {
             apiName: string
+            apiOptions?: any
+            cgiName?: string
             requestData: any
         },
         opts?: ICustomReqOpts
@@ -1126,6 +1130,8 @@ export declare class CloudBase {
             requestData
         }: {
             apiName: string
+            apiOptions?: any
+            cgiName?: string
             requestData: any
         },
         opts?: ICustomReqOpts
