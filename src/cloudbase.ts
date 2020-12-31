@@ -12,6 +12,10 @@ import {
 } from './storage'
 
 import {
+    analytics
+} from './analytics'
+
+import {
     ICloudBaseConfig,
     ICustomReqOpts,
     ICustomErrRes,
@@ -22,7 +26,8 @@ import {
     ICallWxOpenApiOptions,
     IContextParam,
     ICompleteCloudbaseContext,
-    ISCFContext
+    ISCFContext,
+    IReportData,
 } from './type'
 import { DBRequest } from './utils/dbRequest'
 import { Log, logger } from './log'
@@ -147,7 +152,7 @@ export class CloudBase {
                 for (let item of tcbKeysList) {
                     rawContext[item] = contextEnv[item] || process.env[item]
                 }
-            } catch (e) {}
+            } catch (e) { }
         }
 
         if (wx_context_keys) {
@@ -156,7 +161,7 @@ export class CloudBase {
                 for (let item of wxKeysList) {
                     rawContext[item] = contextEnv[item] || process.env[item]
                 }
-            } catch (e) {}
+            } catch (e) { }
         }
 
         rawContext = { ...rawContext, ...contextEnv }
@@ -373,5 +378,9 @@ export class CloudBase {
             this.clsLogger = logger()
         }
         return this.clsLogger
+    }
+
+    public analytics(reportData: IReportData): Promise<void> {
+        return analytics(this, reportData)
     }
 }
