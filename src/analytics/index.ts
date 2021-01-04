@@ -23,7 +23,7 @@ function validateAnalyticsData(data: IReportData): boolean {
         return false
     }
 
-    if (!Number.isInteger(report_data.action_time)) {
+    if (report_data.action_time !== undefined && !Number.isInteger(report_data.action_time)) {
         return false
     }
 
@@ -52,10 +52,16 @@ export async function analytics(
         })
     }
 
+    const action_time = requestData.report_data.action_time === undefined ? Math.floor(Date.now() / 1000) : requestData.report_data.action_time
+
     const transformRequestData: IAnalyticsDataItem = {
         analytics_scene: requestData.report_type,
-        analytics_data: { openid: WX_OPENID,
-            wechat_mini_program_appid: WX_APPID, ...requestData.report_data}
+        analytics_data: {
+            openid: WX_OPENID,
+            wechat_mini_program_appid: WX_APPID,
+            ...requestData.report_data,
+            action_time
+        }
     }
 
     const params = {
