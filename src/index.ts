@@ -1,9 +1,13 @@
 import { CloudBase } from './cloudbase'
 import { ICloudBaseConfig, IContextParam } from './type'
 import { SYMBOL_CURRENT_ENV } from './const/symbol'
+import { extraRequest } from './utils/request'
+
 const { version } = require('../package.json')
 
 export = {
+    request: extraRequest,
+
     init: (config?: ICloudBaseConfig): CloudBase => {
         return new CloudBase(config)
     },

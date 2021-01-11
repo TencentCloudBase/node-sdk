@@ -111,6 +111,9 @@ export function requestWithTimingsMeasure(opts: IReqOpts, extraOptions?: IExtraR
         ;(function r(times?: number) {
             const clientRequest = request(opts, function(err, response, body) {
                 const reusedSocket = !!(clientRequest && clientRequest.req && clientRequest.req.reusedSocket)
+                if (err && extraOptions.debug) {
+                    console.warn(`[RequestTimgings][keepalive:${opts.keepalive}][reusedSocket:${reusedSocket}][times:${times}][code:${err.code}][message:${err.message}]${opts.url}`)
+                }
                 if (err && err.code === 'ECONNRESET' && reusedSocket && times >= 0 && opts.keepalive) {
                     return r(--times)
                 }
