@@ -22,7 +22,7 @@ export const filterValue = function filterValue(o, value) {
     }
 }
 
-export const filterUndefined = function(o) {
+export const filterUndefined = function (o) {
     return filterValue(o, undefined)
 }
 
@@ -83,4 +83,9 @@ export function getWxUrl(config: any): string {
         wxUrl = 'http://tcb-open.tencentyun.com/admin'
     }
     return wxUrl
+}
+
+
+export function checkIsInternal(): boolean {
+    return checkIsInScf() || checkIsInContainer()
 }

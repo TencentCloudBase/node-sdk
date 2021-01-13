@@ -116,7 +116,7 @@ export class Request {
                     code: response.statusCode,
                     message: ` ${response.statusCode} ${
                         http.STATUS_CODES[response.statusCode]
-                    } | [${opts.url}]`
+                        } | [${opts.url}]`
                 })
                 throw e
             }
@@ -393,7 +393,7 @@ export class Request {
     /* eslint-disable-next-line complexity */
     private getUrl(): string {
         const isInSCF = utils.checkIsInScf()
-        const isInContainer = utils.checkIsInContainer()
+        const isInternal = utils.checkIsInternal()
         const { eventId, seqId } = this.tracingInfo
         const { serviceUrl } = this.config
         const serverInjectUrl = getServerInjectUrl()
@@ -430,13 +430,13 @@ export class Request {
             ? this.config.region === process.env.TENCENTCLOUD_REGION
             : true
         const endpoint =
-            isSameRegionVisit && (isInSCF || isInContainer)
+            isSameRegionVisit && (isInternal)
                 ? internalRegionEndpoint
                 : internetRegionEndpoint
 
         const envEndpoint = envId ? `${envId}.${endpoint}` : endpoint
 
-        const protocol = isInSCF ? 'http' : this.getProtocol()
+        const protocol = isInternal ? 'http' : this.getProtocol()
         // 注意：云函数环境下有地域信息，云应用环境下不确定是否有，如果没有，用户必须显式的传入
         const defaultUrl = `${protocol}://${envEndpoint}${this.urlPath}`
 
