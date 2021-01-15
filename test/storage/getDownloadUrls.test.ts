@@ -36,7 +36,7 @@ describe('storage.batchGetDownloadUrl: 获取文件下载链接', () => {
         } catch (e) {
             assert(
                 e.code === ERROR.INVALID_PARAM.code &&
-                    e.message === 'fileList的元素如果是对象，必须是包含fileID和maxAge的对象'
+                e.message === 'fileList的元素如果是对象，必须是包含fileID和maxAge的对象'
             )
         }
 
@@ -47,7 +47,7 @@ describe('storage.batchGetDownloadUrl: 获取文件下载链接', () => {
         } catch (e) {
             assert(
                 e.code === ERROR.INVALID_PARAM.code &&
-                    e.message === 'fileList的元素如果是对象，必须是包含fileID和maxAge的对象'
+                e.message === 'fileList的元素如果是对象，必须是包含fileID和maxAge的对象'
             )
         }
 
@@ -58,7 +58,7 @@ describe('storage.batchGetDownloadUrl: 获取文件下载链接', () => {
         } catch (e) {
             assert(
                 e.code === ERROR.INVALID_PARAM.code &&
-                    e.message === 'fileList的元素如果不是对象，则必须是字符串'
+                e.message === 'fileList的元素如果不是对象，则必须是字符串'
             )
         }
     }, 30000)
@@ -125,7 +125,7 @@ describe('storage.batchGetDownloadUrl: 获取文件下载链接', () => {
         expect(result.fileList[0].code).toBe('STORAGE_FILE_NONEXIST')
     })
 
-    it.only('验证 文件存储接口自定义超时', async () => {
+    it('验证 文件存储接口自定义超时', async () => {
         try {
             const result = await app.getTempFileURL(
                 {
