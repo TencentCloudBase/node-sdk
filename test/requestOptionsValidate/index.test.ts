@@ -246,6 +246,40 @@ describe('校验config设置  请求入参', () => {
         assert(reqOpts.url.indexOf('http://testUrl.test.com') === 0)
     })
 
+    it('校验云函数or容器环境 请求url', async () => {
+        process.env.TENCENTCLOUD_RUNENV = 'SCF'
+        process.env.KUBERNETES_SERVICE_HOST = 'KUBERNETES_SERVICE_HOST'
+        jest.mock('../../src/utils/request', () => {
+            return {
+                extraRequest: jest.fn().mockImplementation(opts => {
+                    return Promise.resolve({
+                        statusCode: 200,
+                        body: {
+                            data: { response_data: opts },
+                            requestId: 'testRequestId'
+                        }
+                    })
+                })
+            }
+        })
+
+        const tcb = require('../../src/index')
+        const config = require('../../test/config.local')
+        let app = tcb.init(config)
+
+        // mock一次http请求
+        let mockReqRes = await app.callFunction({
+            name: 'unexistFunction',
+            data: { a: 1 }
+        })
+
+        let reqOpts = mockReqRes.result
+        // assert(reqOpts.url.indexOf('testUrl') >= 0)
+        assert(reqOpts.url.indexOf('internal') >= 0)
+        process.env.TENCENTCLOUD_RUNENV = ''
+        process.env.KUBERNETES_SERVICE_HOST = ''
+    })
+
     it('校验config.serviceUrl => url', async () => {
         config.serviceUrl = 'http://testUrl.com'
         jest.mock('../../src/utils/request', () => {
