@@ -1025,6 +1025,13 @@ export interface IGetAuthContextRes {
     openId?: string
 }
 
+interface ICallWxOpenApiOptions {
+    apiName: string
+    apiOptions?: any
+    cgiName?: string
+    requestData: any
+}
+
 export declare class CloudBase {
     static scfContext: ISCFContext
     static parseContext(context: IContextParam): ISCFContext
@@ -1092,12 +1099,7 @@ export declare class CloudBase {
         {
             apiName,
             requestData
-        }: {
-            apiName: string
-            apiOptions?: any
-            cgiName?: string
-            requestData: any
-        },
+        }: ICallWxOpenApiOptions,
         opts?: ICustomReqOpts
     ): Promise<ICallWxOpenApiRes>
     /**
@@ -1110,12 +1112,7 @@ export declare class CloudBase {
         {
             apiName,
             requestData
-        }: {
-            apiName: string
-            apiOptions?: any
-            cgiName?: string
-            requestData: any
-        },
+        }: ICallWxOpenApiOptions,
         opts?: ICustomReqOpts
     ): Promise<any>
     /**
@@ -1128,12 +1125,7 @@ export declare class CloudBase {
         {
             apiName,
             requestData
-        }: {
-            apiName: string
-            apiOptions?: any
-            cgiName?: string
-            requestData: any
-        },
+        }: ICallWxOpenApiOptions,
         opts?: ICustomReqOpts
     ): Promise<any>
     /**

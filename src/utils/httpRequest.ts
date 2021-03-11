@@ -15,7 +15,9 @@ import { CloudBase } from '../cloudbase'
 
 import { extraRequest } from './request'
 import { handleWxOpenApiData } from './requestHook'
-import { getWxCloudApiToken } from './getWxCloudApiToken'
+
+import { getWxCloudToken, loadWxCloudbaseAccesstoken } from './wxCloudToken'
+
 import { sign } from '@cloudbase/signature-nodejs'
 import URL from 'url'
 // import { version } from '../../package.json'
@@ -165,19 +167,19 @@ export class Request {
         const config = this.config
 
         const { eventId } = this.tracingInfo
-        let crossAuthorizationData =
+        const crossAuthorizationData =
             opts.getCrossAccountInfo && (await opts.getCrossAccountInfo()).authorization
+        
+        const {wxCloudApiToken, wxCloudbaseAccesstoken} = getWxCloudToken()
 
         const params: ICustomParam = {
             ...args.params,
             envName: config.envName,
             eventId,
-            // wxCloudApiToken: process.env.WX_API_TOKEN || '',
-            wxCloudApiToken: getWxCloudApiToken(),
-            // 对应服务端 wxCloudSessionToken
+            wxCloudApiToken,
+            wxCloudbaseAccesstoken,
             tcb_sessionToken: TCB_SESSIONTOKEN || '',
             sessionToken: config.sessionToken,
-            sdk_version: version, // todo 可去掉该参数
             crossAuthorizationToken: crossAuthorizationData
                 ? Buffer.from(JSON.stringify(crossAuthorizationData)).toString('base64')
                 : ''
