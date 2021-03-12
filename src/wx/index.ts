@@ -28,7 +28,7 @@ export async function callWxOpenApi(
 
     validateCrossAccount(cloudbase.config, opts)
 
-    const params = {
+    const params: any = {
         action: 'wx.api',
         apiName,
         apiOptions,
@@ -48,8 +48,6 @@ export async function callWxOpenApi(
         if (res.code) {
             return res
         }
-        //     throw E({ ...res })
-        // } else {
         let result
         try {
             result = JSON.parse(res.data.responseData)
@@ -77,7 +75,7 @@ export async function callCompatibleWxOpenApi(
 ) {
     validateCrossAccount(cloudbase.config, opts)
 
-    const params = {
+    const params: any = {
         action: 'wx.openApi',
         apiName,
         apiOptions,
@@ -108,7 +106,7 @@ export async function callWxPayApi(
 ) {
     validateCrossAccount(cloudbase.config, opts)
 
-    const params = {
+    const params: any = {
         action: 'wx.wxPayApi',
         apiName,
         apiOptions,

@@ -205,27 +205,26 @@ export interface IEnvironmentInfo {
 
 // 最完整的环境变量类型汇总
 export interface ICompleteCloudbaseContext {
-    TENCENTCLOUD_RUNENV: string
+    _SCF_TCB_LOG?: string
     SCF_NAMESPACE: string
-    TCB_CONTEXT_KEYS: string[]
+    TRIGGER_SRC: string
+    TENCENTCLOUD_RUNENV: string
     TENCENTCLOUD_SECRETID: string
     TENCENTCLOUD_SECRETKEY: string
     TENCENTCLOUD_SESSIONTOKEN: string
-    TRIGGER_SRC: string
+    WX_CONTEXT_KEYS: string[]
     WX_TRIGGER_API_TOKEN_V0?: string
     WX_CLIENTIP?: string
     WX_CLIENTIPV6?: string
-    WX_CONTEXT_KEYS: string[]
-    _SCF_TCB_LOG?: string
     LOGINTYPE?: string
     WX_APPID?: string
     WX_OPENID?: string
     WX_UNIONID?: string
     WX_API_TOKEN?: string
+    WX_CLOUDBASE_ACCESSTOKEN?: string
+    TCB_CONTEXT_KEYS: string[]
     TCB_ENV: string
     TCB_SEQID: string
-    QQ_OPENID?: string
-    QQ_APPID?: string
     TCB_UUID?: string
     TCB_ISANONYMOUS_USER?: string
     TCB_SESSIONTOKEN?: string
@@ -236,8 +235,9 @@ export interface ICompleteCloudbaseContext {
     TCB_HTTP_CONTEXT?: string
     TCB_CONTEXT_CNFG?: string
     TCB_TRACELOG?: string
+    QQ_OPENID?: string
+    QQ_APPID?: string
 }
-
 
 // 上报数据结构
 export interface IAnalyticsDataItem {
