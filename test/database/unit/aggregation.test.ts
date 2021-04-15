@@ -686,5 +686,6 @@ describe('geoNear', () => {
             })
             .end()
         assert.strictEqual(res.data.length === 1 && res.data[0].city === 'Hangzhou', true)
+        assert.strictEqual(res.data[0].distance === 6643.521654040738, true)
     })
 })
