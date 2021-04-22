@@ -1116,6 +1116,19 @@ export declare class CloudBase {
         opts?: ICustomReqOpts
     ): Promise<any>
     /**
+     * wxCallContainerApi调用
+     *
+     * @param param0
+     * @param opts
+     */
+     wxCallContainerApi(
+        {
+            apiName,
+            requestData
+        }: ICallWxOpenApiOptions,
+        opts?: ICustomReqOpts
+    ): Promise<any>
+    /**
      * 微信云调用
      *
      * @param param0
