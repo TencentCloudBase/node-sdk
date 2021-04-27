@@ -33,6 +33,7 @@ import { DBRequest } from './utils/dbRequest'
 import { Log, logger } from './log'
 import { ERROR } from './const/code'
 import { E } from './utils/utils'
+import axios from 'axios'
 
 export class CloudBase {
     public static scfContext: ISCFContext
@@ -231,6 +232,7 @@ export class CloudBase {
             throw Error(`扩展${name} 必须先注册`)
         }
 
+        console.log(opts)
         return ext.invoke(opts, this)
     }
 
@@ -382,5 +384,15 @@ export class CloudBase {
 
     public analytics(reportData: IReportData): Promise<void> {
         return analytics(this, reportData)
+    }
+
+    // shim for tcb extension ci
+    public get requestClient() {
+        return {
+            get: axios,
+            post: axios,
+            put: axios,
+            delete: axios
+        }
     }
 }
