@@ -1,7 +1,7 @@
 import { Db } from '@cloudbase/database'
 import { callFunction } from './functions'
 import { auth } from './auth'
-import { callWxOpenApi, callCompatibleWxOpenApi, callWxPayApi } from './wx'
+import { callWxOpenApi, callCompatibleWxOpenApi, callWxPayApi, wxCallContainerApi } from './wx'
 import {
     uploadFile,
     deleteFile,
@@ -293,6 +293,19 @@ export class CloudBase {
         opts?: ICustomReqOpts
     ): Promise<any> {
         return callWxPayApi(this, wxOpenApiOptions, opts)
+    }
+
+    /**
+     * wxpayapi调用
+     *
+     * @param param0
+     * @param opts
+     */
+     public wxCallContainerApi(
+        wxOpenApiOptions: ICallWxOpenApiOptions,
+        opts?: ICustomReqOpts
+    ): Promise<any> {
+        return wxCallContainerApi(this, wxOpenApiOptions, opts)
     }
 
     /**

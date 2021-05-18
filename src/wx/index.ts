@@ -123,3 +123,34 @@ export async function callWxPayApi(
         opts
     })
 }
+
+/**
+ * wx.wxCallContainerApi
+ * @param {String} apiName  接口名
+ * @param {Buffer} requestData
+ * @return {Promise} 正常内容为buffer，报错为json {code:'', message:'', resquestId:''}
+ */
+ export async function wxCallContainerApi(
+    cloudbase: CloudBase,
+    { apiName, apiOptions, cgiName, requestData }: ICallWxOpenApiOptions,
+    opts?: ICustomReqOpts
+) {
+    validateCrossAccount(cloudbase.config, opts)
+
+    const params: any = {
+        action: 'wx.wxCallContainerApi',
+        apiName,
+        apiOptions,
+        cgiName,
+        requestData
+    }
+
+    return httpRequest({
+        config: cloudbase.config,
+        method: 'post',
+        headers: { 'content-type': 'multipart/form-data' },
+        params,
+        isFormData: true,
+        opts
+    })
+}
