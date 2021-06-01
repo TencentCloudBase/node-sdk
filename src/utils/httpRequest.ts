@@ -202,7 +202,9 @@ export class Request {
     public async makeReqOpts(params): Promise<IReqOpts> {
         const config = this.config
         const args = this.args
-        const url = this.getUrl()
+
+        const isInternal = await utils.checkIsInternalAsync()
+        const url = this.getUrl({isInternal})
         const method = this.getMethod()
 
         const opts: IReqOpts = {
@@ -268,7 +270,7 @@ export class Request {
         } = CloudBase.getCloudbaseContext() // 放在此处是为了兼容本地环境下读环境变量
 
         const isInSCF = utils.checkIsInScf()
-        const isInContainer = utils.checkIsInContainer()
+        const isInContainer = utils.checkIsInEks()
 
         let opts = this.opts
         let getCrossAccountInfo = opts.getCrossAccountInfo || this.config.getCrossAccountInfo
@@ -393,14 +395,12 @@ export class Request {
      * @param action
      */
     /* eslint-disable-next-line complexity */
-    private getUrl(): string {
-        const isInSCF = utils.checkIsInScf()
-        const isInternal = utils.checkIsInternal()
-        const { eventId, seqId } = this.tracingInfo
-        const { serviceUrl } = this.config
-        const serverInjectUrl = getServerInjectUrl()
-
-        if (isInSCF) {
+    private getUrl(options: {
+        isInternal: boolean
+    } = {
+        isInternal: false
+    }): string {
+        if (utils.checkIsInScf()) {
             // 云函数环境下，应该包含以下环境变量，如果没有，后续逻辑可能会有问题
             if (!process.env.TENCENTCLOUD_REGION) {
                 console.error('[ERROR] missing `TENCENTCLOUD_REGION` environment')
@@ -432,15 +432,19 @@ export class Request {
             ? this.config.region === process.env.TENCENTCLOUD_REGION
             : true
         const endpoint =
-            isSameRegionVisit && (isInternal)
+            isSameRegionVisit && (options.isInternal)
                 ? internalRegionEndpoint
                 : internetRegionEndpoint
 
         const envEndpoint = envId ? `${envId}.${endpoint}` : endpoint
 
-        const protocol = isInternal ? 'http' : this.getProtocol()
+        const protocol = options.isInternal ? 'http' : this.getProtocol()
         // 注意：云函数环境下有地域信息，云应用环境下不确定是否有，如果没有，用户必须显式的传入
         const defaultUrl = `${protocol}://${envEndpoint}${this.urlPath}`
+
+        const { eventId, seqId } = this.tracingInfo
+        const { serviceUrl } = this.config
+        const serverInjectUrl = getServerInjectUrl()
 
         const url = serviceUrl || serverInjectUrl || defaultUrl
 

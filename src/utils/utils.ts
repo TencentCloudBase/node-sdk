@@ -1,5 +1,6 @@
 import { IErrorInfo } from '../type'
 import { CloudBase } from '../cloudbase'
+import { lookupAppId } from './metadata'
 
 export class TcbError extends Error {
     public readonly code: string
@@ -12,6 +13,10 @@ export class TcbError extends Error {
         this.message = error.message
         this.requestId = error.requestId
     }
+}
+
+export function isAppId(appIdStr: string) {
+    return /^[1-9][0-9]{4,64}$/gim.test(appIdStr)
 }
 
 export const filterValue = function filterValue(o, value) {
@@ -30,13 +35,25 @@ export const E = (errObj: IErrorInfo) => {
     return new TcbError(errObj)
 }
 
-export const checkIsInScf = () => {
-    const { TENCENTCLOUD_RUNENV } = CloudBase.getCloudbaseContext()
-    return TENCENTCLOUD_RUNENV === 'SCF'
+export function checkIsInScf() {
+    // TENCENTCLOUD_RUNENV
+    return process.env.TENCENTCLOUD_RUNENV === 'SCF'
 }
 
-export const checkIsInContainer = () => {
-    return !!process.env.KUBERNETES_SERVICE_HOST
+export function checkIsInEks() {
+    // EKS_CLUSTER_ID=cls-abcdefg
+    // EKS_LOGS_xxx=
+    return process.env.EKS_CLUSTER_ID !== ''
+}
+
+const kSumeruEnvSet = new Set(['formal', 'pre', 'test'])
+export function checkIsInSumeru() {
+    // SUMERU_ENV=formal | test | pre
+    return kSumeruEnvSet.has(process.env.SUMERU_ENV)
+}
+
+export async function checkIsInTencentCloud(): Promise<boolean> {
+    return isAppId(await lookupAppId())
 }
 
 export function second(): number {
@@ -87,5 +104,26 @@ export function getWxUrl(config: any): string {
 
 
 export function checkIsInternal(): boolean {
-    return checkIsInScf() || checkIsInContainer()
+    return checkIsInScf() || checkIsInEks() || checkIsInSumeru()
+}
+
+export function checkIsInternalAsync(): Promise<boolean> {
+    const isInternal = checkIsInternal()
+    return isInternal ? Promise.resolve(isInternal) : checkIsInTencentCloud()
+}
+
+export function getCurrRunEnvTag() {
+    if (checkIsInScf()) {
+        return 'scf'
+    }
+    else if (checkIsInEks()) {
+        return 'eks'
+    }
+    else if (checkIsInSumeru()) {
+        return 'sumeru'
+    }
+    else if (checkIsInTencentCloud()) {
+        return 'tencentcloud'
+    }
+    return 'unknown'
 }
