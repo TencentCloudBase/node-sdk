@@ -10,7 +10,7 @@
         "tsc": "tsc -p tsconfig.json",
         "tsc:w": "tsc -p tsconfig.json -w",
         "tstest": "mocha --timeout 5000 --require espower-typescript/guess test/**/*.test.ts",
-        "test": "jest  --detectOpenHandles --verbose --coverage --runInBand",
+        "test": "jest --detectOpenHandles --verbose --coverage --runInBand",
         "coverage": "jest --detectOpenHandles --coverage",
         "coveralls": "cat ./coverage/lcov.info | coveralls"
     },

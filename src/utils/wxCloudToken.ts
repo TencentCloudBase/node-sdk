@@ -36,7 +36,7 @@ export function loadWxCloudbaseAccesstoken(): string {
     }
 
     try {
-        if (utils.checkIsInContainer() && fs.existsSync(CLOUDBASE_ACCESS_TOKEN_PATH)) {
+        if (utils.checkIsInEks() && fs.existsSync(CLOUDBASE_ACCESS_TOKEN_PATH)) {
             cloudbaseAccessTokenInfo.token = fs.readFileSync(CLOUDBASE_ACCESS_TOKEN_PATH).toString()
             cloudbaseAccessTokenInfo.timestamp = Date.now()
     

@@ -1,5 +1,7 @@
 import request from 'request'
 
+import { kMetadataBaseUrl } from './metadata'
+
 interface Secret {
     id: string
     key: string
@@ -14,8 +16,7 @@ export default class SecretManager {
     private tmpSecret: Secret | null
     private TMP_SECRET_URL: string
     public constructor() {
-        this.TMP_SECRET_URL =
-            'http://metadata.tencentyun.com/meta-data/cam/security-credentials/TCB_QcsRole'
+        this.TMP_SECRET_URL = `${kMetadataBaseUrl}/meta-data/cam/security-credentials/TCB_QcsRole`
         this.tmpSecret = null
     }
 
