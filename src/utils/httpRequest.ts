@@ -214,7 +214,7 @@ export class Request {
             // timeout: args.timeout || config.timeout || 15000,
             timeout: this.getTimeout(), // todo 细化到api维度 timeout
             // 优先取config，其次取模块，最后取默认
-            headers: await this.getHeaders(params),
+            headers: await this.getHeaders(url),
             proxy: config.proxy
         }
 
@@ -336,18 +336,16 @@ export class Request {
      *
      * 获取headers 此函数中设置authorization
      */
-    private async getHeaders(params): Promise<any> {
-        let { TCB_SOURCE } = CloudBase.getCloudbaseContext()
+    private async getHeaders(url: string): Promise<any> {
         const config = this.config
         const { secretId, secretKey } = config
         const args = this.args
         const method = this.getMethod()
-        const isInSCF = utils.checkIsInScf()
+
+        const { TCB_SOURCE } = CloudBase.getCloudbaseContext()
         // Note: 云函数被调用时可能调用端未传递 SOURCE，TCB_SOURCE 可能为空
-        TCB_SOURCE = TCB_SOURCE || ''
-        const SOURCE = isInSCF ? `${TCB_SOURCE},scf` : ',not_scf'
-        const url = this.getUrl()
-        // 默认
+        const SOURCE = utils.checkIsInScf() ? `${TCB_SOURCE || ''},scf` : ',not_scf'
+
         let requiredHeaders = {
             'User-Agent': `tcb-node-sdk/${version}`,
             'x-tcb-source': SOURCE,

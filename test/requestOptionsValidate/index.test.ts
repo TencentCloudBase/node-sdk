@@ -89,8 +89,6 @@ describe('校验config设置  请求入参', () => {
     }, 30000)
 
     it('校验config.isHttp => protocol', async () => {
-        config.isHttp = true
-
         jest.mock('../../src/utils/request', () => {
             return {
                 extraRequest: jest.fn().mockImplementation(opts => {
@@ -106,20 +104,26 @@ describe('校验config设置  请求入参', () => {
         })
 
         const tcb = require('../../src/index')
-        let app = tcb.init(config)
+        let app = null
+        let mockReqRes = null
+        
+        app = tcb.init({
+            ...config,
+            isHttp: true
+        })
 
         // mock一次http请求
-        let mockReqRes = await app.callFunction({
+        mockReqRes = await app.callFunction({
             name: 'unexistFunction',
             data: { a: 1 }
         })
 
-        let reqOpts = mockReqRes.result
+        assert(mockReqRes.result.url.indexOf('https') < 0)
 
-        assert(reqOpts.url.indexOf('https') < 0)
-
-        config.isHttp = false
-        app = tcb.init(config)
+        app = tcb.init({
+            ...config,
+            isHttp: false
+        })
 
         // mock一次https请求
         mockReqRes = await app.callFunction({
@@ -127,9 +131,7 @@ describe('校验config设置  请求入参', () => {
             data: { a: 1 }
         })
 
-        reqOpts = mockReqRes.result
-
-        assert(reqOpts.url.indexOf('https') >= 0)
+        assert(mockReqRes.result.url.indexOf('https') >= 0)
     })
 
     it('校验 parseContext 后 url', async () => {
@@ -248,6 +250,7 @@ describe('校验config设置  请求入参', () => {
 
     it('校验云函数or容器环境 请求url', async () => {
         process.env.TENCENTCLOUD_RUNENV = 'SCF'
+        process.env.TENCENTCLOUD_REGION = 'ap-shanghai'
         process.env.KUBERNETES_SERVICE_HOST = 'KUBERNETES_SERVICE_HOST'
         jest.mock('../../src/utils/request', () => {
             return {
@@ -274,9 +277,9 @@ describe('校验config设置  请求入参', () => {
         })
 
         let reqOpts = mockReqRes.result
-        // assert(reqOpts.url.indexOf('testUrl') >= 0)
         assert(reqOpts.url.indexOf('internal') >= 0)
         process.env.TENCENTCLOUD_RUNENV = ''
+        process.env.TENCENTCLOUD_REGION = ''
         process.env.KUBERNETES_SERVICE_HOST = ''
     })
 

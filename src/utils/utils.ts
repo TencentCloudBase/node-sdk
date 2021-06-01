@@ -35,6 +35,10 @@ export const E = (errObj: IErrorInfo) => {
     return new TcbError(errObj)
 }
 
+export function isNonEmptyString(str: string) {
+    return typeof str === 'string' && str !== ''
+}
+
 export function checkIsInScf() {
     // TENCENTCLOUD_RUNENV
     return process.env.TENCENTCLOUD_RUNENV === 'SCF'
@@ -43,7 +47,7 @@ export function checkIsInScf() {
 export function checkIsInEks() {
     // EKS_CLUSTER_ID=cls-abcdefg
     // EKS_LOGS_xxx=
-    return process.env.EKS_CLUSTER_ID !== ''
+    return isNonEmptyString(process.env.EKS_CLUSTER_ID)
 }
 
 const kSumeruEnvSet = new Set(['formal', 'pre', 'test'])
@@ -53,7 +57,7 @@ export function checkIsInSumeru() {
 }
 
 export async function checkIsInTencentCloud(): Promise<boolean> {
-    return isAppId(await lookupAppId())
+    return isNonEmptyString(await lookupAppId())
 }
 
 export function second(): number {
@@ -108,8 +112,7 @@ export function checkIsInternal(): boolean {
 }
 
 export function checkIsInternalAsync(): Promise<boolean> {
-    const isInternal = checkIsInternal()
-    return isInternal ? Promise.resolve(isInternal) : checkIsInTencentCloud()
+    return checkIsInternal() ? Promise.resolve(true) : checkIsInTencentCloud()
 }
 
 export function getCurrRunEnvTag() {
