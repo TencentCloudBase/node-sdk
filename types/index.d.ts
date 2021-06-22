@@ -1025,6 +1025,13 @@ export interface IGetAuthContextRes {
     openId?: string
 }
 
+interface ICallFunctionOptions {
+    name: string
+    data: any
+    qualifier?: string
+    // async?: boolean
+}
+
 interface ICallWxOpenApiOptions {
     apiName: string
     apiOptions?: any
@@ -1057,10 +1064,7 @@ export declare class CloudBase {
         {
             name,
             data
-        }: {
-            name: string
-            data: any
-        },
+        }: ICallFunctionOptions,
         opts?: ICustomReqOpts
     ): Promise<ICallFunctionRes>
     auth(): {

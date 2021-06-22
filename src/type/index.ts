@@ -166,6 +166,13 @@ export interface IContextParam {
     namespace: string
 }
 
+export interface ICallFunctionOptions {
+    name: string
+    data: any
+    qualifier?: string
+    // async?: boolean
+}
+
 export interface ICallWxOpenApiOptions {
     apiName: string
     apiOptions?: any

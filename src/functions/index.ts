@@ -1,7 +1,7 @@
 import httpRequest from '../utils/httpRequest'
 import { E } from '../utils/utils'
 import { ERROR } from '../const/code'
-import { ICustomReqOpts } from '../type'
+import { ICustomReqOpts, ICallFunctionOptions } from '../type'
 import { CloudBase } from '../cloudbase'
 
 /**
@@ -10,7 +10,7 @@ import { CloudBase } from '../cloudbase'
  * @param {Object} functionParam 函数参数
  * @return {Promise}
  */
-export async function callFunction(cloudbase: CloudBase, { name, data }, opts?: ICustomReqOpts) {
+export async function callFunction(cloudbase: CloudBase, { name, qualifier, data }: ICallFunctionOptions, opts?: ICustomReqOpts) {
     const { TCB_ROUTE_KEY } = CloudBase.getCloudbaseContext()
     let transformData
     try {
@@ -28,6 +28,8 @@ export async function callFunction(cloudbase: CloudBase, { name, data }, opts?: 
     const params = {
         action: 'functions.invokeFunction',
         function_name: name,
+        qualifier: qualifier,
+        // async: async,
         request_data: transformData
     }
 
@@ -44,11 +46,6 @@ export async function callFunction(cloudbase: CloudBase, { name, data }, opts?: 
         if (res.code) {
             return res
         }
-
-        // if (res.code) {
-        //     // return res
-        //     throw E({ ...res })
-        // } else {
 
         let result
         try {
