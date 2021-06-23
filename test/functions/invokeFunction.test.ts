@@ -87,18 +87,26 @@ describe('functions.invokeFunction: 执行云函数', () => {
     })
 
     it('function debug', async () => {
+        process.env.TCB_CONTEXT_KEYS = 'TCB_ROUTE_KEY'
+        process.env.TCB_ROUTE_KEY = String(Math.floor(Math.random() * 100) + 1)
         const app = tcb.init(config)
-        const callRes = await app.callFunction({
-            name: 'invoke',
-            data: {
-                key1: 'test value 1',
-                key2: 'test value 2',
-                userInfo: {
-                    // appId: '',
-                    openId: 'oaoLb4qz0R8STBj6ipGlHkfNCO2Q'
+        try {
+            const callRes = await app.callFunction({
+                name: 'invoke',
+                // qualifier: '$LATEST',
+                data: {
+                    key1: 'test value 1',
+                    key2: 'test value 2',
+                    userInfo: {
+                        // appId: '',
+                        openId: 'oaoLb4qz0R8STBj6ipGlHkfNCO2Q'
+                    }
                 }
-            }
-        })
-        console.log('callRes:', callRes)
+            })
+            console.log('callRes:', callRes)
+        }
+        catch (e) {
+            console.error(e)
+        }
     })
 })

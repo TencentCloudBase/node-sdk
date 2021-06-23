@@ -23,6 +23,7 @@ import {
     IGetFileUrlRes,
     IDownloadFileRes,
     IUploadFileRes,
+    ICallFunctionOptions,
     ICallWxOpenApiOptions,
     IContextParam,
     ICompleteCloudbaseContext,
@@ -261,8 +262,8 @@ export class CloudBase {
      * @param param0
      * @param opts
      */
-    public callFunction({ name, data }, opts?: ICustomReqOpts): Promise<any> {
-        return callFunction(this, { name, data }, opts)
+    public callFunction(callFunctionOptions: ICallFunctionOptions, opts?: ICustomReqOpts): Promise<any> {
+        return callFunction(this, callFunctionOptions, opts)
     }
 
     public auth(): any {
