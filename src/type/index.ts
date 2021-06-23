@@ -108,6 +108,12 @@ export interface ICustomReqOpts {
     getCrossAccountInfo?: () => Promise<ICrossAccountInfo>
 }
 
+export interface IUserInfoQuery {
+    platform?: string
+    platformId?: string
+    uid?: string
+}
+
 export interface IErrorInfo {
     code?: string
     message?: string

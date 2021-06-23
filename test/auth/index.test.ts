@@ -79,7 +79,7 @@ describe('auth 注入环境变量', () => {
             return jest.fn().mockImplementation((params, callback) => {
                 const body = { code: 'mockCode', message: 'mockMessage' }
                 process.nextTick(() => {
-                    callback(null, { req: {reusedSocket: false}, statusCode: 200, body })
+                    callback(null, { req: { reusedSocket: false }, statusCode: 200, body })
                 })
             })
         })
@@ -171,6 +171,14 @@ describe('auth 注入环境变量', () => {
         } catch (error) {
             assert.ok(error instanceof Error)
         }
+    })
+
+    it.only('测试 queryUserInfo', async () => {
+        const userInfo = await app.auth().queryUserInfo({
+            platform: 'PHONE',
+            platformId: '+8618202741638'
+        })
+        console.log('userInfo', userInfo)
     })
 
     it('获取客户端IP', async () => {
