@@ -173,7 +173,7 @@ describe('auth 注入环境变量', () => {
         }
     })
 
-    it.only('测试 queryUserInfo', async () => {
+    it('测试 queryUserInfo', async () => {
         const userInfo = await app.auth().queryUserInfo({
             platform: 'PHONE',
             platformId: '+8618202741638'
