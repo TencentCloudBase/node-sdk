@@ -281,6 +281,21 @@ describe('mod', () => {
     })
 })
 
+describe('mod - mp compatibility', () => {
+    it('Array of Embedded Documents', async () => {
+        let result = await db
+            .collection(collName)
+            .where({
+                tags: _.elemMatch({
+                    value: _.mod(4, 3)
+                })
+            })
+            .get()
+        assert.strictEqual(result.data.length, 1)
+        assert.strictEqual(result.data[0].category, 'embedded')
+    })
+})
+
 describe('rename', () => {
     it('rename', async () => {
         let result = await db
