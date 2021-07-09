@@ -113,11 +113,11 @@ describe('auth 注入环境变量', () => {
         assert.ok(res.code === 'mockCode')
     })
 
-    it('mock auth.getUserInfoForAdmin 接口报错', async () => {
+    it('mock auth.getUserInfoForAdmin 接口，不存在的用户按匿名返回', async () => {
+
         const uid = 'luke123invalid'
-        expect(app.auth().getEndUserInfo(uid)).rejects.toThrow(
-            new Error('[100007] user_do_not_exist')
-        )
+        const userInfo = await app.auth().getEndUserInfo(uid)
+        expect(userInfo.userInfo.uid === uid)
     })
 
     it('获取用户信息getUserInfo 不传入uid', () => {
