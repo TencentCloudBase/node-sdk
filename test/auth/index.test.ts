@@ -114,7 +114,7 @@ describe('auth 注入环境变量', () => {
     })
 
     it('mock auth.getUserInfoForAdmin 接口报错', async () => {
-        const uid = 'luke123'
+        const uid = 'luke123invalid'
         expect(app.auth().getEndUserInfo(uid)).rejects.toThrow(
             new Error('[100007] user_do_not_exist')
         )
