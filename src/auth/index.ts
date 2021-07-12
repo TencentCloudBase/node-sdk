@@ -4,7 +4,7 @@ import { ERROR } from '../const/code'
 import { CloudBase } from '../cloudbase'
 import { SYMBOL_CURRENT_ENV } from '../const/symbol'
 import httpRequest from '../utils/httpRequest'
-import { ICustomReqOpts } from '../type'
+import { ICustomReqOpts, IUserInfoQuery } from '../type'
 
 const checkCustomUserIdRegex = /^[a-zA-Z0-9_\-#@~=*(){}[\]:.,<>+]{4,32}$/
 
@@ -83,6 +83,38 @@ export function auth(cloudbase: CloudBase) {
                 return {
                     userInfo: {
                         ...defaultUserInfo,
+                        ...res.data
+                    },
+                    requestId: res.requestId
+                }
+            })
+        },
+
+        queryUserInfo(query: IUserInfoQuery, opts?: ICustomReqOpts) {
+            const { uid, platform, platformId } = query
+
+            const params = {
+                action: 'auth.getUserInfoForAdmin',
+                uuid: uid,
+                platform,
+                platformId
+            }
+
+            return httpRequest({
+                config: cloudbase.config,
+                params,
+                method: 'post',
+                opts,
+                headers: {
+                    'content-type': 'application/json'
+                }
+            }).then(res => {
+                if (res.code) {
+                    return res
+                }
+
+                return {
+                    userInfo: {
                         ...res.data
                     },
                     requestId: res.requestId
