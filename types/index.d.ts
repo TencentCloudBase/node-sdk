@@ -554,6 +554,7 @@ export declare namespace Database {
 
     export interface BaseOption {
         timeout?: number
+        raw?: boolean
     }
 
     export interface QueryOption extends BaseOption {

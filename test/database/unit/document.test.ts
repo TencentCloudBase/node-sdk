@@ -3,6 +3,7 @@ import { Util } from '@cloudbase/database/src/util'
 import tcb from '../../../src/index'
 import * as Config from '../../config.local'
 import * as common from '../../common/index'
+import { time } from 'console'
 
 describe('test/unit/document.test.ts', () => {
     const collName = 'db-test-document'
@@ -107,5 +108,21 @@ describe('test/unit/document.test.ts', () => {
             .doc(docId)
             .remove()
         assert.strictEqual(data.deleted, 1)
+    })
+
+    it('API - mongodb raw update', async () => {
+        const unique = Date.now()
+        await db.collection(collName).add([
+            {
+                key: "a",
+                value: unique
+            }
+        ])
+
+        const res1 = await db.collection(collName)
+            .options({ raw: true })
+            .where({ key: { $eq: "a" }, value: { $eq: unique } })
+            .update({ $set: { value: unique + 1 } })
+        assert(res1.updated > 0)
     })
 })

@@ -710,4 +710,29 @@ describe('transaction', () => {
         console.log(await docRef1.get())
         console.log(await docRef2.get())
     })
+
+    it('mongodb 原生事务操作支持', async () => {
+        await db.runTransaction(async function(transaction) {
+            const unique = Date.now()
+            await db.collection(collectionName)
+                    .add([{
+                        key: "a",
+                        value: unique
+                    }])
+
+            const res1 = await transaction
+                .collection(collectionName)
+                .options({ raw: true })
+                .where({ key: { $eq: "a"}})
+                .get()
+            assert(res1.data.length > 0)
+
+            const res2 = await transaction
+                .collection(collectionName)
+                .options({ raw: true })
+                .where({ key: { $eq: "a" }, value: { $eq: unique }})
+                .update({ $set: { value: unique+1 }})
+            assert(res2.updated === 1)
+        })
+    })
 })

@@ -159,4 +159,26 @@ describe('test/unit/collection.test.ts', () => {
         // 清楚当前collection
         await createColl.remove()
     })
+
+    it('API - mongodb raw query', async () => {
+        await collection.add([
+            {
+                key: "a",
+                value: 60
+            }
+        ])
+
+        // mongodb 原生查询
+        const res1 = await collection
+            .options({ raw: true })
+            .where({ key: { $eq: "a" } })
+            .get()
+        assert(res1.data.length > 0)
+
+        const res2 = await collection
+            .options({ raw: true })
+            .where({ key: "a" })
+            .get()
+        assert(res1.data.length === res2.data.length)
+    })
 })
