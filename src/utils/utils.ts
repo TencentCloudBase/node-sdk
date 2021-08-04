@@ -47,7 +47,8 @@ export function checkIsInScf() {
 export function checkIsInEks() {
     // EKS_CLUSTER_ID=cls-abcdefg
     // EKS_LOGS_xxx=
-    return isNonEmptyString(process.env.EKS_CLUSTER_ID)
+    // return isNonEmptyString(process.env.EKS_CLUSTER_ID)
+    return !!process.env.KUBERNETES_SERVICE_HOST
 }
 
 const kSumeruEnvSet = new Set(['formal', 'pre', 'test'])
