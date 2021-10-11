@@ -113,7 +113,7 @@ describe('auth 注入环境变量', () => {
         assert.ok(res.code === 'mockCode')
     })
 
-    it('mock auth.getUserInfoForAdmin 接口，不存在的用户按匿名返回', async () => {
+    it.skip('mock auth.getUserInfoForAdmin 接口，不存在的用户按匿名返回', async () => {
 
         const uid = 'luke123invalid'
         const userInfo = await app.auth().getEndUserInfo(uid)
@@ -173,7 +173,7 @@ describe('auth 注入环境变量', () => {
         }
     })
 
-    it('测试 queryUserInfo', async () => {
+    it.skip('测试 queryUserInfo', async () => {
         const userInfo = await app.auth().queryUserInfo({
             platform: 'PHONE',
             platformId: '+8618202741638'
