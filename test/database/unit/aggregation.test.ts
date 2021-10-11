@@ -689,3 +689,34 @@ describe('geoNear', () => {
         assert.strictEqual(res.data[0].distance === 6643.521654040738, true)
     })
 })
+
+describe('mongodb raw', ()=>{
+    let coll = null
+
+    beforeAll(async () => {
+        coll = await common.safeCollection(db, 'mongoraw')
+        assert.strictEqual(await coll.create([
+            {
+                key: "a"
+            }
+        ]), true)
+    })
+
+    afterAll(async () => {
+        assert.strictEqual(await coll.remove(), true)
+    })
+
+    it('match and count', async () => {
+        const res1 = await db.collection('mongoraw')
+            .options({ raw: true })
+            .aggregate([{ $match: { key: "a" }}, { $count: "keyA"}])
+            .end()
+        assert(res1.data[0]["keyA"] === 1)
+
+        const res2 = await db.collection('mongoraw')
+            .options({ raw: true })
+            .aggregate([{ $match: { key: { $eq: "a" }}}, { $count: "keyA"}])
+            .end()
+        assert(res1.data[0]["keyA"] === res2.data[0]["keyA"])
+    })
+})
