@@ -62,7 +62,7 @@ describe('objectid特殊结构', () => {
         assert(getRes.data[0].a === objId)
     })
 
-    it.only('test 联表 _id 与 非_id字段', async () => {
+    it('test 联表 _id 与 非_id字段', async () => {
         const objId1 = new ObjectID().toString()
         const objId2 = new ObjectID().toString()
 
