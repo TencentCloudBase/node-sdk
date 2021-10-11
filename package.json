@@ -1,6 +1,6 @@
 {
     "name": "@cloudbase/node-sdk",
-    "version": "2.7.1",
+    "version": "2.8.0-beta",
     "description": "tencent cloud base server sdk for node.js",
     "main": "lib/index.js",
     "scripts": {
